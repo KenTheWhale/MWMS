@@ -18,7 +18,7 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Navigate to={"/manager/request"}/>
+                element: <Navigate to={"/manager/request/import"}/>
             },
             {
                 path: "request/import",
