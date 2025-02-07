@@ -6,6 +6,7 @@ import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import 'bootstrap/dist/css/bootstrap.min.css'
+import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
             {
                 path: "area",
                 element: <h1 className={`d-flex justify-content-center text-light`}>Area</h1>
+            },
+            {
+                path: "equipment",
+                element:<EquipmentPage/>
             }
         ]
     },
