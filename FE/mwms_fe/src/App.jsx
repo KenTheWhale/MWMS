@@ -10,6 +10,8 @@ import "./index.scss"
 import ImportRequestPage from "./pages/manager/ImportRequestPage.jsx";
 import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
 import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
+import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
+import CategoryPage from "./pages/manager/CategoryPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -43,6 +45,14 @@ const router = createBrowserRouter([
             {
                 path: "area",
                 element: <h1 className={`d-flex justify-content-center text-light`}>Area</h1>
+            },
+            {
+                path: "equipment",
+                element:<EquipmentPage/>
+            },
+            {
+                path: "category",
+                element:<CategoryPage/>
             }
         ]
     },

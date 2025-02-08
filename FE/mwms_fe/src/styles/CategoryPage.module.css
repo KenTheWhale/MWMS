@@ -1,0 +1,71 @@
+.tbl_container {
+    height: 80vh;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.tbl_container table thead tr th {
+    text-align: center;
+}
+
+.tbl_container table tbody tr button {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+    transition: all 0.3s;
+    margin-left: 10px;
+}
+
+.row {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw;
+    overflow-y: scroll;
+    max-height: 80vh;
+}
+
+.row::-webkit-scrollbar {
+    display: none;
+}
+
+
+.row thead {
+    position: sticky;
+    top: -0.1px;
+}
+
+.add {
+    width: 10vw;
+    padding: 10px;
+    margin: 10px auto;
+}
+
+.tbl_container table th:nth-child(1) {
+    width: 10%;
+}
+.tbl_container table th:nth-child(2) {
+    width: 25%;
+}
+.tbl_container table th:nth-child(3) {
+    width: 10%;
+}
+.tbl_container table th:nth-child(4) {
+    width: 40%;
+}
+.tbl_container table th:nth-child(5) {
+    width: 10%;
+}
+
+.tbl_container table td:nth-child(2) {
+    text-align: left;
+}
+.tbl_container table td:nth-child(3) {
+    text-align: left;
+}
+.tbl_container table td:nth-child(4) {
+    text-align: left;
+}
+.tbl_container table td:nth-child(5) {
+    text-align: center;
+}
