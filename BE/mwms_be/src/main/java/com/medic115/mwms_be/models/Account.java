@@ -35,8 +35,14 @@ public class Account extends Auditable implements UserDetails {
 
     private Boolean status;
 
+    @OneToOne(mappedBy = "account")
+    private Partner partner;
+
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(mappedBy = "account")
+    private List<Task> tasks;
 
     private String firstName;
     private String lastName;
