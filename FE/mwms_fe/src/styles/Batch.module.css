@@ -1,0 +1,55 @@
+:root {
+    --table-background: #1E1E1E;
+    --table-row-even: #1E1E1E;
+    --table-row-odd: #2A2A2A;
+    --table-border: #444444;
+    --hover-background: #333333;
+}
+
+.batchTable {
+    margin: 20px auto;
+    width: 95%;
+    height: 80%;
+    background-color: var(--table-background);
+    color: var(--text-color);
+    border: 1px solid var(--table-border);
+    table-layout: fixed;
+}
+
+.batchTable th, td {
+    border: 1px solid var(--table-border);
+    text-align: center;
+    padding: 8px;
+}
+
+.batchTable tr:nth-child(even) {
+    background-color: var(--table-row-even);
+}
+
+.batchTable tr:nth-child(odd) {
+    background-color: var(--table-row-odd);
+}
+
+.batchTable tr:hover {
+    background-color: var(--hover-background);
+}
+
+.batchTable th:nth-child(1), .batchTable td:nth-child(1) {
+    width: 10%;
+}
+
+.batchTable th:nth-child(2), .batchTable td:nth-child(2) {
+    width: 30%;
+}
+
+.batchTable th:nth-child(3), .batchTable td:nth-child(3) {
+    width: 10%;
+}
+
+.batchTable th:nth-child(4), .batchTable td:nth-child(4) {
+    width: 25%;
+}
+
+.batchTable th:nth-child(5), .batchTable td:nth-child(5) {
+    width: 25%;
+}

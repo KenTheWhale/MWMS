@@ -17,7 +17,6 @@
     background: var(--tab-background);
     width: 17vw;
     height: 100vh;
-    z-index: 0;
 }
 
 .outlet_area {
