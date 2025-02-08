@@ -14,8 +14,8 @@ const dashSalesData = [
 
 const DashDefault = () => {
   const tabContent = (
-    <React.Fragment>
-      <div className="d-flex friendlist-box align-items-center justify-content-center m-b-20">
+    <>
+      <div className="d-flex friendlist-box align-items-center justify-content-center m-b-20" style={{overflowY : "scroll"}} >
         <div className="m-r-10 photo-table flex-shrink-0">
           <Link to="#">
             <img className="rounded-circle" style={{ width: '40px' }} src={avatar1} alt="activity-user" />
@@ -99,10 +99,9 @@ const DashDefault = () => {
           </span>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
   return (
-    <React.Fragment>
       <Row>
         {dashSalesData.map((data, index) => {
           return (
@@ -581,7 +580,6 @@ const DashDefault = () => {
           </Card>
         </Col>
       </Row>
-    </React.Fragment>
   );
 };
 

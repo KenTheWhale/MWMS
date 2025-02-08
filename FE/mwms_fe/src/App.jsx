@@ -5,8 +5,8 @@ import StaffLayout from "./layouts/StaffLayout.jsx";
 import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
-import 'bootstrap/dist/css/bootstrap.min.css'
-
+import DashDefault from "./view/dashboard/index.jsx";
+import "./index.scss"
 const router = createBrowserRouter([
     {
         path: "/login",
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "account",
-                element: <h1 className={`d-flex justify-content-center text-light`}>Account Management</h1>,
+                element: <DashDefault/>,
             }
         ]
     },
