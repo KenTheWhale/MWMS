@@ -17,14 +17,12 @@
     background: var(--tab-background);
     width: 17vw;
     height: 100vh;
-    z-index: 0;
 }
 
 .outlet_area {
     background: var(--app-background);
     width: 83vw;
     height: 100vh;
-    z-index: 0;
 }
 
 /* navbar */
