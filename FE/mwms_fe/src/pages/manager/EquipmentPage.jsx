@@ -1,7 +1,8 @@
-import {Table} from "react-bootstrap";
+import {Button, Col, Form, Row, Table} from "react-bootstrap";
 import style from "../../styles/EquipmentPage.module.css";
 import {useState} from "react";
 import EquipmentPopup from "../../components/EquipmentPopup.jsx";
+import {FaEdit, FaTrash} from "react-icons/fa";
 
 function EquipmentPage() {
 
@@ -158,7 +159,7 @@ function EquipmentPage() {
     return (
         <div className={`container-fluid ${style.tbl_container}`}>
             <div className={`row`}>
-                <h1>Equipment</h1>
+                <h1 className={`text-light`}>Equipment</h1>
             </div>
             <div className={`row }`}>
                 <button
@@ -171,7 +172,22 @@ function EquipmentPage() {
                 </button>
             </div>
             <div className={`row ${style.row}`}>
-                <Table striped bordered hover onClick={(e) => {
+                <Form>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} xs={11} controlId="formGridEmail">
+                            <Form.Control type="email" placeholder="Enter name, code, category,..."/>
+                        </Form.Group>
+
+                        <Form.Group as={Col} xs={1} controlId="searchButton">
+                            <Button variant="primary" type="submit">
+                                Search
+                            </Button>
+                        </Form.Group>
+                    </Row>
+                </Form>
+            </div>
+            <div className={`row ${style.row}`}>
+                <Table striped bordered variant={`dark`} onClick={(e) => {
                     const row = e.nativeEvent.target.closest('tr');
                     if (row && equipments[row.rowIndex - 1]) {
                         handleRowClick(equipments[row.rowIndex - 1]);
@@ -182,8 +198,9 @@ function EquipmentPage() {
                         <th>No.</th>
                         <th>Name</th>
                         <th>Category</th>
+                        <th>Unit</th>
                         <th>Quantity</th>
-                        <th>Price</th>
+                        <th>Price($)</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -193,23 +210,24 @@ function EquipmentPage() {
                             <td>{index + 1}</td>
                             <td>{equipment.name}</td>
                             <td>{equipment.category}</td>
+                            <td></td>
                             <td>{equipment.quantity}</td>
                             <td>{equipment.price}</td>
                             <td>
-                                <button
+                                <Button variant="warning"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleEditClick(equipment);
-                                    }}
-                                    className="btn btn-primary">Edit
-                                </button>
-                                <button
+                                    }}>
+                                    <FaEdit />
+                                </Button>
+                                <Button variant="danger"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleDeleteClick(equipment);
-                                    }}
-                                    className="btn btn-danger">Delete
-                                </button>
+                                    }}>
+                                    <FaTrash />
+                                </Button>
                             </td>
                         </tr>
                     ))}

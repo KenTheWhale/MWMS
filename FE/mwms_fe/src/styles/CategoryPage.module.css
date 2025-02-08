@@ -42,25 +42,19 @@
 }
 
 .tbl_container table th:nth-child(1) {
-    width: 5%;
+    width: 10%;
 }
 .tbl_container table th:nth-child(2) {
     width: 25%;
 }
 .tbl_container table th:nth-child(3) {
-    width: 25%;
+    width: 10%;
 }
 .tbl_container table th:nth-child(4) {
-    width: 10%;
+    width: 40%;
 }
 .tbl_container table th:nth-child(5) {
     width: 10%;
-}
-.tbl_container table th:nth-child(6) {
-    width: 10%;
-}
-.tbl_container table th:nth-child(7) {
-    width: 15%;
 }
 
 .tbl_container table td:nth-child(2) {
@@ -70,12 +64,8 @@
     text-align: left;
 }
 .tbl_container table td:nth-child(4) {
-    text-align: right;
+    text-align: left;
 }
 .tbl_container table td:nth-child(5) {
     text-align: center;
 }
-.tbl_container table td:nth-child(6) {
-    text-align: right;
-}
-

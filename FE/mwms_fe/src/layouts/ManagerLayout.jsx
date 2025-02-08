@@ -30,6 +30,7 @@ function GenerateNavbar() {
                     <MenuItem onClick={() => {navigate("/manager/batch")}}>Batch</MenuItem>
                     <MenuItem onClick={() => {navigate("/manager/task")}}>Task</MenuItem>
                     <MenuItem onClick={() => {navigate("/manager/area")}}>Area</MenuItem>
+                    <MenuItem onClick={() => {navigate("/manager/category")}}>Category</MenuItem>
                     <MenuItem onClick={() => {navigate("/manager/equipment")}}>Equipment</MenuItem>
                 </Menu>
             </Sidebar>
