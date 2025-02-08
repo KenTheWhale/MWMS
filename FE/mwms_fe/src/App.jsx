@@ -7,6 +7,8 @@ import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashDefault from "./view/dashboard/index.jsx";
 import "./index.scss"
+
+
 const router = createBrowserRouter([
     {
         path: "/login",
