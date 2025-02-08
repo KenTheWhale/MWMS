@@ -1,64 +1,80 @@
 :root {
-    --table-background: #1E1E1E;
-    --table-row-even: #1E1E1E;
-    --table-row-odd: #2A2A2A;
-    --table-border: #444444;
-    --text-color: #FFFFFF;
-    --hover-background: #333333;
+    --table-background-import: #1E1E1E;
+    --table-row-even-import: #1E1E1E;
+    --table-row-odd-import: #2A2A2A;
+    --table-border-import: #444444;
+    --text-color-import: #FFFFFF;
+    --hover-background-import: #333333;
 }
 
-.addRequestBtn, .pickBtn{
+.addRequestBtn, .pickBtn {
     display: flex;
     justify-content: flex-end;
-    background-color: var(--app-background);
-    color: var(--text-color);
+    color: var(--text-color-import);
 }
 
 
-.importTable {
+.importTable table {
     margin: 20px auto;
-    width: 95%;
+    width: calc(0.95 * 83vw);
     height: 80%;
-    background-color: var(--table-background);
-    color: var(--text-color);
-    border: 1px solid var(--table-border);
+    background-color: var(--table-background-import);
+    color: var(--text-color-import);
+    border: 1px solid var(--table-border-import);
     table-layout: fixed;
 }
 
-.importTable th, td {
-    border: 1px solid var(--table-border);
+.importTable table th, td {
+    border: 1px solid var(--table-border-import);
     text-align: center;
     padding: 8px;
 }
 
-.importTable tr:nth-child(even) {
-    background-color: var(--table-row-even);
+.importTable table tr:nth-child(even) {
+    background-color: var(--table-row-even-import);
 }
 
-.importTable tr:nth-child(odd) {
-    background-color: var(--table-row-odd);
+.importTable table tr:nth-child(odd) {
+    background-color: var(--table-row-odd-import);
 }
 
-.importTable tr:hover {
-    background-color: var(--hover-background);
+.importTable table tr:hover {
+    background-color: var(--hover-background-import);
 }
 
-.importTable th:nth-child(1), .importTable td:nth-child(1) {
-    width: 10%;
+.importTable table thead tr th:nth-child(1) {
+    width: calc(0.1 * 0.95 * 83vw);
+    text-align: left;
 }
 
-.importTable th:nth-child(2), .importTable td:nth-child(2) {
-    width: 30%;
+.importTable table thead tr th:nth-child(2) {
+    width: calc(0.3 * 0.95 * 83vw);
 }
 
-.importTable th:nth-child(3), .importTable td:nth-child(3) {
-    width: 30%;
+.importTable table thead tr th:nth-child(3) {
+    width: calc(0.3 * 0.95 * 83vw);
 }
 
-.importTable th:nth-child(4), .importTable td:nth-child(4) {
-    width: 10%;
+.importTable table thead tr th:nth-child(4) {
+    width: calc(0.1 * 0.95 * 83vw);
+    text-align: left;
 }
 
-.importTable th:nth-child(5), .importTable td:nth-child(5) {
-    width: 20%;
+.importTable table thead tr th:nth-child(5) {
+    width: calc(0.2 * 0.95 * 83vw);
+}
+
+.importTable table thead tr th {
+    text-align: center !important;
+}
+
+.importTable table tbody tr td:nth-child(1),
+.importTable table tbody tr td:nth-child(4){
+    text-align: left !important;
+}
+
+.importTable table tbody tr td:nth-child(2),
+.importTable table tbody tr td:nth-child(3),
+.importTable table tbody tr td:nth-child(5){
+    text-align: center !important;
 }
