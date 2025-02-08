@@ -1,0 +1,74 @@
+:root {
+    --table-background-export: #1E1E1E;
+    --table-row-even-export: #1E1E1E;
+    --table-row-odd-export: #2A2A2A;
+    --table-border-export: #444444;
+    --text-color-export: #FFFFFF;
+    --hover-background-export: #333333;
+}
+
+.exportTable table {
+    margin: 20px auto;
+    width: calc(0.95 * 83vw);
+    height: 80%;
+    background-color: var(--table-background-export);
+    color: var(--text-color-export);
+    border: 1px solid var(--table-border-export);
+    table-layout: fixed;
+}
+
+.exportTable table th,
+.exportTable table td {
+    border: 1px solid var(--table-border-export);
+    text-align: center;
+    padding: 8px;
+}
+
+.exportTable table tr:nth-child(even) {
+    background-color: var(--table-row-even-export);
+}
+
+.exportTable table tr:nth-child(odd) {
+    background-color: var(--table-row-odd-export);
+}
+
+.exportTable table tr:hover {
+    background-color: var(--hover-background-export);
+}
+
+.exportTable table thead tr th:nth-child(1) {
+    width: calc(0.1 * 0.95 * 83vw);
+    text-align: left;
+}
+
+.exportTable table thead tr th:nth-child(2) {
+    width: calc(0.3 * 0.95 * 83vw);
+}
+
+.exportTable table thead tr th:nth-child(3) {
+    width: calc(0.3 * 0.95 * 83vw);
+}
+
+.exportTable table thead tr th:nth-child(4) {
+    width: calc(0.1 * 0.95 * 83vw);
+    text-align: left;
+}
+
+.exportTable table thead tr th:nth-child(5) {
+    width: calc(0.2 * 0.95 * 83vw);
+}
+
+.exportTable table thead tr th {
+    text-align: center !important;
+}
+
+.exportTable table tbody tr td:nth-child(1),
+.exportTable table tbody tr td:nth-child(4) {
+    text-align: left !important;
+}
+
+.exportTable table tbody tr td:nth-child(2),
+.exportTable table tbody tr td:nth-child(3),
+.exportTable table tbody tr td:nth-child(5) {
+    text-align: center !important;
+}
