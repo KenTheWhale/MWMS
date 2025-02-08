@@ -15,7 +15,7 @@ const dashSalesData = [
 const DashDefault = () => {
   const tabContent = (
     <>
-      <div className="d-flex friendlist-box align-items-center justify-content-center m-b-20" style={{overflowY : "scroll"}} >
+      <div className="d-flex friendlist-box align-items-center justify-content-center m-b-20">
         <div className="m-r-10 photo-table flex-shrink-0">
           <Link to="#">
             <img className="rounded-circle" style={{ width: '40px' }} src={avatar1} alt="activity-user" />
@@ -102,7 +102,7 @@ const DashDefault = () => {
     </>
   );
   return (
-      <Row>
+      <Row style={{overflowY : "scroll", height: "100vh"}}>
         {dashSalesData.map((data, index) => {
           return (
             <Col key={index} xl={6} xxl={4}>
