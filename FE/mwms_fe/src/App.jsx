@@ -6,6 +6,9 @@ import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import 'bootstrap/dist/css/bootstrap.min.css'
+import ImportRequestPage from "./pages/manager/ImportRequestPage.jsx";
+import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
+import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
 import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
 
 const router = createBrowserRouter([
@@ -23,15 +26,15 @@ const router = createBrowserRouter([
             },
             {
                 path: "request/import",
-                element: <h1 className={`d-flex justify-content-center text-light`}>Import Request</h1>
+                element: <ImportRequestPage/>
             },
             {
                 path: "request/export",
-                element: <h1 className={`d-flex justify-content-center text-light`}>Export Request</h1>
+                element: <ExportRequestPage/>
             },
             {
                 path: "batch",
-                element: <h1 className={`d-flex justify-content-center text-light`}>Batch</h1>
+                element: <BatchManagePage/>
             },
             {
                 path: "task",
@@ -113,7 +116,7 @@ const router = createBrowserRouter([
     },
     {
         path: "*",
-        element: <Navigate to={"/manager"}/>
+        element: <Navigate to={"/login"}/>
     }
 ])
 
