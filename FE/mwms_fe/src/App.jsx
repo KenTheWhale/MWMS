@@ -5,7 +5,8 @@ import StaffLayout from "./layouts/StaffLayout.jsx";
 import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
-import 'bootstrap/dist/css/bootstrap.min.css'
+import DashDefault from "./view/dashboard/index.jsx";
+import "./index.scss"
 import ImportRequestPage from "./pages/manager/ImportRequestPage.jsx";
 import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
 import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
@@ -51,11 +52,15 @@ const router = createBrowserRouter([
         children:[
             {
                 index: true,
-                element: <Navigate to={"/admin/account"}/>,
+                element: <Navigate to={"/admin/dashboard"}/>,
+            },
+            {
+                path: "dashboard",
+                element: <DashDefault/>,
             },
             {
                 path: "account",
-                element: <h1 className={`d-flex justify-content-center text-light`}>Account Management</h1>,
+                element: <h1 className={`d-flex justify-content-center text-light`}>Account</h1>,
             }
         ]
     },
