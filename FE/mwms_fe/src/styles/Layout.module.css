@@ -34,6 +34,7 @@
     align-items: center;
     height: 10vh;
     border-bottom: 2px solid whitesmoke;
+    font-size: 2.5rem;
 }
 
 .sidebar{
@@ -75,17 +76,33 @@
     border-top: 2px solid whitesmoke;
 }
 
-.profile img{
+.profile svg{
     width: calc(0.7 * 10vh);
     height: 70%;
-    border: 1px solid black;
-    border-radius: 50%;
-    margin-left: 1.5vw;
+    margin-right: 2.5vw;
+    cursor: pointer;
+    border-radius: 20%;
+    transition: color .2s ease-in-out, background-color .2s ease-in-out;
 }
 
-.profile label{
+.profile svg:hover{
+    color: var(--tab-background);
+    background-color: whitesmoke;
+}
+
+.label_area{
     flex-grow: 1;
-    margin-left: 1vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 2vw;
+}
+
+.label_area p{
+    padding: 0;
+    margin: 0;
+    font-size: 0.6rem;
 }
 
 .footer{

@@ -52,11 +52,15 @@ const router = createBrowserRouter([
         children:[
             {
                 index: true,
-                element: <Navigate to={"/admin/account"}/>,
+                element: <Navigate to={"/admin/dashboard"}/>,
+            },
+            {
+                path: "dashboard",
+                element: <DashDefault/>,
             },
             {
                 path: "account",
-                element: <DashDefault/>,
+                element: <h1 className={`d-flex justify-content-center text-light`}>Account</h1>,
             }
         ]
     },
