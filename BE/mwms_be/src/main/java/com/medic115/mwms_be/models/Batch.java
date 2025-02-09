@@ -3,6 +3,7 @@ package com.medic115.mwms_be.models;
 import com.medic115.mwms_be.common.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "batch")
@@ -21,12 +22,14 @@ public class Batch  extends Auditable {
 
     private Long batch_quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "request_item_id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "request_item_id", referencedColumnName = "id")
     private Request_Item request_item;
 
     @ManyToOne
     @JoinColumn(name = "position_id")
     private Position position;
 
+    @OneToMany(mappedBy = "batch")
+    private List<Serial_Number> serial_numbers;
 }

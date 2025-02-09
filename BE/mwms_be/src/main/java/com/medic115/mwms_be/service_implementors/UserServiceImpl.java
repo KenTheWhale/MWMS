@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.service_implementors;
 
+import com.medic115.mwms_be.dto.response.UserResponse;
 import com.medic115.mwms_be.models.Account;
 import com.medic115.mwms_be.repositories.JwtRepository;
 import com.medic115.mwms_be.repositories.UserRepository;
@@ -11,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,22 @@ public class UserServiceImpl implements UserService {
         };
     }
 
+    @Override
+    public List<UserResponse> getAllAccountExceptAdmin() {
+        return userRepository.findAllExceptAdmin().stream()
+                .map(this::mapToDto).toList();
+    }
+
+    private UserResponse mapToDto(Account account) {
+        return UserResponse.builder()
+                .id(account.getId())
+                .fullName(account.getFullName())
+                .phone(account.getPhone())
+                .gender(account.getGender())
+                .role(account.getRole().toString())
+                .status(account.getStatus())
+                .build();
+    }
 
     private Account getCurrentUser(HttpServletRequest request) {
         String token = extractTokenFromHeader(request);
