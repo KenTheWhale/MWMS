@@ -42,8 +42,6 @@ function GenerateNavbar() {
                 <CgLogOut onClick={() => {
                     navigate("/login")
                 }}/>
-                <img src={"https://5.imimg.com/data5/SELLER/Default/2023/2/XO/TA/CG/144970592/empty-red-white-capsule.png"} alt=""/>
-                <label>Account Name</label>
             </div>
             <div className={style.footer}>
                 <p>&copy; {new Date().getFullYear()} MWMS. All rights reserved</p>
