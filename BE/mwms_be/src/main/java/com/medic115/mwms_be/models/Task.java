@@ -1,37 +1,42 @@
 package com.medic115.mwms_be.models;
 
-import com.medic115.mwms_be.common.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "task")
-@NoArgsConstructor
-@Getter
-@Setter
+
+@Data
 @Builder
 @AllArgsConstructor
-public class Task extends Auditable {
+@NoArgsConstructor
+@Entity
+@Table(name = "`task`")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
-    private String name;
+    String name;
 
-    private String description;
+    String code;
 
-    private Boolean status;
+    String description;
 
-    private LocalDate assigned_date;
+    String status;
+
+    @Column(name = "`assigned_date`")
+    LocalDate assignedDate;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    @JoinColumn(name = "staff_id")
+    Account staff;
 
     @OneToMany(mappedBy = "task")
-    private List<Request_Application> request_applications;
+    List<RequestApplication> requests;
 
 }

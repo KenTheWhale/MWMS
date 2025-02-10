@@ -12,9 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "`batch`")
+@Table(name = "`request_application`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Batch {
+public class RequestApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,22 +22,25 @@ public class Batch {
 
     String code;
 
-    @Column(name = "`equipment_quantity`")
-    int equipmentQty;
+    String status;
 
-    @Column(name = "`created_date`")
-    LocalDate createdDate;
+    String type;
 
-    @OneToOne
-    @JoinColumn(name = "item_id")
-    RequestItem requestItem;
+    @Column(name = "`request_date`")
+    LocalDate requestDate;
+
+    @Column(name = "`last_modified_date`")
+    LocalDate lastModifiedDate;
+
+    @Column(name = "`delivery_date`")
+    LocalDate deliveryDate;
 
     @ManyToOne
-    @JoinColumn(name = "`position_id`")
-    Position position;
+    @JoinColumn(name = "`task_id`")
+    Task task;
 
-    @OneToMany(mappedBy = "batch")
+    @OneToMany(mappedBy = "requestApplication")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<BatchItem> batchItems;
+    List<RequestItem> items;
 }

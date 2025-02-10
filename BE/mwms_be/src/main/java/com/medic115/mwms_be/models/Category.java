@@ -2,14 +2,17 @@ package com.medic115.mwms_be.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
-@Entity
-@Table(name = "category")
-@NoArgsConstructor
-@Getter
-@Setter
+
+@Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "`category`")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
 
     @Id
@@ -23,5 +26,7 @@ public class Category {
     private String description;
 
     @OneToMany(mappedBy = "category")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Equipment> equipments;
 }

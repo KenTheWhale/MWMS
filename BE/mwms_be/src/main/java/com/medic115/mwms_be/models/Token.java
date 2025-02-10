@@ -1,35 +1,38 @@
 package com.medic115.mwms_be.models;
+
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "`partner`")
+@Table(name = "`token`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Partner {
+public class Token{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
+    String value;
 
-    String email;
+    String type;
 
-    String address;
+    String status;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column(name = "`expired_date`")
+    LocalDate expiredDate;
+
+    @Column(name = "`created_date`")
+    LocalDate createdDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "`account_id`")
     Account account;
-
-    @OneToMany(mappedBy = "partner")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    List<RequestItem> items;
 }

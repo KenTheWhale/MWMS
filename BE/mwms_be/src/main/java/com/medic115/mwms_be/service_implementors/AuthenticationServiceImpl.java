@@ -2,29 +2,21 @@ package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
 import com.medic115.mwms_be.dto.requests.SignInRequest;
-import com.medic115.mwms_be.dto.requests.SignUpRequest;
 import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
+import com.medic115.mwms_be.enums.Status;
+import com.medic115.mwms_be.enums.TokenType;
 import com.medic115.mwms_be.models.Account;
-import com.medic115.mwms_be.models.Role;
-import com.medic115.mwms_be.repositories.JwtRepository;
-import com.medic115.mwms_be.repositories.UserRepository;
+import com.medic115.mwms_be.models.Token;
+import com.medic115.mwms_be.repositories.AccountRepo;
+import com.medic115.mwms_be.repositories.TokenRepo;
 import com.medic115.mwms_be.services.AuthenticationService;
 import com.medic115.mwms_be.services.JWTService;
-import com.medic115.mwms_be.token.Token;
-import com.medic115.mwms_be.token.TokenType;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
 @RequiredArgsConstructor
@@ -32,122 +24,104 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final AuthenticationManager authenticationManager;
-
     private final JWTService jwtService;
 
-    private final JwtRepository jwtRepository;
+    private final AccountRepo accountRepo;
 
-    private final UserRepository userRepository;
+    private final TokenRepo tokenRepo;
+
+    @Value("${jwt.expiration.access-token}")
+    private long accessExpiration;
+
+    @Value("${jwt.expiration.refresh-token}")
+    private long refreshExpiration;
 
     @Override
-    public void signUp(SignUpRequest signUpRequest) {
-        Account account = new Account();
-        account.setUsername(signUpRequest.getUsername());
-        account.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        account.setFirstName(signUpRequest.getFirstName());
-        account.setLastName(signUpRequest.getLastName());
-
-        if (signUpRequest.getRoleName().equalsIgnoreCase(Role.ROLE_STAFF.name())) {
-            account.setRole(Role.ROLE_STAFF);
-        } else if (signUpRequest.getRoleName().equalsIgnoreCase(Role.ROLE_MANAGER.name())) {
-            account.setRole(Role.ROLE_MANAGER);
-        } else if (signUpRequest.getRoleName().equalsIgnoreCase(Role.ROLE_PARTNER.name())) {
-            account.setRole(Role.ROLE_PARTNER);
-        } else {
-            account.setRole(Role.ROLE_ADMIN);
+    public ResponseEntity<JwtAuthenticationResponse> signIn(SignInRequest request) {
+        Account acc = accountRepo.findByUsernameAndPassword(request.getUsername(), request.getPassword()).orElse(null);
+        if (acc == null) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(
+                            JwtAuthenticationResponse.builder()
+                                    .message("Username or password is incorrect")
+                                    .token("")
+                                    .build()
+                    );
         }
-        account.setStatus(true);
-        userRepository.save(account);
+
+        //Search if any refresh or access token is active
+        Token refresh = jwtService.checkTokenIsValid(acc, TokenType.REFRESH.getValue());
+        Token access = jwtService.checkTokenIsValid(acc, TokenType.ACCESS.getValue());
+
+        //if refresh is null (no active refresh found) then create a new one
+        if (refresh == null) {
+            String newRefresh = jwtService.generateRefreshToken(acc);
+            tokenRepo.save(Token.builder()
+                    .account(acc)
+                    .status(Status.TOKEN_ACTIVE.getValue())
+                    .type(TokenType.REFRESH.getValue())
+                    .value(newRefresh)
+                    .createdDate(jwtService.extractIssuedAt(newRefresh))
+                    .expiredDate(jwtService.extractExpiration(newRefresh))
+                    .build()
+            );
+        }
+
+        //if access is null (no active access found) then create a new one
+        if (access == null) {
+            String newAccess = jwtService.generateAccessToken(acc);
+            access = tokenRepo.save(Token.builder()
+                    .account(acc)
+                    .status(Status.TOKEN_ACTIVE.getValue())
+                    .type(TokenType.ACCESS.getValue())
+                    .value(newAccess)
+                    .createdDate(jwtService.extractIssuedAt(newAccess))
+                    .expiredDate(jwtService.extractExpiration(newAccess))
+                    .build()
+            );
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        JwtAuthenticationResponse.builder()
+                                .message("Sign in successfully")
+                                .token(access.getValue())
+                                .build()
+                );
     }
 
     @Override
-    public JwtAuthenticationResponse signIn(SignInRequest signInRequest) {
-       Authentication auth =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequest.getUsername(), signInRequest.getPassword()));
-       Account user = (Account) auth.getPrincipal();
-       if(!user.getStatus()){
-           throw new IllegalArgumentException("User is not active !");
-       }
+    public ResponseEntity<JwtAuthenticationResponse> refreshToken(RefreshTokenRequest request) {
+        String username = jwtService.extractUsername(request.getToken());
+        if (username != null) {
+            Account acc = accountRepo.findByUsername(username).orElse(null);
+            if (acc != null) {
+                Token access = jwtService.checkTokenIsValid(acc, TokenType.ACCESS.getValue());
+                Token refresh = jwtService.checkTokenIsValid(acc, TokenType.REFRESH.getValue());
+                if(access.getValue().equals(request.getToken())){
+                    if(refresh != null){
+                        refresh.setStatus(Status.TOKEN_EXPIRED.getValue());
+                        tokenRepo.save(refresh);
+                    }
+                    String newRefresh = jwtService.generateRefreshToken(acc);
+                    tokenRepo.save(
+                            Token.builder()
+                                    .account(acc)
+                                    .status(Status.TOKEN_ACTIVE.getValue())
+                                    .type(TokenType.REFRESH.getValue())
+                                    .value(newRefresh)
+                                    .createdDate(jwtService.extractIssuedAt(newRefresh))
+                                    .expiredDate(jwtService.extractExpiration(newRefresh))
+                                    .build()
+                    );
 
-       var jwt = jwtService.generateToken(user);
-       var refreshToken = jwtService.generateRefreshToken(user);
-
-       revokeAllUserToken(user);
-       saveUserToken(user, jwt, refreshToken);
-
-       return JwtAuthenticationResponse.builder()
-               .token(jwt)
-               .refreshToken(refreshToken)
-               .build();
-    }
-
-    @Override
-    public ResponseEntity<JwtAuthenticationResponse> refreshToken(RefreshTokenRequest refreshTokenRequest, HttpServletResponse response) {
-        final String authHeader = refreshTokenRequest.getToken();
-        final String refreshToken;
-        final String username;
-
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(null);
-        }
-
-        refreshToken = authHeader.substring(7);
-        username = jwtService.extractUsername(refreshToken);
-        final Token currentRefreshToken = jwtRepository.findByRefreshToken(refreshToken).orElse(null);
-
-        if(username != null || currentRefreshToken != null) {
-            var user = this.userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException(username + " is not found !"));
-            if((jwtService.isTokenValid(refreshToken, user)) &&
-            !currentRefreshToken.isRevoked() && !currentRefreshToken.isExpired()) {
-                var accessToken = jwtService.generateToken(user);
-                var newRefreshToken = jwtService.generateRefreshToken(user);
-
-                revokeAllUserToken(user);
-                saveUserToken(user, newRefreshToken, accessToken);
-
-                JwtAuthenticationResponse authResponse = JwtAuthenticationResponse.builder()
-                        .token(accessToken)
-                        .refreshToken(newRefreshToken)
-                        .build();
-                return ResponseEntity.ok(authResponse);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                    return ResponseEntity.status(HttpStatus.OK).body(JwtAuthenticationResponse.builder().token(request.getToken()).message("Refresh successfully").build());
+                }
             }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtAuthenticationResponse.builder().token("").message("Account not found").build());
         }
-    }
-
-    private void saveUserToken(Account user, String jwtToken, String jwtRefreshToken) {
-        Token token = Token.builder()
-                .user(user)
-                .token(jwtToken)
-                .refreshToken(jwtRefreshToken)
-                .tokenType(TokenType.BEARER)
-                .revoked(false)
-                .expired(false)
-                .build();
-        jwtRepository.save(token);
-    }
-
-
-    private String extractTokenFromHeader(HttpServletRequest request) {
-        String authHeader = request.getHeader(AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        return null;
-    }
-
-    private void revokeAllUserToken(Account user) {
-        var validUserToken = jwtRepository.findAllValidTokensByUser((long) user.getId());
-        if (validUserToken.isEmpty()) return;
-        validUserToken.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        jwtRepository.saveAll(validUserToken);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(JwtAuthenticationResponse.builder().token("").message("Token invalid").build());
     }
 }

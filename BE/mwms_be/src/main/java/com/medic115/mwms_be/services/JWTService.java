@@ -1,13 +1,17 @@
 package com.medic115.mwms_be.services;
 
+import com.medic115.mwms_be.models.Account;
+import com.medic115.mwms_be.models.Token;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.Date;
 
 public interface JWTService {
     String extractUsername(String token);
-    String generateToken(Map<String, Object> extraClaims, UserDetails userDetails);
-    String generateToken(UserDetails userDetails);
-    String generateRefreshToken(UserDetails userDetails);
-    boolean isTokenValid(String token, UserDetails userDetails);
+    LocalDate extractExpiration(String token);
+    LocalDate extractIssuedAt(String token);
+    String generateAccessToken(UserDetails user);
+    String generateRefreshToken(UserDetails user);
+    Token checkTokenIsValid(Account acc, String tokenType);
 }
