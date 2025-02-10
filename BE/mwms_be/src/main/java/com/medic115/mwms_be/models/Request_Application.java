@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @AllArgsConstructor
+@AttributeOverride(name = "createdDate", column = @Column(name = "request_date"))
 public class Request_Application extends Auditable {
 
     @Id

@@ -29,6 +29,6 @@ public class Request_Item extends Auditable {
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 
-    @OneToMany(mappedBy = "request_item")
-    private List<Batch> batches;
+    @OneToOne(mappedBy = "request_item")
+    private Batch batch;
 }
