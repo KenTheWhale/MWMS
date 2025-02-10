@@ -4,31 +4,28 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "`position`")
+@Table(name = "`batch_item`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Position {
+public class BatchItem{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
+    @Column(name = "`serial_number`")
+    String serialNumber;
 
-    String status;
-
-    @OneToMany(mappedBy = "position")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    List<Batch> batches;
+    @Column(name = "`imported_date`")
+    LocalDate importedDate;
 
     @ManyToOne
-    @JoinColumn(name = "`area_id`")
-    Area area;
+    @JoinColumn(name = "batch_id")
+    Batch batch;
 }

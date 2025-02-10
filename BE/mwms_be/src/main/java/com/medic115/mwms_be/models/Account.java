@@ -1,66 +1,56 @@
 package com.medic115.mwms_be.models;
-
-
-import com.medic115.mwms_be.common.Auditable;
-import com.medic115.mwms_be.token.Token;
+import com.medic115.mwms_be.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 import java.util.Collection;
 
-@Entity
-@NoArgsConstructor
-@Getter
-@Setter
-@Builder
+@Data
 @AllArgsConstructor
-@Table(name = "account")
-public class Account extends Auditable implements UserDetails {
+@NoArgsConstructor
+@Builder
+@Entity
+@Table(name = "`account`")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Account implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
-    private String username;
+    String username;
 
-    private String password;
+    String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    Role role;
 
-    private String phone;
+    String phone;
 
-    private Boolean status;
+    String status;
 
-    @OneToOne(mappedBy = "account")
-    private Partner partner;
+    @OneToOne(mappedBy = "account", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Partner partner;
 
-    @OneToMany(mappedBy = "user")
-    private List<Token> tokens;
+    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Token> tokens;
 
-    @OneToMany(mappedBy = "account")
-    private List<Task> tasks;
-
-    private String firstName;
-    private String lastName;
-    private Boolean gender;
+    @OneToMany(mappedBy = "staff")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Task> tasks;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.username;
+        return role.getAuthorities();
     }
 
     @Override
@@ -80,10 +70,6 @@ public class Account extends Auditable implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.status;
-    }
-
-    public String getFullName() {
-        return this.firstName + " " + this.lastName;
+        return true;
     }
 }

@@ -14,12 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> getAllUsersExceptAdmin() {
-        List<UserResponse> users = userService.getAllAccountExceptAdmin();
-        return ResponseEntity.ok(users);
+    @GetMapping("/test")
+    @PreAuthorize("hasAuthority('admin:read')")
+    public String helloAdmin(){
+        return "Hello Admin";
     }
 }
