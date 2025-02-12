@@ -11,7 +11,7 @@ public interface JWTService {
     String extractUsername(String token);
     LocalDate extractExpiration(String token);
     LocalDate extractIssuedAt(String token);
-    String generateAccessToken(UserDetails user);
-    String generateRefreshToken(UserDetails user);
+    String generateAccessToken(Account account);
+    String generateRefreshToken(Account account);
     Token checkTokenIsValid(Account acc, String tokenType);
 }
