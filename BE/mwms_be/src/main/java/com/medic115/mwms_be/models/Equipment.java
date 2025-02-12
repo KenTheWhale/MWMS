@@ -1,40 +1,38 @@
 package com.medic115.mwms_be.models;
 
-import com.medic115.mwms_be.common.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
-import java.time.LocalDate;
+import lombok.experimental.FieldDefaults;
 
-@Entity
-@Table(name = "equipment")
-@NoArgsConstructor
-@Getter
-@Setter
+import java.util.List;
+
+@Data
 @Builder
 @AllArgsConstructor
-public class Equipment extends Auditable {
+@NoArgsConstructor
+@Entity
+@Table(name = "`equipment`")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Equipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
-    private String name;
+    String name;
 
-    private String description;
+    String description;
 
-    private String code;
+    double price;
 
-    private LocalDate expiry_date;
-
-    private Double price;
-
-    private Long quantity;
+    String unit;
 
     @OneToMany(mappedBy = "equipment")
-    private List<Request_Item> request_items;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<RequestItem> requestItems;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinColumn(name = "`category_id`")
+    Category category;
 }

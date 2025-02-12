@@ -1,28 +1,33 @@
 package com.medic115.mwms_be.models;
 
-import com.medic115.mwms_be.common.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
-@Entity
-@Table(name = "area")
-@NoArgsConstructor
-@Getter
-@Setter
+
+@Data
 @Builder
 @AllArgsConstructor
-public class Area extends Auditable {
+@NoArgsConstructor
+@Entity
+@Table(name = "`area`")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Area {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
-    private String name;
+    String name;
 
-    private Boolean status;
+    String status;
 
-    private Long max_quantity;
+    @Column(name = "`max_quantity`")
+    int maxQty;
 
     @OneToMany(mappedBy = "area")
-    private List<Position> positions;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Position> positions;
 }

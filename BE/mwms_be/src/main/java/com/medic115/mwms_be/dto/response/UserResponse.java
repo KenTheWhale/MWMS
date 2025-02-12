@@ -9,7 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JwtAuthenticationResponse {
-    private String token;
-    private String message;
+public class UserResponse {
+    private int id;
+    private String role;
+    private String phone;
+    private Boolean status;
+    private String fullName;
+    private Boolean gender;
 }
