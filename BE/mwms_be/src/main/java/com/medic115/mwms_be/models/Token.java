@@ -32,7 +32,7 @@ public class Token{
     @Column(name = "`created_date`")
     LocalDate createdDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "`account_id`")
     Account account;
 }

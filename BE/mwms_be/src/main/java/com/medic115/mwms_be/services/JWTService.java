@@ -14,4 +14,5 @@ public interface JWTService {
     String generateAccessToken(Account account);
     String generateRefreshToken(Account account);
     Token checkTokenIsValid(Account acc, String tokenType);
+    boolean checkToken(String token);
 }
