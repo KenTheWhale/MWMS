@@ -63,61 +63,62 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .status(Status.ACCOUNT_ACTIVE.getValue())
                         .build();
 
-                Account manager = Account.builder()
-                        .username("manager")
-                        .password("123")
-                        .role(Role.MANAGER)
-                        .phone("0909")
-                        .status(Status.ACCOUNT_ACTIVE.getValue())
-                        .build();
+                    Account manager = Account.builder()
+                            .username("manager")
+                            .password("123")
+                            .role(Role.MANAGER)
+                            .phone("0909")
+                            .status(Status.ACCOUNT_ACTIVE.getValue())
+                            .build();
 
-                Account staff = Account.builder()
-                        .username("staff")
-                        .password("123")
-                        .role(Role.STAFF)
-                        .phone("0909")
-                        .status(Status.ACCOUNT_ACTIVE.getValue())
-                        .build();
+                    Account staff = Account.builder()
+                            .username("staff")
+                            .password("123")
+                            .role(Role.STAFF)
+                            .phone("0909")
+                            .status(Status.ACCOUNT_ACTIVE.getValue())
+                            .build();
 
-                Account partner = Account.builder()
-                        .username("partner")
-                        .password("123")
-                        .role(Role.PARTNER)
-                        .phone("0909")
-                        .status(Status.ACCOUNT_ACTIVE.getValue())
-                        .build();
+                    Account partner = Account.builder()
+                            .username("partner")
+                            .password("123")
+                            .role(Role.PARTNER)
+                            .phone("0909")
+                            .status(Status.ACCOUNT_ACTIVE.getValue())
+                            .build();
 
-                accounts.add(admin);
-                accounts.add(manager);
-                accounts.add(staff);
-                accounts.add(partner);
+                    accounts.add(admin);
+                    accounts.add(manager);
+                    accounts.add(staff);
+                    accounts.add(partner);
 
-                accountRepo.saveAll(accounts);
+                    accountRepo.saveAll(accounts);
 
-                for (Account account : accounts) {
-                    String access = jwtService.generateAccessToken(account);
-                    String refresh = jwtService.generateRefreshToken(account);
-                    tokenRepo.save(
-                            Token.builder()
-                                    .value(access)
-                                    .type(TokenType.ACCESS.getValue())
-                                    .status(Status.TOKEN_ACTIVE.getValue())
-                                    .account(account)
-                                    .expiredDate(jwtService.extractExpiration(access))
-                                    .createdDate(jwtService.extractIssuedAt(access))
-                                    .build()
-                    );
+                    for (Account account : accounts) {
+                        String access = jwtService.generateAccessToken(account);
+                        String refresh = jwtService.generateRefreshToken(account);
+                        tokenRepo.save(
+                                Token.builder()
+                                        .value(access)
+                                        .type(TokenType.ACCESS.getValue())
+                                        .status(Status.TOKEN_ACTIVE.getValue())
+                                        .account(account)
+                                        .expiredDate(jwtService.extractExpiration(access))
+                                        .createdDate(jwtService.extractIssuedAt(access))
+                                        .build()
+                        );
 
-                    tokenRepo.save(
-                            Token.builder()
-                                    .value(refresh)
-                                    .type(TokenType.REFRESH.getValue())
-                                    .status(Status.TOKEN_ACTIVE.getValue())
-                                    .account(account)
-                                    .expiredDate(jwtService.extractExpiration(refresh))
-                                    .createdDate(jwtService.extractIssuedAt(refresh))
-                                    .build()
-                    );
+                        tokenRepo.save(
+                                Token.builder()
+                                        .value(refresh)
+                                        .type(TokenType.REFRESH.getValue())
+                                        .status(Status.TOKEN_ACTIVE.getValue())
+                                        .account(account)
+                                        .expiredDate(jwtService.extractExpiration(refresh))
+                                        .createdDate(jwtService.extractIssuedAt(refresh))
+                                        .build()
+                        );
+                    }
                 }
 
 
@@ -323,7 +324,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 requestItems.add(requestItem5);
                 requestItemRepo.saveAll(requestItems);
 
-                
+
 
                 Batch batch1 = Batch
                         .builder()
