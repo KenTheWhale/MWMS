@@ -119,9 +119,6 @@ public class MwmsBeApplication implements CommandLineRunner {
                                         .build()
                         );
                     }
-                }
-
-
                 RequestApplication requestApplication1 = RequestApplication
                         .builder()
                         .code("REQ1")
@@ -337,6 +334,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .builder()
                         .code("BATCH2")
                         .requestItem(requestItem2)
+                        .createdDate(LocalDate.now())
                         .batchItems(null)
                         .equipmentQty(10)
                         .position(null)
@@ -345,6 +343,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .builder()
                         .code("BATCH3")
                         .requestItem(requestItem3)
+                        .createdDate(LocalDate.now())
                         .batchItems(null)
                         .equipmentQty(10)
                         .position(null)
@@ -353,6 +352,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .builder()
                         .code("BATCH4")
                         .requestItem(requestItem4)
+                        .createdDate(LocalDate.now())
                         .batchItems(null)
                         .equipmentQty(10)
                         .position(null)
@@ -361,6 +361,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .builder()
                         .code("BATCH5")
                         .requestItem(requestItem5)
+                        .createdDate(LocalDate.now())
                         .batchItems(null)
                         .equipmentQty(10)
                         .position(null)
@@ -372,12 +373,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 batches.add(batch4);
                 batches.add(batch5);
                 batchRepo.saveAll(batches);
-
-
-
-
-
-            }
+                }
         };
     }
 }
