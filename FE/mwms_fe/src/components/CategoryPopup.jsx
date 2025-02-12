@@ -1,29 +1,28 @@
-import { Modal, Button, Form } from 'react-bootstrap';
+import {Modal, Button, Form} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 
-const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDelete }) => {
+const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelete}) => {
     const [editedCategory, setEditedCategory] = useState({
         name: '',
-        category: '',
-        quantity: '',
-        price: '',
-        description: '',
         code: '',
-        expired_date: ''
+        description: ''
     });
 
     useEffect(() => {
-        if (actionType === 'add') {
+        if (actionType === 'edit' && category) {
+            setEditedCategory({
+                id: category.id,
+                name: category.name || '',
+                code: category.code || '',
+                description: category.description || ''
+            });
+        } else if (actionType === 'add') {
             setEditedCategory({
                 id: null,
                 name: '',
-                category: '',
-                quantity: '',
-                price: '',
-                description: '',
                 code: '',
-                expired_date: ''
+                description: ''
             });
         }
     }, [category, actionType]);
@@ -36,7 +35,9 @@ const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDele
     };
 
     const handleSave = () => {
+        console.log(editedCategory)
         onSave(editedCategory);
+        console.log(editedCategory)
         handleClose();
     };
 
@@ -59,6 +60,7 @@ const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDele
                         <p><strong>Description:</strong> {category.description}</p>
                     </>
                 );
+            case 'edit':
             case 'add':
                 return (
                     <Form>
@@ -97,7 +99,7 @@ const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDele
             case 'delete':
                 return (
                     <>
-                        <p>Are you sure you want to delete this equipment?</p>
+                        <p>Are you sure you want to delete this category?</p>
                         <Button variant="secondary" onClick={handleClose}>Cancel</Button>{' '}
                         <Button variant="danger" onClick={handleDelete}>Delete</Button>
                     </>
@@ -111,7 +113,7 @@ const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDele
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : category?.name}</Modal.Title>
+                <Modal.Title>{actionType === 'edit' ? 'Edit Category' : actionType === 'add' ? 'Add Category' : category?.name}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {renderContent()}
@@ -119,7 +121,7 @@ const CategoryPopup = ({ category, show, handleClose, actionType, onSave, onDele
             <Modal.Footer>
                 {(actionType === 'edit' || actionType === 'add') && (
                     <Button variant="primary" onClick={handleSave}>
-                        {actionType === 'edit' ? 'Save Changes' : 'Add Equipment'}
+                        {actionType === 'edit' ? 'Save Changes' : 'Add category'}
                     </Button>
                 )}
             </Modal.Footer>
