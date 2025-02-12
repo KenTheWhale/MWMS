@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -36,6 +38,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${jwt.expiration.refresh-token}")
     private long refreshExpiration;
 
+
+    private void revokeAllAccountToken(Account account){
+        var validAccountToken = tokenRepo.findAllValidTokensByUser(account.getId());
+
+        if(validAccountToken.isEmpty()) return;
+
+        validAccountToken.stream().forEach(token -> {
+            token.setStatus(Status.TOKEN_EXPIRED.getValue());
+            tokenRepo.save(token);
+        });
+    }
+
     @Override
     public ResponseEntity<JwtAuthenticationResponse> signIn(SignInRequest request) {
         Account acc = accountRepo.findByUsernameAndPassword(request.getUsername(), request.getPassword()).orElse(null);
@@ -50,52 +64,86 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     );
         }
 
+
+
+        String accessToken = jwtService.generateAccessToken(acc);
+        String refreshToken = jwtService.generateRefreshToken(acc);
+
+        revokeAllAccountToken(acc);
+        saveAccountToken(acc, accessToken, refreshToken);
+
         //Search if any refresh or access token is active
-        Token refresh = jwtService.checkTokenIsValid(acc, TokenType.REFRESH.getValue());
-        Token access = jwtService.checkTokenIsValid(acc, TokenType.ACCESS.getValue());
+//        Token refresh = jwtService.checkTokenIsValid(acc, TokenType.REFRESH.getValue());
+//        Token access = jwtService.checkTokenIsValid(acc, TokenType.ACCESS.getValue());
 
         //if refresh is null (no active refresh found) then create a new one
-        if (refresh != null) {
-            refresh.setStatus(Status.TOKEN_EXPIRED.getValue());
-            tokenRepo.save(refresh);
-        }
+//        if (refresh != null) {
+//            refresh.setStatus(Status.TOKEN_EXPIRED.getValue());
+//            tokenRepo.save(refresh);
+//        }
+//
+//        String newRefresh = jwtService.generateRefreshToken(acc);
+//        tokenRepo.save(Token.builder()
+//                .account(acc)
+//                .status(Status.TOKEN_ACTIVE.getValue())
+//                .type(TokenType.REFRESH.getValue())
+//                .value(newRefresh)
+//                .createdDate(jwtService.extractIssuedAt(newRefresh))
+//                .expiredDate(jwtService.extractExpiration(newRefresh))
+//                .build()
+//        );
+//
+//        //if access is null (no active access found) then create a new one
+//        if (access != null) {
+//            access.setStatus(Status.TOKEN_EXPIRED.getValue());
+//            tokenRepo.save(access);
+//        }
+//
+//        String newAccess = jwtService.generateAccessToken(acc);
+//        access = tokenRepo.save(Token.builder()
+//                .account(acc)
+//                .status(Status.TOKEN_ACTIVE.getValue())
+//                .type(TokenType.ACCESS.getValue())
+//                .value(newAccess)
+//                .createdDate(jwtService.extractIssuedAt(newAccess))
+//                .expiredDate(jwtService.extractExpiration(newAccess))
+//                .build()
+//        );
 
-        String newRefresh = jwtService.generateRefreshToken(acc);
-        tokenRepo.save(Token.builder()
-                .account(acc)
-                .status(Status.TOKEN_ACTIVE.getValue())
-                .type(TokenType.REFRESH.getValue())
-                .value(newRefresh)
-                .createdDate(jwtService.extractIssuedAt(newRefresh))
-                .expiredDate(jwtService.extractExpiration(newRefresh))
-                .build()
-        );
 
-        //if access is null (no active access found) then create a new one
-        if (access != null) {
-            access.setStatus(Status.TOKEN_EXPIRED.getValue());
-            tokenRepo.save(access);
-        }
 
-        String newAccess = jwtService.generateAccessToken(acc);
-        access = tokenRepo.save(Token.builder()
-                .account(acc)
-                .status(Status.TOKEN_ACTIVE.getValue())
-                .type(TokenType.ACCESS.getValue())
-                .value(newAccess)
-                .createdDate(jwtService.extractIssuedAt(newAccess))
-                .expiredDate(jwtService.extractExpiration(newAccess))
-                .build()
-        );
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
                         JwtAuthenticationResponse.builder()
                                 .message("Sign in successfully")
-                                .token(access.getValue())
+                                .token(accessToken)
                                 .build()
                 );
+    }
+
+
+    private void saveAccountToken(Account account, String jwtToken, String refreshToken) {
+        Token access = Token.builder()
+                .account(account)
+                .value(jwtToken)
+                .createdDate(jwtService.extractIssuedAt(jwtToken))
+                .expiredDate(jwtService.extractExpiration(jwtToken))
+                .type(TokenType.ACCESS.getValue())
+                .status(Status.TOKEN_ACTIVE.getValue())
+                .build();
+        tokenRepo.save(access);
+
+        Token refresh = Token.builder()
+                .account(account)
+                .value(refreshToken)
+                .createdDate(jwtService.extractIssuedAt(jwtToken))
+                .expiredDate(jwtService.extractExpiration(jwtToken))
+                .type(TokenType.REFRESH.getValue())
+                .status(Status.TOKEN_ACTIVE.getValue())
+                .build();
+        tokenRepo.save(refresh);
     }
 
     @Override
