@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.service_implementors;
 
+import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.Account;
 import com.medic115.mwms_be.models.Token;
@@ -72,16 +73,25 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String generateAccessToken(Account account) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", account.getRole().name());
+        Map<String, Object> claims = generateClaims(account);
         return generateToken(claims, account, accessExpiration);
     }
 
     @Override
     public String generateRefreshToken(Account account) {
+        Map<String, Object> claims = generateClaims(account);
+        return generateToken(claims, account, refreshExpiration);
+    }
+
+    private Map<String, Object> generateClaims(Account account){
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", account.getRole().name());
-        return generateToken(claims, account, refreshExpiration);
+        if(account.getRole().equals(Role.PARTNER)){
+            claims.put("type", account.getPartner().getType());
+        }else{
+            claims.put("type", "");
+        }
+        return claims;
     }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails user, long expiredTime){
@@ -106,6 +116,11 @@ public class JWTServiceImpl implements JWTService {
             }
         }
         return t;
+    }
+
+    @Override
+    public boolean checkToken(String token) {
+        return extractClaim(token, Claims::getExpiration).after(new Date());
     }
 
 
