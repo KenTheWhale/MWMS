@@ -2,6 +2,8 @@
     --tab-background: #222222;
     --app-background: #121212;
     --text-color: #FF8C00FF;
+    --navbar-width: 17vw;
+    --outlet-width: 83vw;
 }
 
 /* main */
@@ -15,13 +17,13 @@
 
 .navbar_area {
     background: var(--tab-background);
-    width: 17vw;
+    width: var(--navbar-width);
     height: 100vh;
 }
 
 .outlet_area {
     background: var(--app-background);
-    width: 83vw;
+    width: var(--outlet-width);
     height: 100vh;
     z-index: 0;
 }
