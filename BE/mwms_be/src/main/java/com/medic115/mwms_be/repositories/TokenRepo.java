@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface TokenRepo extends JpaRepository<Token, Integer> {
     Optional<Token> findByAccount_IdAndStatusAndType(int accountId, String status, String type);
+    Optional<Token> findByValue(String value);
 }
