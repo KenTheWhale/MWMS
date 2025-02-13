@@ -1,7 +1,5 @@
 package com.medic115.mwms_be.config;
 
-
-
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.TokenType;
 import com.medic115.mwms_be.models.Account;
@@ -28,12 +26,23 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
-
-
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
     private final AccountRepo accountRepo;
     private final TokenRepo tokenRepo;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/") ||
+                path.startsWith("/v2/api-docs") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-resources") ||
+                path.startsWith("/configuration/") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/webjars/") ||
+                path.equals("/swagger-ui.html");
+    }
 
     @Override
     protected void doFilterInternal(
@@ -42,54 +51,41 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        String jwt;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        String username = jwtService.extractUsername(jwt);
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            Account account = accountRepo.findByUsername(userDetails.getUsername()).orElse(null);
-            if (account == null || !account.getStatus().equalsIgnoreCase(Status.ACCOUNT_ACTIVE.getValue())) {
-                filterChain.doFilter(request, response);
-                return;
-            }
 
-            Token refresh = jwtService.checkTokenIsValid(account, TokenType.REFRESH.getValue());
-            Token access = jwtService.checkTokenIsValid(account, TokenType.ACCESS.getValue());
+        try {
+            String jwt = authHeader.substring(7);
+            String username = jwtService.extractUsername(jwt);
 
-            if (access == null) {
-                // if both are null then return 403
-                if (refresh == null) {
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                Account account = accountRepo.findByUsername(userDetails.getUsername()).orElse(null);
+
+                if (account == null || !account.getStatus().equalsIgnoreCase(Status.ACCOUNT_ACTIVE.getValue())) {
                     filterChain.doFilter(request, response);
                     return;
                 }
-                //if access is null but refresh is not => create new access
-                tokenRepo.save(Token.builder()
-                        .value(jwtService.generateAccessToken(account))
-                        .type(TokenType.ACCESS.getValue())
-                        .account(account)
-                        .status(Status.TOKEN_ACTIVE.getValue())
-                        .build()
-                );
+
+                // Chỉ kiểm tra access token
+                Token accessToken = jwtService.checkTokenIsValid(account, TokenType.ACCESS.getValue());
+                if (accessToken != null) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-
-
-            //grant permission
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (Exception e) {
+            // Log exception if needed
         }
+
         filterChain.doFilter(request, response);
     }
 }

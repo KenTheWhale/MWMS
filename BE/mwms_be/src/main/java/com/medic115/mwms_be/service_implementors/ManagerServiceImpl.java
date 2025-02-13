@@ -8,21 +8,29 @@ import com.medic115.mwms_be.dto.response.UpdateCategoryResponse;
 import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
 import com.medic115.mwms_be.models.Category;
 import com.medic115.mwms_be.repositories.CategoryRepo;
+import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.enums.Role;
+import com.medic115.mwms_be.repositories.AccountRepo;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.CategoryValidation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerServiceImpl implements ManagerService {
 
-   CategoryRepo categoryRepo;
+    private final AccountRepo accountRepo;
+
+    CategoryRepo categoryRepo;
 
     @Override
     public ViewCategoryResponse viewCategory() {
@@ -71,6 +79,27 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public DeleteCategoryResponse deleteCategory(int id) {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getStaffList() {
+        List<Map<String, Object>> data = accountRepo.findAllByRole(Role.STAFF).stream()
+                .map(
+                        account -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("username", account.getUsername());
+                            item.put("phone", account.getPhone());
+                            item.put("status", account.getStatus());
+                            return item;
+                        }
+                )
+                .toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("")
+                        .data(data)
+                        .build()
+        );
     }
 
 }

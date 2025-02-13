@@ -24,6 +24,8 @@ public class Partner {
 
     String address;
 
+    String type;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "`account_id`")
     Account account;

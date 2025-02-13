@@ -14,6 +14,10 @@ public enum Status {
     REQUEST_PENDING("pending"),
     REQUEST_REJECTED("rejected"),
     REQUEST_ACCEPTED("accepted"),
-    REQUEST_CANCELLED("cancelled");
+    REQUEST_CANCELLED("cancelled"),
+    AREA_AVAILABLE("available"),
+    AREA_FULL("full"),
+    TASK_PROCESSING("processing"),
+    TASK_COMPLETED("completed"),;
     private final String value;
 }
