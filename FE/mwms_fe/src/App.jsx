@@ -15,8 +15,10 @@ import {configureStore} from "@reduxjs/toolkit";
 import {accountReducer} from "./reducers/AccountReducer.js";
 import {Provider} from "react-redux";
 import TaskPage from "./pages/manager/TaskPage.jsx";
+import { authReducer } from "./reducers/AuthReducer.jsx";
 
 const router = createBrowserRouter([
+
     {
         path: "/login",
         element: <LoginPage/>
@@ -135,7 +137,8 @@ const router = createBrowserRouter([
 
 const store = configureStore({
     reducer:{
-        accountReducer: accountReducer
+        accountReducer: accountReducer,
+        authReducer: authReducer
     }
 });
 
