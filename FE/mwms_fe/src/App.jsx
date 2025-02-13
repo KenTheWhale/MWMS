@@ -6,7 +6,6 @@ import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashDefault from "./view/dashboard/index.jsx";
-import "./index.scss"
 import ImportRequestPage from "./pages/manager/ImportRequestPage.jsx";
 import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
 import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";

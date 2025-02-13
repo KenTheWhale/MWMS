@@ -1,0 +1,17 @@
+package com.medic115.mwms_be.services;
+
+import com.medic115.mwms_be.dto.requests.PositionRequest;
+import com.medic115.mwms_be.dto.response.PositionResponse;
+
+import java.util.List;
+
+public interface PositionService {
+
+    void createPosition(Integer areaId, PositionRequest request);
+
+    List<PositionResponse> getAllPosition();
+
+    PositionResponse getPosition(Integer id);
+
+    PositionResponse updatePosition(Integer id, PositionRequest request);
+}
