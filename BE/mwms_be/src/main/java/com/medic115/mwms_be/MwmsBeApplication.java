@@ -70,6 +70,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 List<BatchItem> batchItems = new ArrayList<>();
                 List<Task> tasks = new ArrayList<>();
 
+                //init account
                 if (accountRepo.findAll().isEmpty()) {
                     Account admin = Account.builder()
                             .username("admin")
