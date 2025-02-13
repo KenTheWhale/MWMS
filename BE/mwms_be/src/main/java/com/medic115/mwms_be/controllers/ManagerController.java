@@ -21,11 +21,13 @@ public class ManagerController {
     private final ManagerService managerService;
 
     @GetMapping("/category")
+    @PreAuthorize("hasAuthority('manager:read')")
     public ViewCategoryResponse viewCategory() {
         return managerService.viewCategory();
     }
 
     @PostMapping("/category")
+    @PreAuthorize("hasAuthority('manager:create')")
     public AddCategoryResponse addCategory(@RequestBody AddCategoryRequest request) {
         return managerService.addCategory(request);
     }
