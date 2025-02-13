@@ -41,10 +41,11 @@ public class MwmsBeApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {}
+    public void run(String... args) throws Exception {
+    }
 
     @Bean
-    public CommandLineRunner initData(){
+    public CommandLineRunner initData() {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
@@ -55,6 +56,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 List<Equipment> equipments = new ArrayList<>();
                 List<Category> categories = new ArrayList<>();
 
+                //init account
                 Account admin = Account.builder()
                         .username("admin")
                         .password("123")
@@ -63,62 +65,64 @@ public class MwmsBeApplication implements CommandLineRunner {
                         .status(Status.ACCOUNT_ACTIVE.getValue())
                         .build();
 
-                    Account manager = Account.builder()
-                            .username("manager")
-                            .password("123")
-                            .role(Role.MANAGER)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
+                Account manager = Account.builder()
+                        .username("manager")
+                        .password("123")
+                        .role(Role.MANAGER)
+                        .phone("0909")
+                        .status(Status.ACCOUNT_ACTIVE.getValue())
+                        .build();
 
-                    Account staff = Account.builder()
-                            .username("staff")
-                            .password("123")
-                            .role(Role.STAFF)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
+                Account staff = Account.builder()
+                        .username("staff")
+                        .password("123")
+                        .role(Role.STAFF)
+                        .phone("0909")
+                        .status(Status.ACCOUNT_ACTIVE.getValue())
+                        .build();
 
-                    Account partner = Account.builder()
-                            .username("partner")
-                            .password("123")
-                            .role(Role.PARTNER)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
+                Account partner = Account.builder()
+                        .username("partner")
+                        .password("123")
+                        .role(Role.PARTNER)
+                        .phone("0909")
+                        .status(Status.ACCOUNT_ACTIVE.getValue())
+                        .build();
 
-                    accounts.add(admin);
-                    accounts.add(manager);
-                    accounts.add(staff);
-                    accounts.add(partner);
+                accounts.add(admin);
+                accounts.add(manager);
+                accounts.add(staff);
+                accounts.add(partner);
 
-                    accountRepo.saveAll(accounts);
+                accountRepo.saveAll(accounts);
 
-                    for (Account account : accounts) {
-                        String access = jwtService.generateAccessToken(account);
-                        String refresh = jwtService.generateRefreshToken(account);
-                        tokenRepo.save(
-                                Token.builder()
-                                        .value(access)
-                                        .type(TokenType.ACCESS.getValue())
-                                        .status(Status.TOKEN_ACTIVE.getValue())
-                                        .account(account)
-                                        .expiredDate(jwtService.extractExpiration(access))
-                                        .createdDate(jwtService.extractIssuedAt(access))
-                                        .build()
-                        );
+                for (Account account : accounts) {
+                    String access = jwtService.generateAccessToken(account);
+                    String refresh = jwtService.generateRefreshToken(account);
+                    tokenRepo.save(
+                            Token.builder()
+                                    .value(access)
+                                    .type(TokenType.ACCESS.getValue())
+                                    .status(Status.TOKEN_ACTIVE.getValue())
+                                    .account(account)
+                                    .expiredDate(jwtService.extractExpiration(access))
+                                    .createdDate(jwtService.extractIssuedAt(access))
+                                    .build()
+                    );
 
-                        tokenRepo.save(
-                                Token.builder()
-                                        .value(refresh)
-                                        .type(TokenType.REFRESH.getValue())
-                                        .status(Status.TOKEN_ACTIVE.getValue())
-                                        .account(account)
-                                        .expiredDate(jwtService.extractExpiration(refresh))
-                                        .createdDate(jwtService.extractIssuedAt(refresh))
-                                        .build()
-                        );
-                    }
+                    tokenRepo.save(
+                            Token.builder()
+                                    .value(refresh)
+                                    .type(TokenType.REFRESH.getValue())
+                                    .status(Status.TOKEN_ACTIVE.getValue())
+                                    .account(account)
+                                    .expiredDate(jwtService.extractExpiration(refresh))
+                                    .createdDate(jwtService.extractIssuedAt(refresh))
+                                    .build()
+                    );
+                }
+
+                //init request application
                 RequestApplication requestApplication1 = RequestApplication
                         .builder()
                         .code("REQ1")
@@ -177,6 +181,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 requestApplications.add(requestApplication5);
                 requestApplicationRepo.saveAll(requestApplications);
 
+                //init category
                 Category category1 = Category
                         .builder()
                         .code("CATEGORY1")
@@ -215,6 +220,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 categories.add(category5);
                 categoryRepo.saveAll(categories);
 
+                //init equipment
                 Equipment equipment1 = Equipment
                         .builder()
                         .name("EQUIPMENT1")
@@ -263,6 +269,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 equipments.add(equipment5);
                 equipmentRepo.saveAll(equipments);
 
+                //init request item
                 RequestItem requestItem1 = RequestItem
                         .builder()
                         .requestApplication(requestApplication1)
@@ -321,8 +328,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 requestItems.add(requestItem5);
                 requestItemRepo.saveAll(requestItems);
 
-
-
+                //init batch
                 Batch batch1 = Batch
                         .builder()
                         .code("BATCH1")
@@ -373,7 +379,9 @@ public class MwmsBeApplication implements CommandLineRunner {
                 batches.add(batch4);
                 batches.add(batch5);
                 batchRepo.saveAll(batches);
-                }
+
+
+            }
         };
     }
 }

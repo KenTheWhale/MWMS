@@ -1,4 +1,7 @@
 package com.medic115.mwms_be.repositories;
 
-public interface TaskRepo {
+import com.medic115.mwms_be.models.Task;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TaskRepo extends JpaRepository<Task, Integer> {
 }

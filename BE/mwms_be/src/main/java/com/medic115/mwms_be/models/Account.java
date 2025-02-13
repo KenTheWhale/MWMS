@@ -1,13 +1,14 @@
 package com.medic115.mwms_be.models;
+
 import com.medic115.mwms_be.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.List;
+
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
