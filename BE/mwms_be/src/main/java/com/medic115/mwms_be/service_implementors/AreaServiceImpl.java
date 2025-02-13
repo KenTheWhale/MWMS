@@ -3,7 +3,7 @@ package com.medic115.mwms_be.service_implementors;
 import com.medic115.mwms_be.dto.requests.AreaRequest;
 import com.medic115.mwms_be.dto.response.AreaResponse;
 import com.medic115.mwms_be.models.Area;
-import com.medic115.mwms_be.repositories.AreaRepository;
+import com.medic115.mwms_be.repositories.AreaRepo;
 import com.medic115.mwms_be.services.AreaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AreaServiceImpl implements AreaService {
 
-    private final AreaRepository areaRepository;
+    private final AreaRepo areaRepo;
 
     @Override
     public void createArea(AreaRequest request) {
         if (request == null) throw new IllegalArgumentException("Request cannot be null");
 
-        areaRepository.save(Area.builder()
+        areaRepo.save(Area.builder()
                 .name(request.name())
                 .status(request.status())
                 .maxQty(request.maxQty())
@@ -30,7 +30,7 @@ public class AreaServiceImpl implements AreaService {
 
     @Override
     public List<AreaResponse> getAllAreas() {
-        List<Area> areas = areaRepository.findAll();
+        List<Area> areas = areaRepo.findAll();
         if (areas.isEmpty()) {
             return null;
         }
@@ -41,7 +41,7 @@ public class AreaServiceImpl implements AreaService {
     public AreaResponse getAreaById(Integer id) {
         if (id == null) throw new IllegalArgumentException("Id cannot be null");
 
-        Area area = areaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Dont have area with: " + id));
+        Area area = areaRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Dont have area with: " + id));
         return mapToDto(area);
     }
 
@@ -49,13 +49,13 @@ public class AreaServiceImpl implements AreaService {
     public AreaResponse updateArea(Integer id, AreaRequest request) {
         if (id == null || request == null) throw new IllegalArgumentException("Id and request cannot be null");
 
-        Area area = areaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Dont have area with: " + id));
+        Area area = areaRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Dont have area with: " + id));
 
         area.setName(request.name());
         area.setStatus(request.status());
         area.setMaxQty(request.maxQty());
 
-        areaRepository.save(area);
+        areaRepo.save(area);
 
         return mapToDto(area);
     }
