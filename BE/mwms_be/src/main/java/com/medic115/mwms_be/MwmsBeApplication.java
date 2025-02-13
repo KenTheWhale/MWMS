@@ -34,10 +34,17 @@ public class MwmsBeApplication implements CommandLineRunner {
 
     private final BatchRepo batchRepo;
 
+    private final BatchItemRepo batchItemRepo;
+
     private final EquipmentRepo equipmentRepo;
 
     private final CategoryRepo categoryRepo;
 
+    private final AreaRepo areaRepo;
+
+    private final PositionRepo positionRepo;
+
+    private final TaskRepo taskRepo;
 
     public static void main(String[] args) {
         SpringApplication.run(MwmsBeApplication.class, args);
@@ -58,6 +65,10 @@ public class MwmsBeApplication implements CommandLineRunner {
                 List<Batch> batches = new ArrayList<>();
                 List<Equipment> equipments = new ArrayList<>();
                 List<Category> categories = new ArrayList<>();
+                List<Area> areas = new ArrayList<>();
+                List<Position> positions = new ArrayList<>();
+                List<BatchItem> batchItems = new ArrayList<>();
+                List<Task> tasks = new ArrayList<>();
 
                 if (accountRepo.findAll().isEmpty()) {
                     Account admin = Account.builder()
@@ -159,10 +170,65 @@ public class MwmsBeApplication implements CommandLineRunner {
                                         .build()
                         );
                     }
+
+                    Task task1 = Task
+                            .builder()
+                            .code("TASK1")
+                            .name("CHECK BATCH 1")
+                            .staff(staff)
+                            .description("This is a check batch task")
+                            .status(Status.TASK_PROCESSING.getValue())
+                            .assignedDate(LocalDate.now())
+                            .build();
+                    Task task2 = Task
+                            .builder()
+                            .code("TASK2")
+                            .name("CHECK BATCH 2")
+                            .staff(staff)
+                            .description("This is a check batch task")
+                            .status(Status.TASK_PROCESSING.getValue())
+                            .assignedDate(LocalDate.now())
+                            .build();
+                    Task task3 = Task
+                            .builder()
+                            .code("TASK3")
+                            .name("CHECK BATCH")
+                            .staff(staff)
+                            .description("This is a check batch task")
+                            .status(Status.TASK_PROCESSING.getValue())
+                            .assignedDate(LocalDate.now())
+                            .build();
+                    Task task4 = Task
+                            .builder()
+                            .code("TASK4")
+                            .name("CHECK BATCH")
+                            .staff(staff)
+                            .description("This is a check batch task")
+                            .status(Status.TASK_PROCESSING.getValue())
+                            .assignedDate(LocalDate.now())
+                            .build();
+                    Task task5 = Task
+                            .builder()
+                            .code("TASK5")
+                            .name("CHECK BATCH")
+                            .staff(staff)
+                            .description("This is a check batch task")
+                            .status(Status.TASK_PROCESSING.getValue())
+                            .assignedDate(LocalDate.now())
+                            .build();
+
+                    tasks.add(task1);
+                    tasks.add(task2);
+                    tasks.add(task3);
+                    tasks.add(task4);
+                    tasks.add(task5);
+                    taskRepo.saveAll(tasks);
+
+
                     RequestApplication requestApplication1 = RequestApplication
                             .builder()
                             .code("REQ1")
-                            .task(null)
+                            .task(task1)
                             .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
@@ -172,7 +238,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     RequestApplication requestApplication2 = RequestApplication
                             .builder()
                             .code("REQ2")
-                            .task(null)
+                            .task(task2)
                             .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
@@ -182,7 +248,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     RequestApplication requestApplication3 = RequestApplication
                             .builder()
                             .code("REQ3")
-                            .task(null)
+                            .task(task3)
                             .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
@@ -192,7 +258,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     RequestApplication requestApplication4 = RequestApplication
                             .builder()
                             .code("REQ4")
-                            .task(null)
+                            .task(task4)
                             .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
@@ -202,7 +268,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     RequestApplication requestApplication5 = RequestApplication
                             .builder()
                             .code("REQ5")
-                            .task(null)
+                            .task(task5)
                             .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
@@ -303,6 +369,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     equipments.add(equipment5);
                     equipmentRepo.saveAll(equipments);
 
+
                     RequestItem requestItem1 = RequestItem
                             .builder()
                             .requestApplication(requestApplication1)
@@ -310,6 +377,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .batch(null)
                             .quantity(10)
                             .unitPrice(300)
+                            .partner(supplier.getPartner())
                             .carrierName("MWMS")
                             .carrierPhone("123456789")
                             .build();
@@ -320,6 +388,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .batch(null)
                             .quantity(10)
                             .unitPrice(300)
+                            .partner(supplier.getPartner())
                             .carrierName("MWMS")
                             .carrierPhone("123456789")
                             .build();
@@ -330,6 +399,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .batch(null)
                             .quantity(10)
                             .unitPrice(300)
+                            .partner(supplier.getPartner())
                             .carrierName("MWMS")
                             .carrierPhone("123456789")
                             .build();
@@ -340,6 +410,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .batch(null)
                             .quantity(10)
                             .unitPrice(300)
+                            .partner(supplier.getPartner())
                             .carrierName("MWMS")
                             .carrierPhone("123456789")
                             .build();
@@ -350,6 +421,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .batch(null)
                             .quantity(10)
                             .unitPrice(300)
+                            .partner(supplier.getPartner())
                             .carrierName("MWMS")
                             .carrierPhone("123456789")
                             .build();
@@ -362,48 +434,105 @@ public class MwmsBeApplication implements CommandLineRunner {
                     requestItemRepo.saveAll(requestItems);
 
 
+                    //------------------Area-----------------//
+                    Area area1 = Area
+                            .builder()
+                            .name("AREA1")
+                            .status(Status.AREA_AVAILABLE.getValue())
+                            .maxQty(100)
+                            .build();
+                    Area area2 = Area
+                            .builder()
+                            .name("AREA1")
+                            .status(Status.AREA_AVAILABLE.getValue())
+                            .maxQty(100)
+                            .build();
+                    Area area3 = Area
+                            .builder()
+                            .name("AREA1")
+                            .status(Status.AREA_AVAILABLE.getValue())
+                            .maxQty(100)
+                            .build();
+                    Area area4 = Area
+                            .builder()
+                            .name("AREA1")
+                            .status(Status.AREA_AVAILABLE.getValue())
+                            .maxQty(100)
+                            .build();
+                    Area area5 = Area
+                            .builder()
+                            .name("AREA1")
+                            .status(Status.AREA_AVAILABLE.getValue())
+                            .maxQty(100)
+                            .build();
+
+                    areas.add(area1);
+                    areas.add(area2);
+                    areas.add(area3);
+                    areas.add(area4);
+                    areas.add(area5);
+                    areaRepo.saveAll(areas);
+
+                    Position position1 = Position
+                            .builder()
+                            .name("POSITION1")
+                            .area(area1)
+                            .build();
+                    Position position2 = Position
+                            .builder()
+                            .name("POSITION2")
+                            .area(area1)
+                            .build();
+                    Position position3 = Position
+                            .builder()
+                            .name("POSITION3")
+                            .area(area1)
+                            .build();
+
+                    positions.add(position1);
+                    positions.add(position2);
+                    positions.add(position3);
+                    positionRepo.saveAll(positions);
+
                     Batch batch1 = Batch
                             .builder()
                             .code("BATCH1")
                             .requestItem(requestItem1)
-                            .batchItems(null)
-                            .position(null)
+                            .createdDate(LocalDate.now())
+                            .equipmentQty(10)
+                            .position(position1)
                             .build();
                     Batch batch2 = Batch
                             .builder()
                             .code("BATCH2")
                             .requestItem(requestItem2)
                             .createdDate(LocalDate.now())
-                            .batchItems(null)
                             .equipmentQty(10)
-                            .position(null)
+                            .position(position1)
                             .build();
                     Batch batch3 = Batch
                             .builder()
                             .code("BATCH3")
                             .requestItem(requestItem3)
                             .createdDate(LocalDate.now())
-                            .batchItems(null)
                             .equipmentQty(10)
-                            .position(null)
+                            .position(position2)
                             .build();
                     Batch batch4 = Batch
                             .builder()
                             .code("BATCH4")
                             .requestItem(requestItem4)
                             .createdDate(LocalDate.now())
-                            .batchItems(null)
                             .equipmentQty(10)
-                            .position(null)
+                            .position(position3)
                             .build();
                     Batch batch5 = Batch
                             .builder()
                             .code("BATCH5")
                             .requestItem(requestItem5)
                             .createdDate(LocalDate.now())
-                            .batchItems(null)
                             .equipmentQty(10)
-                            .position(null)
+                            .position(position3)
                             .build();
 
                     batches.add(batch1);
@@ -412,10 +541,63 @@ public class MwmsBeApplication implements CommandLineRunner {
                     batches.add(batch4);
                     batches.add(batch5);
                     batchRepo.saveAll(batches);
+
+                    BatchItem batchItem1 = BatchItem
+                            .builder()
+                            .batch(batch1)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT1")
+                            .build();
+                    BatchItem batchItem2 = BatchItem
+                            .builder()
+                            .batch(batch1)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT2")
+                            .build();
+
+                    BatchItem batchItem3 = BatchItem
+                            .builder()
+                            .batch(batch2)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT3")
+                            .build();
+                    BatchItem batchItem4 = BatchItem
+                            .builder()
+                            .batch(batch2)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT4")
+                            .build();
+                    BatchItem batchItem5 = BatchItem
+                            .builder()
+                            .batch(batch3)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT5")
+                            .build();
+                    BatchItem batchItem6 = BatchItem
+                            .builder()
+                            .batch(batch4)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT6")
+                            .build();
+                    BatchItem batchItem7 = BatchItem
+                            .builder()
+                            .batch(batch5)
+                            .importedDate(LocalDate.now())
+                            .serialNumber("BAIT7")
+                            .build();
+
+                    batchItems.add(batchItem1);
+                    batchItems.add(batchItem2);
+                    batchItems.add(batchItem3);
+                    batchItems.add(batchItem4);
+                    batchItems.add(batchItem5);
+                    batchItems.add(batchItem6);
+                    batchItems.add(batchItem7);
+                    batchItemRepo.saveAll(batchItems);
+
+
                 }
             }
-
-            ;
         };
     }
 }

@@ -21,7 +21,6 @@ public class Position {
 
     String name;
 
-    String status;
 
     @OneToMany(mappedBy = "position")
     @ToString.Exclude

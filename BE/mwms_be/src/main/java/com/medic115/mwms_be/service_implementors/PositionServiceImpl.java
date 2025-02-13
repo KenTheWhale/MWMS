@@ -4,8 +4,8 @@ import com.medic115.mwms_be.dto.requests.PositionRequest;
 import com.medic115.mwms_be.dto.response.PositionResponse;
 import com.medic115.mwms_be.models.Area;
 import com.medic115.mwms_be.models.Position;
-import com.medic115.mwms_be.repositories.AreaRepository;
-import com.medic115.mwms_be.repositories.PositionRepository;
+import com.medic115.mwms_be.repositories.AreaRepo;
+import com.medic115.mwms_be.repositories.PositionRepo;
 import com.medic115.mwms_be.services.PositionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PositionServiceImpl implements PositionService {
 
-    private final PositionRepository positionRepository;
+    private final PositionRepo positionRepo;
 
-    private final AreaRepository areaRepository;
+    private final AreaRepo areaRepo;
 
     @Override
     public void createPosition(Integer areaId, PositionRequest request) {
@@ -26,20 +26,19 @@ public class PositionServiceImpl implements PositionService {
             throw new IllegalArgumentException("request and id cannot be null");
         }
 
-        Area area = areaRepository.findById(areaId).orElseThrow(() -> new EntityNotFoundException("Area not found"));
+        Area area = areaRepo.findById(areaId).orElseThrow(() -> new EntityNotFoundException("Area not found"));
 
         Position position = Position.builder()
                 .name(request.name())
                 .area(area)
-                .status(request.status())
                 .build();
 
-        positionRepository.save(position);
+        positionRepo.save(position);
     }
 
     @Override
     public List<PositionResponse> getAllPosition() {
-        return positionRepository.findAll().stream().map(this::mapToDto).toList();
+        return positionRepo.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -48,7 +47,7 @@ public class PositionServiceImpl implements PositionService {
             throw new IllegalArgumentException("id cannot be null");
         }
 
-        Position position = positionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
+        Position position = positionRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
         return mapToDto(position);
     }
 
@@ -58,11 +57,10 @@ public class PositionServiceImpl implements PositionService {
             throw new IllegalArgumentException("id and request cannot be null");
         }
 
-        Position position = positionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
+        Position position = positionRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
         position.setName(request.name());
-        position.setStatus(request.status());
 
-        return mapToDto(positionRepository.save(position));
+        return mapToDto(positionRepo.save(position));
     }
 
 
@@ -70,7 +68,6 @@ public class PositionServiceImpl implements PositionService {
         return PositionResponse.builder()
                 .id(position.getId())
                 .name(position.getName())
-                .status(position.getStatus())
                 .build();
     }
 }
