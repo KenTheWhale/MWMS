@@ -1,14 +1,13 @@
 import React from "react";
-import { Card, Button, Alert } from "react-bootstrap";
-import { NavLink, Link } from "react-router-dom";
+import {Card} from "react-bootstrap";
 
-import Breadcrumb from "../../../layouts/Breadcrumb/index.jsx";
+// import Breadcrumb from "../../../layouts/Breadcrumb/index.jsx";
 import AuthLogin from "./JWTLogin";
 
-const Signin1 = () => {
+const Signin = () => {
   return (
     <React.Fragment>
-      <Breadcrumb />
+      {/*<Breadcrumb />*/}
       <div className="auth-wrapper">
         <div className="auth-content">
           <div className="auth-bg">
@@ -31,4 +30,4 @@ const Signin1 = () => {
   );
 };
 
-export default Signin1;
+export default Signin;

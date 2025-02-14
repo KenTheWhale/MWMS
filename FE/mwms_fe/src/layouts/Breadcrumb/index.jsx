@@ -11,31 +11,6 @@ const Breadcrumb = () => {
   const [main, setMain] = useState([]);
   const [item, setItem] = useState([]);
 
-  // useEffect(() => {
-  //   navigation.items.map((item, index) => {
-  //     if (item.type && item.type === 'group') {
-  //       getCollapse(item, index);
-  //     }
-  //     return false;
-  //   });
-  // });
-
-  const getCollapse = (item, index) => {
-    if (item.children) {
-      item.children.filter((collapse) => {
-        if (collapse.type && collapse.type === 'collapse') {
-          getCollapse(collapse, index);
-        } else if (collapse.type && collapse.type === 'item') {
-          if (location.pathname === collapse.url) {
-            setMain(item);
-            setItem(collapse);
-          }
-        }
-        return false;
-      });
-    }
-  };
-
   let mainContent, itemContent;
   let breadcrumbContent = '';
   let title = '';
@@ -80,7 +55,6 @@ const Breadcrumb = () => {
         </div>
       );
     }
-
     document.title = title + BASE_TITLE;
   }
 

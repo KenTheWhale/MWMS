@@ -2,6 +2,8 @@ import {Outlet, useNavigate} from "react-router-dom";
 import style from '../styles/Layout.module.css'
 import {Menu, MenuItem, Sidebar, SubMenu} from "react-pro-sidebar";
 import {CgLogOut} from "react-icons/cg";
+import {useEffect} from "react";
+import {refreshTokenService} from "../services/RefreshTokenService.js";
 
 function GenerateNavbar() {
     const navigate = useNavigate();
@@ -27,8 +29,12 @@ function GenerateNavbar() {
                     <MenuItem onClick={() => {
                         navigate("/manager/area")
                     }}>Area</MenuItem>
-                    <MenuItem onClick={() => {navigate("/manager/category")}}>Category</MenuItem>
-                    <MenuItem onClick={() => {navigate("/manager/equipment")}}>Equipment</MenuItem>
+                    <MenuItem onClick={() => {
+                        navigate("/manager/category")
+                    }}>Category</MenuItem>
+                    <MenuItem onClick={() => {
+                        navigate("/manager/equipment")
+                    }}>Equipment</MenuItem>
                 </Menu>
             </Sidebar>
             <div className={style.profile}>
@@ -48,14 +54,30 @@ function GenerateNavbar() {
 }
 
 export default function ManagerLayout() {
-    return (
-        <div className={style.main}>
-            <div className={style.navbar_area}>
-                <GenerateNavbar/>
-            </div>
-            <div className={style.outlet_area}>
-                <Outlet/>
-            </div>
+
+    useEffect(() => {
+        let intervalId;
+
+        if (localStorage.getItem("access")) {
+            intervalId = setInterval(async () => {
+                await refreshTokenService(localStorage.getItem("access"));
+            }, 9000000);
+        }
+
+        // Remove the interval when the component unmounts or when access token is not available
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, []);
+
+return (
+    <div className={style.main}>
+        <div className={style.navbar_area}>
+            <GenerateNavbar/>
         </div>
-    )
+        <div className={style.outlet_area}>
+            <Outlet/>
+        </div>
+    </div>
+)
 }
