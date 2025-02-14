@@ -58,9 +58,9 @@ export default function ManagerLayout() {
     useEffect(() => {
         let intervalId;
 
-        if (localStorage.getItem("access")) {
+        if (localStorage.getItem("accessToken")) {
             intervalId = setInterval(async () => {
-                await refreshTokenService(localStorage.getItem("access"));
+                await refreshTokenService(localStorage.getItem("accessToken"));
             }, 9000000);
         }
 

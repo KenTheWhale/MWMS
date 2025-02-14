@@ -1,13 +1,10 @@
 import React from "react";
 import {Card} from "react-bootstrap";
-
-// import Breadcrumb from "../../../layouts/Breadcrumb/index.jsx";
 import AuthLogin from "./JWTLogin";
 
 const Signin = () => {
   return (
     <React.Fragment>
-      {/*<Breadcrumb />*/}
       <div className="auth-wrapper">
         <div className="auth-content">
           <div className="auth-bg">
