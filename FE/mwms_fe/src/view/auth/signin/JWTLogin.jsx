@@ -1,4 +1,3 @@
-import React from 'react';
 import { Row, Col, Alert, Button } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -71,7 +70,7 @@ const JWTLogin = () => {
                             type="text"
                             value={values.username}
                         />
-                        {touched.username && errors.username && 
+                        {touched.username && errors.username &&
                             <small className="text-danger form-text">{errors.username}</small>
                         }
                     </div>
@@ -87,7 +86,7 @@ const JWTLogin = () => {
                             type="password"
                             value={values.password}
                         />
-                        {touched.password && errors.password && 
+                        {touched.password && errors.password &&
                             <small className="text-danger form-text">{errors.password}</small>
                         }
                     </div>
@@ -101,12 +100,12 @@ const JWTLogin = () => {
 
                     <Row>
                         <Col mt={2}>
-                            <Button 
-                                className="btn-block mb-4" 
-                                color="primary" 
-                                disabled={loading} 
-                                size="large" 
-                                type="submit" 
+                            <Button
+                                className="btn-block mb-4"
+                                color="primary"
+                                disabled={loading}
+                                size="large"
+                                type="submit"
                                 variant="primary"
                             >
                                 {loading ? 'Signing in...' : 'Sign in'}

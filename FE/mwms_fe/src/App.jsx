@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
+import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 import ManagerLayout from "./layouts/ManagerLayout.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import StaffLayout from "./layouts/StaffLayout.jsx";
@@ -15,11 +11,11 @@ import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
 import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
 import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
 import CategoryPage from "./pages/manager/CategoryPage.jsx";
-import { configureStore } from "@reduxjs/toolkit";
-import { accountReducer } from "./reducers/AccountReducer.js";
-import { Provider } from "react-redux";
+import {configureStore} from "@reduxjs/toolkit";
+import {accountReducer} from "./reducers/AccountReducer.js";
+import {Provider} from "react-redux";
 import TaskPage from "./pages/manager/TaskPage.jsx";
-import { authReducer } from "./reducers/AuthReducer.jsx";
+import {authReducer} from "./reducers/AuthReducer.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 
@@ -132,7 +128,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/sp",
-    element: <SupplierLayout />,
+    element: (
+        <ProtectedRoute allowedRoles={["PARTNER"]}>
+          <SupplierLayout/>
+        </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -150,7 +150,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/rq",
-    element: <RequesterLayout />,
+    element: (
+        <ProtectedRoute allowedRoles={["PARTNER"]}>
+          <RequesterLayout/>
+        </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -184,11 +188,11 @@ const store = configureStore({
 });
 
 function App() {
-  return (
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
-  );
+    return (
+        <Provider store={store}>
+            <RouterProvider router={router}/>
+        </Provider>
+    )
 }
 
-export default App;
+export default App
