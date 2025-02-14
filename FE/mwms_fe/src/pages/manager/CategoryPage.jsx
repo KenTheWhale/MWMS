@@ -80,12 +80,6 @@ function CategoryPage() {
     const [actionType, setActionType] = useState('');
 
     useEffect(() => {
-        if (!localStorage.getItem('user')){
-            navigate('/login');
-        }
-    });
-
-    useEffect(() => {
         async function fetchData() {
             return await getCategoryList();
         }
@@ -135,6 +129,15 @@ function CategoryPage() {
         setCategories(updatedCategories);
         setShowModal(false);
     };
+
+    useEffect(() => {
+        async function fetchData() {
+            return await getCategoryList();
+        }
+        fetchData().then((data) => {
+            setCategories(data);
+        });
+    }, []);
 
     return (
         <div className={`container-fluid ${style.tbl_container}`}>
