@@ -1,6 +1,7 @@
 package com.medic115.mwms_be.services;
 
 import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
+import com.medic115.mwms_be.dto.requests.DeleteCategoryRequest;
 import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
 import com.medic115.mwms_be.dto.response.AddCategoryResponse;
 import com.medic115.mwms_be.dto.response.DeleteCategoryResponse;
@@ -13,12 +14,12 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> getStaffList();
 
-    ViewCategoryResponse viewCategory();
+    ResponseEntity<ResponseObject> viewCategory();
 
-    AddCategoryResponse addCategory(AddCategoryRequest request);
+    ResponseEntity<ResponseObject> addCategory(AddCategoryRequest request);
 
-    UpdateCategoryResponse updateCategory(UpdateCategoryRequest request);
+    ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request);
 
-    DeleteCategoryResponse deleteCategory(int id);
+    ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
 
 }

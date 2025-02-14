@@ -1,18 +1,17 @@
 package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
+import com.medic115.mwms_be.dto.requests.DeleteCategoryRequest;
 import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.DeleteCategoryResponse;
-import com.medic115.mwms_be.dto.response.UpdateCategoryResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.repositories.CategoryRepo;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.enums.Role;
+import com.medic115.mwms_be.models.Category;
 import com.medic115.mwms_be.repositories.AccountRepo;
+import com.medic115.mwms_be.repositories.CategoryRepo;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.CategoryValidation;
+import com.medic115.mwms_be.validations.DeleteCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateCategoryValidation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,35 +27,42 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerServiceImpl implements ManagerService {
 
-    private final AccountRepo accountRepo;
+    AccountRepo accountRepo;
 
     CategoryRepo categoryRepo;
 
     @Override
-    public ViewCategoryResponse viewCategory() {
+    public ResponseEntity<ResponseObject> viewCategory() {
         List<Category> categories = categoryRepo.findAll();
-        return ViewCategoryResponse.builder()
-                .status("200")
-                .message("Categories retrieved successfully")
-                .categorieList(categories.stream()
-                        .map(cate -> ViewCategoryResponse.Cate.builder()
-                                .id(cate.getId())
-                                .code(cate.getCode())
-                                .name(cate.getName())
-                                .description(cate.getDescription())
-                                .build())
-                        .toList())
-                .build();
+        List<Map<String, Object>> data = categories.stream()
+                .map(
+                        category -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("id", category.getId());
+                            item.put("code", category.getCode());
+                            item.put("name", category.getName());
+                            item.put("description", category.getDescription());
+                            return item;
+                        }
+                )
+                .toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get category successfully")
+                        .data(data)
+                        .build()
+        );
     }
 
     @Override
-    public AddCategoryResponse addCategory(AddCategoryRequest request) {
+    public ResponseEntity<ResponseObject> addCategory(AddCategoryRequest request) {
         String error = CategoryValidation.validateCategory(request, categoryRepo);
         if (error != null) {
-            return AddCategoryResponse.builder()
-                    .status("400")
-                    .message(error)
-                    .build();
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
         }
         categoryRepo.save(
                 Category.builder()
@@ -65,20 +71,51 @@ public class ManagerServiceImpl implements ManagerService {
                         .description(request.getDescription())
                         .build()
         );
-        return AddCategoryResponse.builder()
-                .status("400")
-                .message("Category added successfully")
-                .build();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Add category successfully")
+                        .build()
+        );
     }
 
     @Override
-    public UpdateCategoryResponse updateCategory(UpdateCategoryRequest request) {
-        return null;
+    public ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request) {
+        String error = UpdateCategoryValidation.validate(request, categoryRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        Category category = categoryRepo.findById(request.getId()).get();
+        category.setCode(request.getCode());
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        categoryRepo.save(category);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Update category successfully")
+                        .build()
+        );
     }
 
     @Override
-    public DeleteCategoryResponse deleteCategory(int id) {
-        return null;
+    public ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request) {
+        String error = DeleteCategoryValidation.validate(request, categoryRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        categoryRepo.deleteById(request.getCateId());
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Delete category successfully")
+                        .build()
+        );
     }
 
     @Override
