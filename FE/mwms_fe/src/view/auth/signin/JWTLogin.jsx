@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Row, Col, Alert, Button } from 'react-bootstrap';
+import {useState} from 'react';
+import {Alert, Button, Col, Row} from 'react-bootstrap';
 import * as Yup from 'yup';
-import { Formik } from 'formik';
+import {Formik} from 'formik';
 import axiosClient from '../../../assets/api';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 const JWTLogin = () => {
   const [error, setError] = useState(null);
