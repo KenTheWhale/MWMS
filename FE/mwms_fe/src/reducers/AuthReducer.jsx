@@ -8,8 +8,9 @@ const initialState = {
     role: null,
 };
 
+const newState = JSON.parse(localStorage.getItem("state"));
 
-export const authReducer = (state = initialState, action) => {
+export const authReducer = (state = newState ? newState : initialState, action) => {
     switch(action.type) {
         case AUTH_TYPES.LOGIN_REQUEST:
             return {

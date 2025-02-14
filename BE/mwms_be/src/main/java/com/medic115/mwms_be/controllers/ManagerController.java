@@ -28,6 +28,8 @@ public class ManagerController {
 
     private final ManagerService managerService;
 
+    //-------------------------------------------------Category-------------------------------------------------//
+
     @GetMapping("/category")
     @PreAuthorize("hasAuthority('manager:read')")
     public ResponseEntity<ResponseObject> viewCategory() {
@@ -52,11 +54,15 @@ public class ManagerController {
         return managerService.deleteCategory(request);
     }
 
+    //-------------------------------------------------Staff-------------------------------------------------//
+
     @GetMapping("/staff/list")
     @PreAuthorize("hasAuthority('manager:read')")
     public ResponseEntity<ResponseObject> getStaffList() {
         return managerService.getStaffList();
     }
+
+    //-------------------------------------------------Request-------------------------------------------------//
 
     @GetMapping("/request/import")
     public ResponseEntity<ResponseObject> getAllRequestImport() {

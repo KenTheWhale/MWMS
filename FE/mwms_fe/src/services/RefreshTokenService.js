@@ -1,20 +1,15 @@
-import {url} from "../config/AxiosConfig.js";
+import axiosClient from "../config/api.jsx";
 
 export const refreshTokenService = async (token) => {
 
     if (token) {
         try {
-            const response = await url.post("/user/refresh", { token: token }, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+            const response = await axiosClient().post("/user/refresh", { token: token });
 
             const data = response.data;
 
             if (data && data.token) {
-                localStorage.setItem("access", data.token);
+                localStorage.setItem("accessToken", data.token);
             } else {
                 console.error("Invalid token data received when refreshing.");
             }

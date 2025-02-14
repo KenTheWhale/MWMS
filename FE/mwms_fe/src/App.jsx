@@ -12,11 +12,10 @@ import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
 import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
 import CategoryPage from "./pages/manager/CategoryPage.jsx";
 import {configureStore} from "@reduxjs/toolkit";
-import {accountReducer} from "./reducers/AccountReducer.js";
 import {Provider} from "react-redux";
 import TaskPage from "./pages/manager/TaskPage.jsx";
 import {authReducer} from "./reducers/AuthReducer.jsx";
-import ProtectedRoute from "./ProtectedRoute.jsx";
+import ProtectedRoute from "./config/ProtectedRoute.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 
 const router = createBrowserRouter([
@@ -182,7 +181,6 @@ const router = createBrowserRouter([
 
 const store = configureStore({
   reducer: {
-    accountReducer: accountReducer,
     authReducer: authReducer,
   },
 });

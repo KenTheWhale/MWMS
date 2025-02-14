@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface ManagerService {
 
+    //----------------------------Staff----------------------------//
+
     ResponseEntity<ResponseObject> getStaffList();
 
 
