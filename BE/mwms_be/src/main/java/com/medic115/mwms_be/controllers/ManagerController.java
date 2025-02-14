@@ -1,12 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
-import com.medic115.mwms_be.dto.requests.ApproveImportRequest;
-import com.medic115.mwms_be.dto.requests.CancelImportRequest;
-import com.medic115.mwms_be.dto.requests.FilterRequestApplicationRequest;
-import com.medic115.mwms_be.dto.requests.GetRequestDetailRequest;
-import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
-import com.medic115.mwms_be.dto.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
+import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.AddCategoryResponse;
 import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
@@ -55,6 +49,30 @@ public class ManagerController {
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
+
+    @GetMapping("/equipment")
+    @PreAuthorize("hasAuthority('manager:read')")
+    public ResponseEntity<ResponseObject> viewEquipment() {
+        return managerService.viewEquipment();
+    }
+
+    @PostMapping("/equipment")
+    @PreAuthorize("hasAuthority('manager:create')")
+    public ResponseEntity<ResponseObject> addEquipment(@RequestBody AddEquipmentRequest request) {
+        return managerService.addEquipment(request);
+    }
+
+    @PutMapping("/equipment")
+    @PreAuthorize("hasAuthority('manager:update')")
+    public ResponseEntity<ResponseObject> updateEquipment(@RequestBody UpdateEquipmentRequest request) {
+        return managerService.updateEquipment(request);
+    }
+
+    @DeleteMapping("/equipment")
+    @PreAuthorize("hasAuthority('manager:delete')")
+    public ResponseEntity<ResponseObject> deleteEquipment(@RequestBody DeleteEquipmentRequest request) {
+        return managerService.deleteEquipment(request);
+    }
 
     @GetMapping("/staff/list")
     @PreAuthorize("hasAuthority('manager:read')")

@@ -1,13 +1,8 @@
 package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
-import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.enums.Role;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.repositories.AccountRepo;
-import com.medic115.mwms_be.repositories.CategoryRepo;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.Category;
 import com.medic115.mwms_be.models.Equipment;
@@ -130,6 +125,101 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Delete category successfully")
+                        .build()
+        );
+    }
+
+    //-----------------------------------------------EQUIPMENT-----------------------------------------------//
+    @Override
+    public ResponseEntity<ResponseObject> viewEquipment() {
+        List<Equipment> equipments = equipmentRepo.findAll();
+        List<Map<String, Object>> data = equipments.stream()
+                .map(
+                        equipment -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("id", equipment.getId());
+                            item.put("name", equipment.getName());
+                            item.put("description", equipment.getDescription());
+                            item.put("unit", equipment.getUnit());
+                            item.put("price", equipment.getPrice());
+                            return item;
+                        }
+                )
+                .toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get equipment successfully")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request) {
+        Category category = categoryRepo.findByName(request.getCategory());
+//        String error = CategoryValidation.validateCategory(request, equipmentRepo);
+//        if (error != null) {
+//            return ResponseEntity.badRequest().body(
+//                    ResponseObject.builder()
+//                            .message(error)
+//                            .build()
+//            );
+//        }
+        equipmentRepo.save(
+                Equipment.builder()
+                        .name(request.getName())
+                        .description(request.getDescription())
+                        .category(category)
+                        .unit(request.getUnit())
+                        .price(request.getPrice())
+                        .build()
+        );
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Add equipment successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request) {
+        Category category = categoryRepo.findByName(request.getCategory());
+//        String error = UpdateCategoryValidation.validate(request, categoryRepo);
+//        if (error != null) {
+//            return ResponseEntity.badRequest().body(
+//                    ResponseObject.builder()
+//                            .message(error)
+//                            .build()
+//            );
+//        }
+        Equipment equipment = equipmentRepo.findById(request.getEqId()).get();
+        equipment.setPrice(request.getPrice());
+        equipment.setUnit(request.getUnit());
+        equipment.setCategory(category);
+        equipment.setName(request.getName());
+        equipment.setDescription(request.getDescription());
+        equipmentRepo.save(equipment);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Update category successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request) {
+//        String error = DeleteCategoryValidation.validate(request, categoryRepo);
+//        if (error != null) {
+//            return ResponseEntity.badRequest().body(
+//                    ResponseObject.builder()
+//                            .message(error)
+//                            .build()
+//            );
+//        }
+        categoryRepo.deleteById(request.getEqId());
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Delete equipment successfully")
                         .build()
         );
     }

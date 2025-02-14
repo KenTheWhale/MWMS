@@ -42,4 +42,11 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
 
+    ResponseEntity<ResponseObject> viewEquipment();
+
+    ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
 }
