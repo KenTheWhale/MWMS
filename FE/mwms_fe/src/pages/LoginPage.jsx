@@ -1,14 +1,13 @@
-import Signin1 from "../view/auth/signin/SignIn1";
+import Signin from "../view/auth/signin/SignIn.jsx";
 
 export default function LoginPage() {
+    if(localStorage.length !== 0){
+        localStorage.clear()
+    }
+
     return (
         <>
-            {/* <Button variant={"success"} onClick={() => {navigate("/manager")}}>Manager pages</Button>
-            <Button variant={"success"} onClick={() => {navigate("/staff")}}>Staff pages</Button>
-            <Button variant={"success"} onClick={() => {navigate("/admin")}}>Admin pages</Button>
-            <Button variant={"success"} onClick={() => {navigate("/sp")}}>Supplier pages</Button>
-            <Button variant={"success"} onClick={() => {navigate("/rq")}}>Requester pages</Button> */}
-            <Signin1/>
+            <Signin/>
         </>
     )
 }
