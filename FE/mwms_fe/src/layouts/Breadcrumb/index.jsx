@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ListGroup } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
-
-// import navigation from '../../../menu-items';
-// import { BASE_TITLE } from '../../../config/constant';
+import { Link } from 'react-router-dom';
 
 const Breadcrumb = () => {
-  const location = useLocation();
-
   const [main, setMain] = useState([]);
   const [item, setItem] = useState([]);
+
 
   let mainContent, itemContent;
   let breadcrumbContent = '';
@@ -55,7 +51,6 @@ const Breadcrumb = () => {
         </div>
       );
     }
-    document.title = title + BASE_TITLE;
   }
 
   return <React.Fragment>{breadcrumbContent}</React.Fragment>;
