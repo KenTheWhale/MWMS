@@ -14,7 +14,21 @@ const JWTLogin = () => {
     const handleLogin = async (values, { setSubmitting }) => {
         try {
             await dispatch(loginUser(values.username, values.password));
-            navigate('/admin');
+            const permission = localStorage.getItem("role");
+            switch(permission){
+                case "ADMIN":
+                    navigate("/admin");
+                    break;
+                case "STAFF":
+                    navigate("/staff");
+                    break;
+                case "MANAGER":
+                    navigate("/manager");
+                    break;
+                default:
+                    navigate("/login");
+                    break;
+            }
         } catch (err) {
             console.log(err)
         } finally {

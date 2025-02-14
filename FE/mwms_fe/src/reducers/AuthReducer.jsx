@@ -4,7 +4,8 @@ const initialState = {
     user: null,
     loading: false,
     error: null,
-    isAuthenticated: false
+    isAuthenticated: false,
+    role: null,
 };
 
 
@@ -21,7 +22,8 @@ export const authReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
                 isAuthenticated: true,
-                user: action.payload,
+                user: action.payload.userData,
+                role: action.payload.role,
                 error: null
             };
         case AUTH_TYPES.LOGIN_FAILURE:

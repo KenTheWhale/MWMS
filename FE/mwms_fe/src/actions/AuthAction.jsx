@@ -1,3 +1,5 @@
+import { jwtDecode } from "jwt-decode";
+
 export const AUTH_TYPES = {
     LOGIN_REQUEST: 'LOGIN_REQUEST',
     LOGIN_SUCCESS: 'LOGIN_SUCCESS',
@@ -12,9 +14,9 @@ export const loginRequest = () => ({
     type: AUTH_TYPES.LOGIN_REQUEST
 });
 
-export const loginSuccess = (userData) => ({
+export const loginSuccess = (userData, role) => ({
     type: AUTH_TYPES.LOGIN_SUCCESS,
-    payload: userData
+    payload: {userData, role}
 });
 
 export const loginFailure = (error) => ({
@@ -35,7 +37,9 @@ export const loginUser = (username, password) => async (dispatch) => {
         });
         
         localStorage.setItem('accessToken', response.data.token);
-        dispatch(loginSuccess(response.data));
+        const decode = jwtDecode(response.data.token);
+        localStorage.setItem('role', decode.role);
+        dispatch(loginSuccess(response.data, decode.role));
         return response.data;
     } catch (error) {
         const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
