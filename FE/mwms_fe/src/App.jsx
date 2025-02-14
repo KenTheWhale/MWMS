@@ -128,7 +128,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/sp",
-    element: <SupplierLayout />,
+    element: (
+        <ProtectedRoute allowedRoles={["PARTNER"]}>
+          <SupplierLayout/>
+        </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -146,7 +150,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/rq",
-    element: <RequesterLayout />,
+    element: (
+        <ProtectedRoute allowedRoles={["PARTNER"]}>
+          <RequesterLayout/>
+        </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
