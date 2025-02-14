@@ -45,7 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if(validAccountToken.isEmpty()) return;
 
-        validAccountToken.stream().forEach(token -> {
+        validAccountToken.forEach(token -> {
             token.setStatus(Status.TOKEN_EXPIRED.getValue());
             tokenRepo.save(token);
         });
@@ -65,10 +65,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     );
         }
 
+        revokeAllAccountToken(acc);
+
         String accessToken = jwtService.generateAccessToken(acc);
         String refreshToken = jwtService.generateRefreshToken(acc);
 
-        revokeAllAccountToken(acc);
         saveAccountToken(acc, accessToken, refreshToken);
 
         return ResponseEntity

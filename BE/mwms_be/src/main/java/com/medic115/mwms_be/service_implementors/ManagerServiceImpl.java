@@ -101,7 +101,8 @@ public class ManagerServiceImpl implements ManagerService {
     //-----------------------------------------------STAFF-----------------------------------------------//
     @Override
     public ResponseEntity<ResponseObject> getStaffList() {
-        List<Map<String, Object>> data = accountRepo.findAllByRole(Role.STAFF).stream()
+        List<Map<String, Object>> data = accountRepo.findAll().stream()
+                .filter(account -> account.getRole().equals(Role.STAFF))
                 .map(
                         account -> {
                             Map<String, Object> item = new HashMap<>();
