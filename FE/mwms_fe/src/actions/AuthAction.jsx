@@ -8,7 +8,7 @@ export const AUTH_TYPES = {
 };
 
 // accountActions.js
-import axiosClient from '../assets/api.jsx';
+import axiosClient from '../config/api.jsx';
 
 export const loginRequest = () => ({
     type: AUTH_TYPES.LOGIN_REQUEST
