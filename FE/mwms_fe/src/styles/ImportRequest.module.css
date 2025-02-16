@@ -1,80 +1,94 @@
 :root {
-    --table-background-import: #1E1E1E;
-    --table-row-even-import: #1E1E1E;
-    --table-row-odd-import: #2A2A2A;
-    --table-border-import: #444444;
-    --text-color-import: #FFFFFF;
-    --hover-background-import: #333333;
+    --table-background: #FFFFFF;
+    --table-row-even: #F8F9FA;
+    --table-row-odd: #E9ECEF;
+    --table-border: #DEE2E6;
+    --text-color: #212529;
+    --hover-background: #D6D8DB;
+    --button-bg: #007BFF;
+    --button-text: #FFFFFF;
 }
 
-.addRequestBtn, .pickBtn {
-    display: flex;
-    justify-content: flex-end;
-    color: var(--text-color-import);
+.importTable {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+    padding: 20px 0;
 }
-
 
 .importTable table {
-    margin: 20px auto;
-    width: calc(0.95 * 83vw);
-    height: 80%;
-    background-color: var(--table-background-import);
-    color: var(--text-color-import);
-    border: 1px solid var(--table-border-import);
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    background-color: var(--table-background);
+    color: var(--text-color);
     table-layout: fixed;
 }
 
-.importTable table th, td {
-    border: 1px solid var(--table-border-import);
+.importTable th, .importTable td {
+    border: 1px solid var(--table-border);
     text-align: center;
-    padding: 8px;
+    padding: 12px;
+    word-wrap: break-word;
 }
 
-.importTable table tr:nth-child(even) {
-    background-color: var(--table-row-even-import);
+.importTable thead {
+    background-color: #343A40;
+    color: #FFFFFF;
 }
 
-.importTable table tr:nth-child(odd) {
-    background-color: var(--table-row-odd-import);
+.importTable tbody tr:nth-child(even) {
+    background-color: var(--table-row-even);
 }
 
-.importTable table tr:hover {
-    background-color: var(--hover-background-import);
+.importTable tbody tr:nth-child(odd) {
+    background-color: var(--table-row-odd);
 }
 
-.importTable table thead tr th:nth-child(1) {
-    width: calc(0.1 * 0.95 * 83vw);
-    text-align: left;
+.importTable tbody tr:hover {
+    background-color: var(--hover-background);
 }
 
-.importTable table thead tr th:nth-child(2) {
-    width: calc(0.3 * 0.95 * 83vw);
+.importTable table thead th:nth-child(1),
+.importTable table tbody td:nth-child(1) {
+    width: 10%;
 }
 
-.importTable table thead tr th:nth-child(3) {
-    width: calc(0.3 * 0.95 * 83vw);
+.importTable table thead th:nth-child(2),
+.importTable table tbody td:nth-child(2),
+.importTable table thead th:nth-child(3),
+.importTable table tbody td:nth-child(3),
+.importTable table thead th:nth-child(4),
+.importTable table tbody td:nth-child(4) {
+    width: 20%;
 }
 
-.importTable table thead tr th:nth-child(4) {
-    width: calc(0.1 * 0.95 * 83vw);
-    text-align: left;
+.importTable table thead th:nth-child(5),
+.importTable table tbody td:nth-child(5) {
+    width: 10%;
 }
 
-.importTable table thead tr th:nth-child(5) {
-    width: calc(0.2 * 0.95 * 83vw);
+.importTable table thead th:nth-child(6),
+.importTable table tbody td:nth-child(6) {
+    width: 20%;
 }
 
-.importTable table thead tr th {
-    text-align: center !important;
+
+.importTable .action-btn {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
 }
 
-.importTable table tbody tr td:nth-child(1),
-.importTable table tbody tr td:nth-child(4){
-    text-align: left !important;
+.importTable .action-btn:hover {
+    background-color: #0056b3;
 }
 
-.importTable table tbody tr td:nth-child(2),
-.importTable table tbody tr td:nth-child(3),
-.importTable table tbody tr td:nth-child(5){
-    text-align: center !important;
+.importTable tbody tr td:nth-child(6) {
+    white-space: nowrap;
+    text-align: center;
 }
