@@ -4,13 +4,10 @@ const initialState = {
     user: null,
     loading: false,
     error: null,
-    isAuthenticated: false,
-    role: null,
+    isAuthenticated: !!localStorage.getItem('accessToken')
 };
 
-const newState = JSON.parse(localStorage.getItem("state"));
-
-export const authReducer = (state = newState ? newState : initialState, action) => {
+export const authReducer = (state = initialState, action) => {
     switch(action.type) {
         case AUTH_TYPES.LOGIN_REQUEST:
             return {
@@ -24,7 +21,6 @@ export const authReducer = (state = newState ? newState : initialState, action) 
                 loading: false,
                 isAuthenticated: true,
                 user: action.payload.userData,
-                role: action.payload.role,
                 error: null
             };
         case AUTH_TYPES.LOGIN_FAILURE:
