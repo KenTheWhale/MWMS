@@ -7,11 +7,11 @@ const ProtectedRoute = ({ children, allowedRoles}) => {
     const role = localStorage.getItem("role");
 
     if(!isAuthenticated){
-        return <Navigate to="/login" />;
+        return;
     }
 
     if (!allowedRoles.includes(role)) {
-        return <Navigate to="/unauthorized" />;
+        return ;
     }
 
     return children;
