@@ -19,12 +19,9 @@ export const getExportRequest = async () => {
         if (response && response.status === 200) {
             const body = response.data;
             return  body.data;
-        } else {
-            throw new Error("Failed to fetch export requests");
         }
     } catch (error) {
-        console.error("Error fetching export requests:", error);
-        return { error: "Can not fetch export requests" };
+        console.log(error.response.data.message)
     }
 };
 
@@ -44,12 +41,8 @@ export const filterRequest = async () => {
 }
 
 export const viewRequestDetail = async (code) => {
-    try{
-        const data = { code: code };
-        const response = await axiosClient.post("/manager/request/detail", data);
-        const body = response.data;
-        return body.data;
-    } catch (error) {
-        throw error;
-    }
+    const data = { code: code };
+    const response = await axiosClient.post("/manager/request/detail", data);
+    const body = response.data;
+    return body.data;
 }

@@ -1,10 +1,21 @@
 import style from '../../styles/manager/TaskPage.module.css'
 import {Button, Form, Modal, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
-import {url} from "../../config/AxiosConfig.js";
+import {getStaffList} from "../../services/StaffService.js";
+import {getTaskList} from "../../services/TaskService.js";
 
 /* eslint-disable react/prop-types */
 function GenerateTable() {
+    const [tasks, setTasks] = useState([]);
+
+    useEffect(() => {
+        async function fetchTasks() {
+            return await getTaskList();
+        }
+
+        fetchTasks().then(res => setTasks(res.data));
+    }, [])
+
     return (
         <Table striped bordered hover>
             <thead>
@@ -15,19 +26,21 @@ function GenerateTable() {
                 <th>Description</th>
                 <th>Status</th>
                 <th>Assigned date</th>
+                <th>Staff</th>
             </tr>
             </thead>
             <tbody>
             {
-                [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num, index) => {
+                tasks.map((task, index) => {
                     return (
                         <tr key={index}>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
+                            <td>{index + 1}</td>
+                            <td>{task.code}</td>
+                            <td>{task.name}</td>
+                            <td>{task.description}</td>
+                            <td>{task.status}</td>
+                            <td>{task.assignedDate}</td>
+                            <td>{task.staff ? task.staff : ""}</td>
                         </tr>
                     )
                 })
@@ -39,19 +52,24 @@ function GenerateTable() {
 
 function GenerateRequestViewModal({modalVisible, setModalVisible}) {
     const [staffs, setStaffs] = useState([]);
+    const [tasks, setTasks] = useState([]);
+
+    useEffect( () => {
+        async function getStaffs() {
+            return await getStaffList()
+        }
+
+        getStaffs().then(data => setStaffs(data));
+
+    }, []);
 
     useEffect(() => {
-        url.get("/manager/staff/list", {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiTUFOQUdFUiIsInN1YiI6Im1hbmFnZXIiLCJpYXQiOjE3MzkzNDMxMTAsImV4cCI6MTczOTM1MzkxMH0.F741pLrBCKeD9aX4g6iT4egrh7K1GxxxSN2_o_psc2HnKyUTItBycZwrXSteEw6WNkJktdiCXBU2eoDeptsQhQ`
-            }
-        }).then(res => {
-            setStaffs(res.data.data);
-        }).catch(err => {
-            console.log(err.response.status);
-        });
-    }, []);
+        async function getTasks(){
+            return await getTaskList()
+        }
+
+        getTasks().then(data => setTasks(data.data));
+    }, [])
 
     return (
         <Modal show={modalVisible} onHide={() => setModalVisible(false)} size={"lg"} centered>
@@ -59,7 +77,7 @@ function GenerateRequestViewModal({modalVisible, setModalVisible}) {
                 <Modal.Title>Request List</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Table striped bordered hover>
+                <Table striped bordered hover className={style.detail}>
                     <thead>
                     <tr>
                         <th>No</th>
@@ -69,19 +87,21 @@ function GenerateRequestViewModal({modalVisible, setModalVisible}) {
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>
-                            <Form.Select>
-                                <option disabled selected>Select a staff...</option>
-                                {staffs.map((staff, index) => (
-                                    <option key={index} value={staff.username}>{staff.username}</option>
-                                ))}
-                            </Form.Select>
-                        </td>
-                    </tr>
+                    {tasks.filter(task => task.staff === "").map((task, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{task.code}</td>
+                            <td>{task.name}</td>
+                            <td>
+                                <Form.Select>
+                                    <option disabled selected>Select a staff...</option>
+                                    {staffs.map((staff, index) => (
+                                        <option key={index} value={staff.username}>{staff.username}</option>
+                                    ))}
+                                </Form.Select>
+                            </td>
+                        </tr>
+                    ))}
                     </tbody>
                 </Table>
                 <div className={style.save_btn}>
