@@ -1,8 +1,7 @@
 import style from "../../styles/CategoryPage.module.css";
-import {Button, Col, Form, Row, Table} from "react-bootstrap";
-import {useEffect, useState} from "react";
+import {Button, Form, Table} from "react-bootstrap";
+import {useState} from "react";
 import CategoryPopup from "../../components/CategoryPopup.jsx";
-import {useNavigate} from "react-router-dom";
 import {FaEdit, FaTrash} from "react-icons/fa";
 
 
@@ -126,36 +125,33 @@ function CategoryPage() {
     };
 
     return (
-        <div className={`container-fluid ${style.tbl_container}`}>
-            <div className={`row`}>
+        <div className={style.main}>
+            <div className={style.title_area}>
                 <h1 className={`text-light`}>Category</h1>
             </div>
-            <div className={`row`}>
+            <div className={style.add_button_area}>
                 <button
                     onClick={() => {
                         setSelectedCategory(null);
                         setActionType('add');
                         setShowModal(true);
                     }}
-                    className={`btn btn-primary ${style.add}`}>Add Category
+                    className={`btn btn-primary`}>Add Category
                 </button>
             </div>
-            <div className={`row ${style.row}`}>
-                    <Row className="mb-3">
-                        <Col xs={11}>
-                            <Form.Group controlId="formGridSearch">
-                                <Form.Control type="email" placeholder="Enter name, code,..." />
-                            </Form.Group>
-                        </Col>
-
-                        <Col xs={1}>
-                            <Button variant="primary" type="submit" style={{ width: "100%" }}>
-                                Search
-                            </Button>
-                        </Col>
-                    </Row>
+            <div className={style.search_area}>
+                <div className={style.search_input}>
+                    <Form.Group controlId="formGridSearch">
+                        <Form.Control type="email" placeholder="Enter name, code,..."/>
+                    </Form.Group>
+                </div>
+                <div className={style.search_button}>
+                    <Button variant="primary" type="submit" style={{width: "100%"}}>
+                        Search
+                    </Button>
+                </div>
             </div>
-            <div className={`row ${style.row}`}>
+            <div className={style.table_area}>
                 <Table striped bordered hover onClick={(e) => {
                     const row = e.nativeEvent.target.closest('tr');
                     if (row && categories[row.rowIndex - 1]) {

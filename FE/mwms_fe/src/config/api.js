@@ -8,6 +8,13 @@ const axiosClient = axios.create({
     },
 })
 
+const authClient = axios.create({
+    baseURL: axios.defaults.baseURL + "/auth",
+    headers:{
+        "Content-Type" : "application/json"
+    }
+})
+
 axiosClient.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("accessToken");
@@ -19,4 +26,4 @@ axiosClient.interceptors.request.use(
     (error) => Promise.reject(error)
 )
 
-export default axiosClient;
+export {axiosClient, authClient};

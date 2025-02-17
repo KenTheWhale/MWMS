@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux"
 import { Navigate } from "react-router-dom";
 
-
 /* eslint-disable react/prop-types */
 const ProtectedRoute = ({ children, allowedRoles}) => {
     const { isAuthenticated } = useSelector(state => state.authReducer);
