@@ -54,6 +54,13 @@
 .table_container table thead tr th{
     position: sticky;
     top: -0.1px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.table_container table tbody tr td:nth-child(n + 2):nth-child(-n + 7){
+    text-align: left;
 }
 
 /* request list modal */
@@ -64,4 +71,13 @@
 
 .save_btn button{
     margin: 0;
+}
+
+/* detail modal */
+.detail thead tr th{
+    text-align: center;
+}
+
+.detail tbody tr td:nth-child(n + 2):nth-child(-n + 3){
+    text-align: left;
 }

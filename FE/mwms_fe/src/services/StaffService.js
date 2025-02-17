@@ -1,7 +1,10 @@
-export const getStaffList = () => {
-    try {
+import {axiosClient} from "../config/api.jsx";
 
-    }catch (err){
-        throw err;
+
+export const getStaffList = async () => {
+    const response = await axiosClient.get("/manager/staff/list")
+    if(response.status === 200) {
+        return response.data.data
     }
+    return response.status
 }
