@@ -5,15 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../actions/AuthAction";
 import { useState } from "react";
-import { Icon } from "react-icons-kit";
-import { eyeOff } from "react-icons-kit/feather/eyeOff";
-import { eye } from "react-icons-kit/feather/eye";
+import { EyeOff, Eye } from "lucide-react";
 
 const JWTLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [type, setType] = useState("password");
-  const [icon, setIcon] = useState(eyeOff);
+  const [showPassword, setShowPassword] = useState(false);
   const { error, loading } = useSelector((state) => state.authReducer);
 
   const handleLogin = async (values, { setSubmitting }) => {
@@ -42,13 +40,8 @@ const JWTLogin = () => {
   };
 
   const handleToggle = () => {
-    if (type === "password") {
-      setIcon(eye);
-      setType("text");
-    } else {
-      setIcon(eyeOff);
-      setType("password");
-    }
+    setShowPassword(!showPassword);
+    setType(showPassword ? "password" : "text");
   };
 
   return (
@@ -90,6 +83,7 @@ const JWTLogin = () => {
               onChange={handleChange}
               type="text"
               value={values.username}
+              autoComplete="username"
             />
             {touched.username && errors.username && (
               <small className="text-danger form-text">{errors.username}</small>
@@ -98,13 +92,14 @@ const JWTLogin = () => {
 
           <div className="form-group mb-4 position-relative">
             <input
-              className="form-control pe-5" // Thêm pe-5 để tránh icon che mất text
+              className="form-control pe-5"
               placeholder="Password"
               name="password"
               onBlur={handleBlur}
               onChange={handleChange}
               type={type}
               value={values.password}
+              autoComplete="current-password"
             />
             {touched.password && errors.password && (
               <small className="text-danger form-text">{errors.password}</small>
@@ -114,7 +109,11 @@ const JWTLogin = () => {
               style={{ cursor: "pointer" }}
               onClick={handleToggle}
             >
-              <Icon icon={icon} size={20} />
+              {showPassword ? (
+                <Eye size={20} />
+              ) : (
+                <EyeOff size={20} />
+              )}
             </span>
           </div>
 

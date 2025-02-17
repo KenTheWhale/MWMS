@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import {axiosClient} from "../config/api";
 
 export const AUTH_TYPES = {
     LOGIN_REQUEST: 'LOGIN_REQUEST',
@@ -7,8 +8,6 @@ export const AUTH_TYPES = {
     LOGOUT: 'LOGOUT'
 };
 
-// accountActions.js
-import axiosClient from '../config/api.jsx';
 
 export const loginRequest = () => ({
     type: AUTH_TYPES.LOGIN_REQUEST

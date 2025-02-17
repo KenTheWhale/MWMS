@@ -1,4 +1,4 @@
-import axiosClient from "../config/api.jsx";
+import { axiosClient } from "../config/api";
 
 export const refreshTokenService = async (token) => {
 
