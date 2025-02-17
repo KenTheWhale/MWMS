@@ -4,9 +4,8 @@ import { Navigate } from "react-router-dom";
 
 /* eslint-disable react/prop-types */
 const ProtectedRoute = ({ children, allowedRoles}) => {
-    const { isAuthenticated, role } = useSelector(state => state.authReducer);
-
-    localStorage.setItem("state", JSON.stringify(useSelector((state) => state.authReducer)))
+    const { isAuthenticated } = useSelector(state => state.authReducer);
+    const role = localStorage.getItem("role");
 
     if(!isAuthenticated){
         return <Navigate to="/login" />;
