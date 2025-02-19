@@ -35,4 +35,9 @@ public class Equipment {
     @ManyToOne
     @JoinColumn(name = "`category_id`")
     Category category;
+
+    @OneToMany(mappedBy = "equipment")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<BatchItem> items;
 }
