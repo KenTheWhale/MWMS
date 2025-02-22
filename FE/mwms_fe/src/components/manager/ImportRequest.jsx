@@ -4,7 +4,7 @@ import style from '../../styles/ImportRequest.module.css'
 import {BsFilter} from "react-icons/bs";
 import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
 
-/* eslint-disable react/prop-types */
+ 
 function ImportRequest() {
 
     const [requestList, setRequestList] = useState([]);
