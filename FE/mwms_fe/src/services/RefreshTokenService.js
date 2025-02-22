@@ -1,10 +1,10 @@
-import axiosClient from "../config/api.jsx";
+import {axiosClient} from "../config/api.jsx";
 
 export const refreshTokenService = async (token) => {
 
     if (token) {
         try {
-            const response = await axiosClient().post("/user/refresh", { token: token });
+            const response = await axiosClient.post("/user/refresh", { token: token });
 
             const data = response.data;
 

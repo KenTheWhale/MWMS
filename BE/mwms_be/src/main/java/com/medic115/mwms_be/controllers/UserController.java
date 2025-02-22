@@ -14,18 +14,9 @@ public class UserController {
 
     private final AuthenticationService authenticationService;
 
-    @GetMapping("/test")
-    @PreAuthorize("hasAuthority('admin:read')")
-    public String helloAdmin(){
-        return "Hello Admin";
-    }
 
     @PostMapping("/refresh")
-    @PreAuthorize(
-            "hasAuthority('admin:read')" +
-                    "|| hasAuthority('manager:read')" +
-                    "|| hasAuthority('staff:read')" +
-                    "|| hasAuthority('partner:read')")
+    @PreAuthorize("hasRole('admin')")
     ResponseEntity<JwtAuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest request){
         return authenticationService.refreshToken(request);
     }

@@ -1,10 +1,10 @@
-import React from 'react';
-import { Row, Col, Card, Table, Tabs, Tab } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import {Card, Col, Row, Table} from 'react-bootstrap';
+import {Link} from 'react-router-dom';
 
 import avatar1 from '../../assets/images/user/avatar-1.jpg';
 import avatar2 from '../../assets/images/user/avatar-2.jpg';
 import avatar3 from '../../assets/images/user/avatar-3.jpg';
+import style from '../../styles/Admin.module.css'
 
 const dashSalesData = [
   { title: 'Daily Sales', amount: '$249.95', icon: 'icon-arrow-up text-c-green', value: 50, class: 'progress-c-theme' },
@@ -14,7 +14,7 @@ const dashSalesData = [
 
 const DashDefault = () => {
   return (
-      <Row style={{overflowY : "scroll", height: "100vh", marginLeft: "0.5px"}}>
+      <Row className={style.screen} style={{overflowY : "scroll", height: "100vh", marginLeft: "0.5px", marginRight: "0.5px"}}>
         {dashSalesData.map((data, index) => {
           return (
             <Col key={index} xl={6} xxl={4} className='mt-5'>

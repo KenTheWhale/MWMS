@@ -111,12 +111,31 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .phone("0909")
                             .status(Status.ACCOUNT_ACTIVE.getValue())
                             .build();
+                    Account test1 = Account.builder()
+                            .username("test1")
+                            .password("123")
+                            .role(Role.PARTNER)
+                            .phone("0909")
+                            .status(Status.ACCOUNT_ACTIVE.getValue())
+                            .build();
+
+                    Account test2 = Account.builder()
+                            .username("test2")
+                            .password("123")
+                            .role(Role.PARTNER)
+                            .phone("0909")
+                            .status(Status.ACCOUNT_ACTIVE.getValue())
+                            .build();
+
+
 
                     accounts.add(admin);
                     accounts.add(manager);
                     accounts.add(staff);
                     accounts.add(supplier);
                     accounts.add(requester);
+                    accounts.add(test1);
+                    accounts.add(test2);
 
                     accountRepo.saveAll(accounts);
 
@@ -139,12 +158,35 @@ public class MwmsBeApplication implements CommandLineRunner {
                                     .account(requester)
                                     .build()
                     );
+                    Partner sp2 = partnerRepo.save(
+                            Partner.builder()
+                                    .name("tester1")
+                                    .email("tester1@medic115.com")
+                                    .address("123 Some Street")
+                                    .type("supplier")
+                                    .account(test1)
+                                    .build()
+                    );
+                    Partner rq2 = partnerRepo.save(
+                            Partner.builder()
+                                    .name("tester2")
+                                    .email("tester2@medic115.com")
+                                    .address("123 Some Street")
+                                    .type("requester")
+                                    .account(test2)
+                                    .build()
+                    );
 
                     requester.setPartner(rq);
                     supplier.setPartner(sp);
+                    test1.setPartner(sp2);
+                    test2.setPartner(rq2);
+
 
                     accountRepo.save(requester);
                     accountRepo.save(supplier);
+                    accountRepo.save(test1);
+                    accountRepo.save(test2);
 
                     for (Account account : accounts) {
                         String access = jwtService.generateAccessToken(account);
@@ -440,31 +482,31 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
+                            .square(500)
                             .build();
                     Area area2 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
+                            .square(500)
                             .build();
                     Area area3 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
+                            .square(500)
                             .build();
                     Area area4 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
+                            .square(500)
                             .build();
                     Area area5 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
+                            .square(500)
                             .build();
 
                     areas.add(area1);

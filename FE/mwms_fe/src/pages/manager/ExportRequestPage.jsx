@@ -66,7 +66,7 @@ function ExportRequestPage() {
                         <BsFilter size={20}/>
                     </button>
                     <button className="btn btn-info"
-                            onClick={refreshData}>
+                            onClick={() => window.location.reload()}>
                         <IoReload size={20}/>
                     </button>
                 </div>
