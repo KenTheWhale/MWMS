@@ -12,6 +12,7 @@ import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.CategoryValidation;
 import com.medic115.mwms_be.validations.DeleteCategoryValidation;
 import com.medic115.mwms_be.validations.UpdateCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -99,7 +100,7 @@ public class ManagerServiceImpl implements ManagerService {
                             .build()
             );
         }
-        Category category = categoryRepo.findById(request.getId()).get();
+        Category category = categoryRepo.findByCode(request.getCode());
         category.setCode(request.getCode());
         category.setName(request.getName());
         category.setDescription(request.getDescription());
@@ -121,7 +122,7 @@ public class ManagerServiceImpl implements ManagerService {
                             .build()
             );
         }
-        categoryRepo.deleteById(request.getCateId());
+        categoryRepo.deleteByCode(request.getCateCode());
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Delete category successfully")
@@ -139,6 +140,7 @@ public class ManagerServiceImpl implements ManagerService {
                             Map<String, Object> item = new HashMap<>();
                             item.put("id", equipment.getId());
                             item.put("name", equipment.getName());
+                            item.put("code", equipment.getCode());
                             item.put("description", equipment.getDescription());
                             item.put("unit", equipment.getUnit());
                             item.put("price", equipment.getPrice());
@@ -167,6 +169,7 @@ public class ManagerServiceImpl implements ManagerService {
 //        }
         equipmentRepo.save(
                 Equipment.builder()
+                        .code(request.getCode())
                         .name(request.getName())
                         .description(request.getDescription())
                         .category(category)
@@ -184,15 +187,15 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request) {
         Category category = categoryRepo.findByName(request.getCategory());
-//        String error = UpdateCategoryValidation.validate(request, categoryRepo);
-//        if (error != null) {
-//            return ResponseEntity.badRequest().body(
-//                    ResponseObject.builder()
-//                            .message(error)
-//                            .build()
-//            );
-//        }
-        Equipment equipment = equipmentRepo.findById(request.getEqId()).get();
+        String error = UpdateEquipmentValidation.validate(request, equipmentRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        Equipment equipment = equipmentRepo.findByCode(request.getCode());
         equipment.setPrice(request.getPrice());
         equipment.setUnit(request.getUnit());
         equipment.setCategory(category);
@@ -216,7 +219,7 @@ public class ManagerServiceImpl implements ManagerService {
 //                            .build()
 //            );
 //        }
-        categoryRepo.deleteById(request.getEqId());
+        equipmentRepo.deleteByCode(request.getCode());
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Delete equipment successfully")

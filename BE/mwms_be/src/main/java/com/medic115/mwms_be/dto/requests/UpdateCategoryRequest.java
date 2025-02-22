@@ -10,11 +10,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCategoryRequest {
 
-    int id;
+    String code;
 
     String name;
-
-    String code;
 
     String description;
 

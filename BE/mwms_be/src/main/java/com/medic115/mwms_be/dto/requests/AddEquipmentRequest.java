@@ -12,6 +12,8 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddEquipmentRequest {
 
+    String code;
+
     String name;
 
     String description;

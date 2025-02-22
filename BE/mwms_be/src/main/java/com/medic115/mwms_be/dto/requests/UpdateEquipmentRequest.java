@@ -12,13 +12,11 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateEquipmentRequest {
 
-    int eqId;
+    String code;
 
     String name;
 
     String description;
-
-    String code;
 
     LocalDate expiredDate;
 
