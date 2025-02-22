@@ -23,8 +23,7 @@ public class Area {
 
     String status;
 
-    @Column(name = "`max_quantity`")
-    int maxQty;
+    int square;
 
     @OneToMany(mappedBy = "area")
     @ToString.Exclude

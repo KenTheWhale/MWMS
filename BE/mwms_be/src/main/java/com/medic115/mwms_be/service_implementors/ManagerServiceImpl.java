@@ -1,20 +1,10 @@
 package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
-import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.DeleteCategoryResponse;
-import com.medic115.mwms_be.dto.response.UpdateCategoryResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.repositories.CategoryRepo;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.dto.response.*;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.models.Equipment;
-import com.medic115.mwms_be.models.RequestApplication;
+import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.CategoryValidation;
@@ -44,6 +34,8 @@ public class ManagerServiceImpl implements ManagerService {
     private final EquipmentRepo equipmentRepo;
 
     private final CategoryRepo categoryRepo;
+
+    private final PartnerRepo partnerRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -262,12 +254,58 @@ public class ManagerServiceImpl implements ManagerService {
                 .status(Status.REQUEST_PENDING.getValue())
                 .build();
 
-        Equipment equipment = equipmentRepo.findByName(request.getEquipmentName());
+        requestApplicationRepo.save(requestApplication);
 
-        if (equipment == null) {
+        for (CreateImportRequest.RequestItemList item : request.getRequestItemList()) {
+            Equipment equipment = equipmentRepo.findById(item.getEquipmentId());
+            Partner partner = partnerRepo.findById(item.getPartnerId());
 
+            if (equipment == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseObject.builder()
+                                .message("404 Equipment Not Found")
+                                .data(null)
+                                .build()
+                );
+            }
+
+            if (partner == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseObject.builder()
+                                .message("404 Partner Not Found")
+                                .data(null)
+                                .build()
+                );
+            }
+
+            RequestItem requestItem = RequestItem
+                    .builder()
+                    .equipment(equipment)
+                    .partner(partner)
+                    .requestApplication(requestApplication)
+                    .quantity(item.getQuantity())
+                    .carrierName("")
+                    .carrierPhone("")
+                    .unitPrice(0)
+                    .build();
+
+            requestItemRepo.save(requestItem);
         }
-        return null;
+
+        Map<String, Object> requestApplicationMap = new HashMap<>();
+        requestApplicationMap.put("code", newCode);
+        requestApplicationMap.put("requestDate", LocalDate.now());
+        requestApplicationMap.put("deliveryDate", null);
+        requestApplicationMap.put("lastModifiedDate", LocalDate.now());
+        requestApplicationMap.put("status", Status.REQUEST_PENDING.getValue());
+        requestApplicationMap.put("task", null);
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK request create success")
+                        .data(requestApplicationMap)
+                        .build()
+        );
     }
 
 
@@ -437,6 +475,6 @@ public class ManagerServiceImpl implements ManagerService {
         }
         String lastCode = lastRequest.getCode();
         int lastNumber = Integer.parseInt(lastCode.replace("REQ", ""));
-        return "REQ" + lastNumber;
+        return "REQ" + (lastNumber + 1);
     }
 }
