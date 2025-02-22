@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
-import style from "../../styles/ExportRequest.module.css";
+import style from "../../styles/manager/ExportRequest.module.css";
 import {BsFilter} from "react-icons/bs";
 import {filterRequest, getExportRequest, getImportRequest} from "../../services/RequestService.js";
 import {IoReload} from "react-icons/io5";
 
-function ExportRequestPage() {
+function ExportRequest() {
     const [requestList, setRequestList] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -111,4 +111,4 @@ function ExportRequestPage() {
     )
 }
 
-export default ExportRequestPage;
+export default ExportRequest;

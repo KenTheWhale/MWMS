@@ -1,8 +1,8 @@
 import {useState} from "react";
-import style from "../../styles/Batch.module.css";
+import style from "../../styles/manager/Batch.module.css";
 import {Button} from "react-bootstrap";
 
-function BatchManagePage() {
+function BatchManage() {
     const [batchList, setBatchList] = useState([
         {
             code: "BA1",
@@ -80,4 +80,4 @@ function BatchManagePage() {
     )
 }
 
-export default BatchManagePage;
+export default BatchManage;

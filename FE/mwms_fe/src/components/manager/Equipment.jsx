@@ -1,10 +1,10 @@
 import {Button, Col, Form, Row, Table} from "react-bootstrap";
-import style from "../../styles/EquipmentPage.module.css";
+import style from "../../styles/manager/Equipment.module.css";
 import {useState} from "react";
-import EquipmentPopup from "../../components/EquipmentPopup.jsx";
+import EquipmentPopup from "../EquipmentPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
 
-function EquipmentPage() {
+function Equipment() {
 
     const [equipments, setEquipments] = useState(
         [
@@ -255,4 +255,4 @@ function EquipmentPage() {
     );
 }
 
-export default EquipmentPage;
+export default Equipment;

@@ -5,7 +5,7 @@ import {BsFilter} from "react-icons/bs";
 import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
 
 /* eslint-disable react/prop-types */
-function ImportRequestPage() {
+function ImportRequest() {
 
     const [requestList, setRequestList] = useState([]);
     const [filterDate, setFilterDate] = useState("");
@@ -241,4 +241,4 @@ function ImportRequestPage() {
     )
 }
 
-export default ImportRequestPage;
+export default ImportRequest;
