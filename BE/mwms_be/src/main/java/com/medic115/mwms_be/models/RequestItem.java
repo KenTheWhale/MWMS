@@ -44,4 +44,8 @@ public class RequestItem {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Batch batch;
+
+    int length;
+
+    int width;
 }
