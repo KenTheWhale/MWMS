@@ -92,6 +92,33 @@ public class ManagerServiceImpl implements ManagerService {
         return null;
     }
 
+    //-----------------------------------------------STAFF-----------------------------------------------//
+
+    @Override
+    public ResponseEntity<ResponseObject> getTaskList() {
+        List<Map<String, Object>> data = taskRepo.findAll().stream()
+                .map(
+                        task -> {
+                            Map<String, Object> dataItem = new HashMap<>();
+                            dataItem.put("code", task.getCode());
+                            dataItem.put("name", task.getName());
+                            dataItem.put("desc", task.getDescription());
+                            dataItem.put("status", task.getStatus());
+                            dataItem.put("assigned", task.getAssignedDate());
+                            dataItem.put("staff", task.getStaff().getUsername());
+                            return dataItem;
+                        }
+                )
+                .toList();
+
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("")
+                        .data(data)
+                        .build()
+        );
+    }
+
 
     //-----------------------------------------------STAFF-----------------------------------------------//
     @Override

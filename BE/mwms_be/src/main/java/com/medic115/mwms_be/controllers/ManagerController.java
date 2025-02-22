@@ -42,7 +42,11 @@ public class ManagerController {
 
     //-------------------------------------------------Task-------------------------------------------------//
 
-
+    @GetMapping("/task/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getTaskList() {
+        return managerService.getTaskList();
+    }
 
     //-------------------------------------------------Request-------------------------------------------------//
 
