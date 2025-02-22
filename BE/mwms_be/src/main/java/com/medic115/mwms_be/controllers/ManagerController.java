@@ -42,6 +42,12 @@ public class ManagerController {
 
     //-------------------------------------------------Task-------------------------------------------------//
 
+    @GetMapping("/task")
+    @PreAuthorize("hasAuthority('manager:read')")
+    public ResponseEntity<ResponseObject> getTaskList() {
+        return managerService.getTaskList();
+    }
+
     //-------------------------------------------------Request-------------------------------------------------//
 
     @GetMapping("/request/import")
