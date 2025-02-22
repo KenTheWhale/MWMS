@@ -44,7 +44,6 @@ public class ManagerController {
 
     @GetMapping("/request/import")
     @PreAuthorize("hasRole('manager')")
-
     public ResponseEntity<ResponseObject> getAllRequestImport() {
         return managerService.getAllRequestImport();
     }
@@ -79,10 +78,16 @@ public class ManagerController {
         return managerService.cancelImportRequest(request);
     }
 
-    @PostMapping("/request/create")
+    @PostMapping("/request/import")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
         return managerService.createImportRequest(request);
+    }
+
+    @PutMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> updateImportRequest(@RequestBody UpdateImportRequest request) {
+        return managerService.updateImportRequest(request);
     }
 
 

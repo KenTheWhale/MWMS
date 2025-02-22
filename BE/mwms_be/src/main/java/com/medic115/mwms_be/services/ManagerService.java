@@ -32,6 +32,8 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
 
+    ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
+
     //----------------------------Category----------------------------//
     ViewCategoryResponse viewCategory();
 
