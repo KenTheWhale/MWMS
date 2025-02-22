@@ -28,8 +28,4 @@ public class BatchItem{
     @ManyToOne
     @JoinColumn(name = "batch_id")
     Batch batch;
-
-    @ManyToOne
-    @JoinColumn(name = "`equipment_id`")
-    Equipment equipment;
 }
