@@ -29,9 +29,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     private final RequestApplicationRepo requestApplicationRepo;
 
-    private final RequestItemRepo requestItemRepo;
-
-    private final BatchRepo batchRepo;
+    private final TaskRepo taskRepo;
 
     private final EquipmentRepo equipmentRepo;
 
