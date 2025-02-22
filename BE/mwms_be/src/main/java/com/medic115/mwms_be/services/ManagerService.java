@@ -40,6 +40,4 @@ public interface ManagerService {
     UpdateCategoryResponse updateCategory(UpdateCategoryRequest request);
 
     DeleteCategoryResponse deleteCategory(int id);
-
-    ResponseEntity<ResponseObject> getTaskList();
 }

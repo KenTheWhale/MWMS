@@ -6,6 +6,6 @@ public record AreaResponse(
        Integer id,
        String name,
        String status,
-       int maxQty
+       int square
 ) {
 }
