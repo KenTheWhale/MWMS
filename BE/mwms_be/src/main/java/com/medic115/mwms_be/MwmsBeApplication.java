@@ -482,26 +482,31 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
+                            .square(500)
                             .build();
                     Area area2 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
+                            .square(500)
                             .build();
                     Area area3 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
+                            .square(500)
                             .build();
                     Area area4 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
+                            .square(500)
                             .build();
                     Area area5 = Area
                             .builder()
                             .name("AREA1")
                             .status(Status.AREA_AVAILABLE.getValue())
+                            .square(500)
                             .build();
 
                     areas.add(area1);

@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import {axiosClient} from "../config/api";
+import {authClient} from "../config/api.jsx";
 
 export const AUTH_TYPES = {
     LOGIN_REQUEST: 'LOGIN_REQUEST',
@@ -30,7 +30,7 @@ export const logout = () => ({
 export const loginUser = (username, password) => async (dispatch) => {
     dispatch(loginRequest());
     try {
-        const response = await axiosClient.post('/auth/login', {
+        const response = await authClient.post('/login', {
             username,
             password
         });
