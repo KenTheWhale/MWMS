@@ -21,7 +21,9 @@ export const getExportRequest = async () => {
             return  body.data;
         }
     } catch (error) {
-        console.log(error.response.data.message)
+        // console.error("Error fetching export requests:", error.response.status);
+        // alert(error.response.data.message);
+        return { error: "Can not fetch export requests" };
     }
 };
 
