@@ -42,6 +42,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     // revoke all token relate to account
     private void revokeAllAccountToken(Account account){
         var validAccountToken = tokenRepo.findAllValidTokensByUser(account.getId());
+        var validAccountToken2 = tokenRepo.findAllByStatusAndAccount_Id(Status.TOKEN_ACTIVE.getValue(), account.getId());
+        System.out.println("Result: " + (validAccountToken.size() == validAccountToken2.size()));
 
         if(validAccountToken.isEmpty()) return;
 
