@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -144,7 +145,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject
                             .builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data("")
                             .build()
             );
@@ -178,7 +179,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject
                             .builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data("")
                             .build()
             );
@@ -211,7 +212,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject
                             .builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data("")
                             .build()
             );
@@ -236,8 +237,8 @@ public class ManagerServiceImpl implements ManagerService {
         requestApplicationRepo.save(requestApplication);
 
         for (CreateImportRequest.RequestItemList item : request.getRequestItemList()) {
-            Equipment equipment = equipmentRepo.findById(item.getEquipmentId());
-            Partner partner = partnerRepo.findById(item.getPartnerId());
+            Equipment equipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+            Partner partner = partnerRepo.findById(item.getPartnerId()).orElse(null);
 
             if (equipment == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -295,7 +296,7 @@ public class ManagerServiceImpl implements ManagerService {
         if (requestApplication == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data(null)
                             .build()
             );
@@ -337,7 +338,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject
                             .builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data("")
                             .build()
             );
@@ -390,7 +391,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject
                             .builder()
-                            .message("404 Not Found")
+                            .message("204 No Content")
                             .data("")
                             .build()
             );
@@ -444,6 +445,88 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    @Override
+    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
+
+        RequestApplication requestApplication = requestApplicationRepo.findById(request.getRequestAppId()).orElse(null);
+
+
+        if (requestApplication == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(ResponseObject.builder()
+                            .message("204 No Content - Request application not found")
+                            .build());
+        }
+
+        List<RequestItem> currentItems = requestApplication.getItems();
+        List<UpdateImportRequest.Items> updatedItems = request.getItems();
+        List<Integer> itemIdsInList = currentItems.stream().map(RequestItem::getId).toList();
+        int count = 0;
+
+        for (RequestItem item : currentItems) {
+             UpdateImportRequest.Items i = getItemById(item.getId(), updatedItems);
+             Equipment equipment;
+             Partner partner;
+             if(
+                     i != null
+                             && (equipment = equipmentRepo.findById(i.getEquipmentId()).orElse(null)) != null
+                             && (partner = partnerRepo.findById(i.getPartnerId()).orElse(null)) != null) {
+
+                 item.setEquipment(equipment);
+                 item.setPartner(partner);
+                 item.setQuantity(i.getQuantity());
+
+                 requestItemRepo.save(item);
+                 count++;
+             }
+        }
+        if(count == 0){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseObject.builder()
+                            .message("400 bad request - No items updated")
+                            .build());
+        }
+
+
+//        for(UpdateImportRequest.Items item : updatedItems) {
+//
+//            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+//            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+//
+//            if (newEquipment == null || newPartner == null) {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body(ResponseObject.builder()
+//                                .message("400 Bad Request - Equipment or Partner not found")
+//                                .build());
+//            }
+//
+//            for(RequestItem itemPresent : currentItems) {
+//                if(itemIdsInList.contains(item.getRequestItemId())){
+//                    if(item.getRequestItemId() == itemPresent.getId()){
+//                        itemPresent.setEquipment(newEquipment);
+//                        itemPresent.setPartner(newPartner);
+//                        itemPresent.setQuantity(item.getQuantity());
+//                    }
+//                }
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                        ResponseObject.builder()
+//                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
+//                                .build()
+//                );
+//            }
+//        }
+
+//        requestApplication.setItems(currentItems);
+//        requestApplicationRepo.save(requestApplication);
+
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK update application successfully")
+                        .build()
+        );
+    }
+
 
     //-----------------------------PRIVATE FUNCTION-----------------------------//
     private String generateRequestCode() {
@@ -455,5 +538,9 @@ public class ManagerServiceImpl implements ManagerService {
         String lastCode = lastRequest.getCode();
         int lastNumber = Integer.parseInt(lastCode.replace("REQ", ""));
         return "REQ" + (lastNumber + 1);
+    }
+
+    private UpdateImportRequest.Items getItemById(int id, List<UpdateImportRequest.Items> items) {
+        return items.stream().filter(item -> item.getRequestItemId() == id).findFirst().orElse(null);
     }
 }
