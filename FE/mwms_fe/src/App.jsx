@@ -16,7 +16,7 @@ import {Provider} from "react-redux";
 import TaskPage from "./pages/manager/TaskPage.jsx";
 import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
-import ProtectedRoute from "./config/ProtectedRoute";
+import ProtectedRoute from "./config/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {

@@ -29,11 +29,13 @@ public class ManagerServiceImpl implements ManagerService {
 
     private final RequestApplicationRepo requestApplicationRepo;
 
+    private final TaskRepo taskRepo;
+
+    private final EquipmentRepo equipmentRepo;
+
     private final RequestItemRepo requestItemRepo;
 
     private final BatchRepo batchRepo;
-
-    private final EquipmentRepo equipmentRepo;
 
     private final CategoryRepo categoryRepo;
 
@@ -111,6 +113,31 @@ public class ManagerServiceImpl implements ManagerService {
                         .data(data)
                         .build()
         );
+    }
+
+    //-----------------------------------------------Task-----------------------------------------------//
+
+    @Override
+    public ResponseEntity<ResponseObject> getTaskList() {
+        List<Map<String, Object>> data = taskRepo.findAll().stream()
+                .map(task -> {
+                            Map<String, Object> dataItem = new HashMap<>();
+                            dataItem.put("code", task.getCode());
+                            dataItem.put("name", task.getName());
+                            dataItem.put("description", task.getDescription());
+                            dataItem.put("assignedDate", task.getAssignedDate().toString());
+                            dataItem.put("status", task.getStatus());
+                            dataItem.put("staff", task.getStaff().getUsername());
+                            dataItem.put("staffCode", task.getStaff().getId());
+                            return dataItem;
+                        }
+                ).toList();
+        return ResponseEntity.ok()
+                .body(ResponseObject.builder()
+                        .message("")
+                        .data(data)
+                        .build()
+                );
     }
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
