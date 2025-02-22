@@ -1,10 +1,10 @@
 import {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
-import style from '../../styles/ImportRequest.module.css'
+import style from '../../styles/manager/ImportRequest.module.css'
 import {BsFilter} from "react-icons/bs";
 import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
 
-function ImportRequestPage() {
+function ImportRequest() {
 
     const [requestList, setRequestList] = useState([]);
     const [filterDate, setFilterDate] = useState("");
@@ -80,4 +80,4 @@ function ImportRequestPage() {
     )
 }
 
-export default ImportRequestPage;
+export default ImportRequest;

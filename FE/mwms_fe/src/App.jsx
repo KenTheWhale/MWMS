@@ -6,14 +6,14 @@ import SupplierLayout from "./layouts/SupplierLayout.jsx";
 import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashDefault from "./view/dashboard/index.jsx";
-import ImportRequestPage from "./pages/manager/ImportRequestPage.jsx";
-import BatchManagePage from "./pages/manager/BatchManagePage.jsx";
-import ExportRequestPage from "./pages/manager/ExportRequestPage.jsx";
-import EquipmentPage from "./pages/manager/EquipmentPage.jsx";
-import CategoryPage from "./pages/manager/CategoryPage.jsx";
+import ImportRequest from "./components/manager/ImportRequest.jsx";
+import BatchManage from "./components/manager/BatchManage.jsx";
+import ExportRequest from "./components/manager/ExportRequest.jsx";
+import Equipment from "./components/manager/Equipment.jsx";
+import Category from "./components/manager/Category.jsx";
 import {configureStore} from "@reduxjs/toolkit";
 import {Provider} from "react-redux";
-import TaskPage from "./pages/manager/TaskPage.jsx";
+import Task from "./components/manager/Task.jsx";
 import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
@@ -37,19 +37,19 @@ const router = createBrowserRouter([
       },
       {
         path: "request/import",
-        element: <ImportRequestPage />,
+        element: <ImportRequest />,
       },
       {
         path: "request/export",
-        element: <ExportRequestPage />,
+        element: <ExportRequest />,
       },
       {
         path: "batch",
-        element: <BatchManagePage />,
+        element: <BatchManage />,
       },
       {
         path: "task",
-        element: <TaskPage />,
+        element: <Task />,
       },
       {
         path: "area",
@@ -59,11 +59,11 @@ const router = createBrowserRouter([
       },
       {
         path: "equipment",
-        element: <EquipmentPage />,
+        element: <Equipment />,
       },
       {
         path: "category",
-        element: <CategoryPage />,
+        element: <Category />,
       },
     ],
   },
