@@ -1,30 +1,67 @@
 import {useEffect, useState} from "react";
-import {Button} from "react-bootstrap";
-import style from '../../styles/manager/ImportRequest.module.css'
+import {Button, Modal} from "react-bootstrap";
+import style from '../../styles/ImportRequest.module.css'
 import {BsFilter} from "react-icons/bs";
 import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
 
+/* eslint-disable react/prop-types */
 function ImportRequest() {
 
     const [requestList, setRequestList] = useState([]);
     const [filterDate, setFilterDate] = useState("");
+    const [modalMode, setModalMode] = useState("add");
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [show, setShow] = useState(false);
+    const [newRequest, setNewRequest] = useState({
+        code: "",
+        requestDate: "",
+        deliveryDate: "",
+        lastModifiedDate: "",
+        status: "Pending",
+        detail: "",
+        requestItem: []
+    });
 
 
-    useEffect( () => {
+    useEffect(() => {
         async function fetchData() {
             return await getImportRequest();
         }
-        fetchData().then((response) => {setRequestList(response)});
+
+        fetchData().then((response) => {
+            setRequestList(response)
+        });
     }, []);
 
     const handleDateChange = (event) => {
         setFilterDate(event.target.value);
     };
 
-    const handleViewDetail = async (code) => {
+    const handleViewDetail = async (code, request) => {
+            setModalMode("view")
+            setSelectedRequest(request);
+            setShow(true)
+
         const requestDetail = await viewRequestDetail(code);
         console.log(requestDetail);
     }
+
+    const handleAddShow = () => {
+        setNewRequest(
+            {
+                code: "",
+                requestDate: "",
+                deliveryDate: "",
+                status: "Pending",
+                detail: "",
+                requestItem: []
+            }
+        )
+        setModalMode("add")
+        setShow(true)
+    };
+
+    const handleClose = () => setShow(false);
 
 
     return (
@@ -68,13 +105,137 @@ function ImportRequest() {
                                         <td>{item.deliveryDate}</td>
                                         <td>{item.lastModifiedDate}</td>
                                         <td>{item.status}</td>
-                                        <td><Button onClick={() => handleViewDetail(item.code)}>View Detail</Button></td>
+                                        <td><Button onClick={() => handleViewDetail(item.code, item)}>View Detail</Button>
+                                        </td>
                                     </tr>
                                 ))
                         }
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div className={`container-fluid`}>
+                <Modal
+                    size={`xl`}
+                    show={show}
+                    onHide={handleClose}
+                    backdrop="static"
+                    keyboard={false}>
+                    <Modal.Header closeButton>
+                        {
+                            modalMode === "add" ? (
+                                <Modal.Title>Request application</Modal.Title>
+                            ) : (
+                                <Modal.Title>Detail</Modal.Title>
+                            )
+                        }
+                    </Modal.Header>
+                    <Modal.Body className={``}>
+                        <div>
+                            {
+                                modalMode === "add" ? (
+                                    <div>
+                                        <table className="table">
+                                            <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Quantity</th>
+                                                <th>Partner</th>
+                                                <th></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {
+
+                                            }
+                                            </tbody>
+                                        </table>
+                                        <button>+</button>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {
+                                            selectedRequest !== null ? (
+                                                <div>
+                                                    <h5>Request Code: {selectedRequest.code}</h5>
+                                                    <h6>Status: {selectedRequest.status}</h6>
+                                                    <h6>Request Date: {selectedRequest.requestDate}</h6>
+                                                    <h6>Delivery Date: {selectedRequest.deliveryDate}</h6>
+                                                </div>
+                                            ) : (
+                                                <p> no request detail</p>
+                                            )
+                                        }
+
+                                        <div>
+                                            <table className="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Quantity</th>
+                                                    <th>Partner</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {
+                                                    "requestItem" in selectedRequest ? selectedRequest.requestItem.map(
+                                                        (item, index) => (
+                                                            <tr key={index}>
+                                                                <td>{item.name}</td>
+                                                                <td>{item.description}</td>
+                                                                <td>{item.quantity}</td>
+                                                                <td>{item.partner}</td>
+                                                            </tr>
+                                                        )
+                                                    ) : (
+                                                        <>Not have item in request</>
+                                                    )
+                                                }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            }
+                        < /div>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        {
+                            modalMode === "add" ? (
+                                <div>
+                                    <Button variant="secondary"
+                                            onClick={handleClose}
+                                            className={`ms-2`}>
+                                        Close
+                                    </Button>
+                                    <Button variant="primary"
+                                            className={`ms-2`}>submit</Button>
+                                </div>
+                            ) : (
+                                selectedRequest.status === "Pending" ? (
+                                    <div>
+                                        <Button variant="danger"
+                                                > Cancel</Button>
+                                        <Button variant="secondary"
+                                                onClick={handleClose}
+                                                className={`ms-2`}>
+                                            Close
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <Button variant="secondary" onClick={handleClose}>
+                                            Close
+                                        </Button>
+                                    </div>
+                                )
+                            )
+                        }
+                    </Modal.Footer>
+                </Modal>
             </div>
         </div>
     )

@@ -10,6 +10,7 @@ import java.util.List;
 public interface RequestApplicationRepo extends JpaRepository<RequestApplication, Integer> {
     List<RequestApplication> findAllByRequestDate(LocalDate requestDate);
 
+
     @EntityGraph(attributePaths = {"items.equipment", "items.partner"})
     RequestApplication getRequestApplicationByCode(String code);
 
