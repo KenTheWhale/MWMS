@@ -34,45 +34,51 @@ public class ManagerController {
 
     //-------------------------------------------------Staff-------------------------------------------------//
 
-    @GetMapping("/staff/list")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getStaffList() {
-        return managerService.getStaffList();
-    }
+//    @GetMapping("/staff/list")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getStaffList() {
+//        return managerService.getStaffList();
+//    }
 
     //-------------------------------------------------Task-------------------------------------------------//
 
-    @GetMapping("/task/list")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getTaskList() {
-        return managerService.getTaskList();
-    }
+//    @GetMapping("/task/list")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getTaskList() {
+//        return managerService.getTaskList();
+//    }
 
     //-------------------------------------------------Request-------------------------------------------------//
 
-    @GetMapping("/request/import")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestImport() {
-        return managerService.getAllRequestImport();
-    }
+//    @GetMapping("/request")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequests() {
+//        return managerService.getAllRequests();
+//    }
+//
+//    @GetMapping("/request/import")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestImport() {
+//        return managerService.getAllRequestImport();
+//    }
+//
+//    @GetMapping("/request/export")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestExport() {
+//        return managerService.getAllRequestExport();
+//    }
 
-    @GetMapping("/request/export")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestExport() {
-        return managerService.getAllRequestExport();
-    }
-
-    @PostMapping("/request/filter")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
-        return managerService.filterRequestByRequestDate(request);
-    }
-
-    @PostMapping("/request/detail")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
-        return managerService.getRequestDetailByCode(request);
-    }
+//    @PostMapping("/request/filter")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
+//        return managerService.filterRequestByRequestDate(request);
+//    }
+//
+//    @PostMapping("/request/detail")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
+//        return managerService.getRequestDetailByCode(request);
+//    }
 
     @PutMapping("/request/approve")
     @PreAuthorize("hasRole('manager')")
@@ -86,17 +92,17 @@ public class ManagerController {
         return managerService.cancelImportRequest(request);
     }
 
-    @PostMapping("/request/import")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
-        return managerService.createImportRequest(request);
-    }
-
-    @PutMapping("/request/import")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> updateImportRequest(@RequestBody UpdateImportRequest request) {
-        return managerService.updateImportRequest(request);
-    }
+//    @PostMapping("/request/import")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
+//        return managerService.createImportRequest(request);
+//    }
+//
+//    @PutMapping("/request/import")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> updateImportRequest(@RequestBody UpdateImportRequest request) {
+//        return managerService.updateImportRequest(request);
+//    }
 
 
 }

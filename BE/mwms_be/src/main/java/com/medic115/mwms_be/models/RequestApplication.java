@@ -32,15 +32,8 @@ public class RequestApplication {
     @Column(name = "`last_modified_date`")
     LocalDate lastModifiedDate;
 
-    @Column(name = "`delivery_date`")
-    LocalDate deliveryDate;
-
-    @ManyToOne
-    @JoinColumn(name = "`task_id`")
-    Task task;
-
     @OneToMany(mappedBy = "requestApplication")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<RequestItem> items;
+    List<ItemGroup> itemGroups;
 }

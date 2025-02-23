@@ -30,24 +30,17 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
-    String phone;
-
     String status;
-
-    @OneToOne(mappedBy = "account", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    Partner partner;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Token> tokens;
 
-    @OneToMany(mappedBy = "staff")
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Task> tasks;
+    User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

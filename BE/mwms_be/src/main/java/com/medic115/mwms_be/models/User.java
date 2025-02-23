@@ -5,17 +5,15 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-import java.time.LocalDate;
-
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
-@Table(name = "`task`")
+@Table(name = "`user`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Task {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,21 +21,21 @@ public class Task {
 
     String name;
 
-    String code;
+    String email;
 
-    String description;
-
-    String status;
-
-    @Column(name = "`assigned_date`")
-    LocalDate assignedDate;
-
-    @ManyToOne
-    @JoinColumn(name = "staff_id")
-    User user;
+    String phone;
 
     @OneToOne
-    @JoinColumn(name = "`group_id`")
-    ItemGroup itemGroup;
+    @JoinColumn(name = "`account_id`")
+    Account account;
 
+    @OneToOne(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Partner partner;
+
+    @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Task> tasks;
 }
