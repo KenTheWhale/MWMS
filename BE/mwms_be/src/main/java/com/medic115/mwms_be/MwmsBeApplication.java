@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @SpringBootApplication
@@ -58,7 +57,8 @@ public class MwmsBeApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {}
+    public void run(String... args) throws Exception {
+    }
 
     @Bean
     public CommandLineRunner initData() {
@@ -110,7 +110,7 @@ public class MwmsBeApplication implements CommandLineRunner {
 
                 //-----------------------------Partner-----------------------------//
                 accounts.forEach(acc -> {
-                    if(acc.getRole().name().equals(Role.PARTNER.name())){
+                    if (acc.getRole().name().equals(Role.PARTNER.name())) {
                         Partner p = Partner.builder()
                                 .user(users.get(accounts.indexOf(acc)))
                                 .type(acc.getUsername().contains("requester") ? "requester" : "supplier")
@@ -126,7 +126,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     String accessValue = jwtService.generateAccessToken(accountRepo.findByUsername(acc.getUsername()).get());
                     String refreshValue = jwtService.generateRefreshToken(accountRepo.findByUsername(acc.getUsername()).get());
 
-                    Token access =  Token.builder()
+                    Token access = Token.builder()
                             .account(acc)
                             .value(accessValue)
                             .type(TokenType.ACCESS.getValue())
@@ -135,7 +135,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .status(Status.TOKEN_ACTIVE.getValue())
                             .build();
 
-                    Token refresh =  Token.builder()
+                    Token refresh = Token.builder()
                             .account(acc)
                             .value(refreshValue)
                             .type(TokenType.REFRESH.getValue())
@@ -149,6 +149,152 @@ public class MwmsBeApplication implements CommandLineRunner {
 
                     tokenRepo.save(access);
                     tokenRepo.save(refresh);
+                });
+
+                //-----------------------------Area-----------------------------//
+                for (int i = 1; i <= 5; i++) {
+                    Area area = Area.builder()
+                            .name("Area " + i)
+                            .status("ACTIVE")
+                            .square(100 * i)
+                            .build();
+                    areas.add(area);
+                    areaRepo.save(area);
+                }
+
+                //-----------------------------Position-----------------------------//
+                areas.forEach(area -> {
+                    for (int i = 1; i <= 3; i++) {
+                        Position position = Position.builder()
+                                .name("Position " + i + " in " + area.getName())
+                                .area(area)
+                                .build();
+                        positions.add(position);
+                        positionRepo.save(position);
+                    }
+                });
+
+                //-----------------------------Category-----------------------------//
+                for (int i = 1; i <= 5; i++) {
+                    Category category = Category.builder()
+                            .code("CAT-" + i)
+                            .name("Category " + i)
+                            .description("Description for category " + i)
+                            .build();
+                    categories.add(category);
+                    categoryRepo.save(category);
+                }
+
+                //-----------------------------Equipment-----------------------------//
+                categories.forEach(category -> {
+                    for (int i = 1; i <= 2; i++) {
+                        Equipment equipment = Equipment.builder()
+                                .code("EQ-" + i + "-" + category.getCode())
+                                .name("Equipment " + i)
+                                .description("Description for equipment " + i)
+                                .price(100.0 * i)
+                                .unit("pcs")
+                                .category(category)
+                                .build();
+                        equipments.add(equipment);
+                        equipmentRepo.save(equipment);
+                    }
+                });
+
+                //-----------------------------RequestApplication-----------------------------//
+                for (int i = 1; i <= 3; i++) {
+                    RequestApplication requestApplication = RequestApplication.builder()
+                            .code("REQ-" + i)
+                            .status("PENDING")
+                            .type("ORDER")
+                            .requestDate(LocalDate.now())
+                            .lastModifiedDate(LocalDate.now())
+                            .build();
+                    requestApplications.add(requestApplication);
+                    requestApplicationRepo.save(requestApplication);
+                }
+
+                //-----------------------------ItemGroup-----------------------------//
+                requestApplications.forEach(request -> {
+                    ItemGroup itemGroup = ItemGroup.builder()
+                            .requestApplication(request)
+                            .deliveryDate(LocalDate.now().plusDays(3))
+                            .carrierName("Carrier " + request.getCode())
+                            .carrierPhone("0909-" + request.getCode())
+                            .build();
+                    itemGroups.add(itemGroup);
+                    itemGroupRepo.save(itemGroup);
+                });
+
+                //-----------------------------RequestItem-----------------------------//
+                itemGroups.forEach(group -> equipments.forEach(equipment -> {
+                    Partner partner = partners.stream()
+                            .filter(p -> "supplier".equals(p.getType()))
+                            .findFirst()
+                            .orElse(null);
+
+                    RequestItem requestItem = RequestItem.builder()
+                            .quantity(5)
+                            .unitPrice(100.0)
+                            .equipment(equipment)
+                            .itemGroup(group)
+                            .partner(partner)
+                            .length(10)
+                            .width(5)
+                            .build();
+
+                    requestItems.add(requestItem);
+                    requestItemRepo.save(requestItem);
+                }));
+
+                //-----------------------------Batch-----------------------------//
+                positions.forEach(position -> {
+                    for (int i = 1; i == 1; i++) {
+                        if (requestItems.isEmpty()) {
+                            break;
+                        }
+
+                        RequestItem requestItem = requestItems.remove(0);
+
+                        Batch batch = Batch.builder()
+                                .code("BATCH-" + i)
+                                .equipmentQty(10 * i)
+                                .createdDate(LocalDate.now())
+                                .position(position)
+                                .requestItem(requestItem)
+                                .build();
+
+                        batches.add(batch);
+                        batchRepo.save(batch);
+                    }
+                });
+
+                //-----------------------------BatchItem-----------------------------//
+                batches.forEach(batch -> {
+                    for (int i = 1; i <= 3; i++) {
+                        BatchItem batchItem = BatchItem.builder()
+                                .serialNumber("SN-" + i + "-" + batch.getCode())
+                                .importedDate(LocalDate.now())
+                                .batch(batch)
+                                .build();
+                        batchItems.add(batchItem);
+                        batchItemRepo.save(batchItem);
+                    }
+                });
+
+                //-----------------------------Task-----------------------------//
+                itemGroups.forEach(group -> {
+                    Task task = Task.builder()
+                            .name("Task for " + group.getRequestApplication().getCode())
+                            .code("TASK-" + group.getRequestApplication().getCode())
+                            .description("Task description")
+                            .status("ASSIGNED")
+                            .user(accountRepo.findAll().stream().filter(acc -> acc.getRole().name().equalsIgnoreCase(Role.STAFF.name())).findFirst().get().getUser())
+                            .assignedDate(LocalDate.now())
+                            .itemGroup(group)
+                            .build();
+                    tasks.add(task);
+                    taskRepo.save(task);
                 });
             }
         };

@@ -526,36 +526,36 @@ public class ManagerServiceImpl implements ManagerService {
 //        }
 //
 //
-////        for(UpdateImportRequest.Items item : updatedItems) {
-////
-////            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
-////            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
-////
-////            if (newEquipment == null || newPartner == null) {
-////                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-////                        .body(ResponseObject.builder()
-////                                .message("400 Bad Request - Equipment or Partner not found")
-////                                .build());
-////            }
-////
-////            for(RequestItem itemPresent : currentItems) {
-////                if(itemIdsInList.contains(item.getRequestItemId())){
-////                    if(item.getRequestItemId() == itemPresent.getId()){
-////                        itemPresent.setEquipment(newEquipment);
-////                        itemPresent.setPartner(newPartner);
-////                        itemPresent.setQuantity(item.getQuantity());
-////                    }
-////                }
-////                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-////                        ResponseObject.builder()
-////                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
-////                                .build()
-////                );
-////            }
-////        }
+//        for(UpdateImportRequest.Items item : updatedItems) {
 //
-////        requestApplication.setItems(currentItems);
-////        requestApplicationRepo.save(requestApplication);
+//            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+//            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+//
+//            if (newEquipment == null || newPartner == null) {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body(ResponseObject.builder()
+//                                .message("400 Bad Request - Equipment or Partner not found")
+//                                .build());
+//            }
+//
+//            for(RequestItem itemPresent : currentItems) {
+//                if(itemIdsInList.contains(item.getRequestItemId())){
+//                    if(item.getRequestItemId() == itemPresent.getId()){
+//                        itemPresent.setEquipment(newEquipment);
+//                        itemPresent.setPartner(newPartner);
+//                        itemPresent.setQuantity(item.getQuantity());
+//                    }
+//                }
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                        ResponseObject.builder()
+//                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
+//                                .build()
+//                );
+//            }
+//        }
+
+//        requestApplication.setItems(currentItems);
+//        requestApplicationRepo.save(requestApplication);
 //
 //        return ResponseEntity.ok().body(
 //                ResponseObject
