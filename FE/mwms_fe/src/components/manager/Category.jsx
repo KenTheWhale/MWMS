@@ -1,12 +1,12 @@
-import style from "../../styles/CategoryPage.module.css";
+import style from "../../styles/manager/Category.module.css";
 import {Button, Form, Table} from "react-bootstrap";
 import {useState} from "react";
-import CategoryPopup from "../../components/CategoryPopup.jsx";
+import CategoryPopup from "../CategoryPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import {getCategoryList} from "../../services/CategoryService.js";
 
 
-function CategoryPage() {
+function Category() {
 
     // const [categories, setCategories] = useState([
     //         {
@@ -220,4 +220,4 @@ function CategoryPage() {
     );
 }
 
-export default CategoryPage;
+export default Category;

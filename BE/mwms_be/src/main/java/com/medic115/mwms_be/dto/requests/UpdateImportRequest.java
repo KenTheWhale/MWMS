@@ -6,22 +6,24 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateImportRequest {
-    List<RequestItemList> requestItemList;
+public class UpdateImportRequest {
+    int requestAppId;
+
+    List<Items> items;
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class RequestItemList{
+    public static class Items {
+        int requestItemId;
         int equipmentId;
         int partnerId;
         int quantity;
     }
-
 }
