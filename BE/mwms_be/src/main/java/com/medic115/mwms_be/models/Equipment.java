@@ -19,6 +19,8 @@ public class Equipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    String code;
+
     String name;
 
     String description;
@@ -35,4 +37,9 @@ public class Equipment {
     @ManyToOne
     @JoinColumn(name = "`category_id`")
     Category category;
+
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<PartnerEquipment> partnerEquipments;
 }

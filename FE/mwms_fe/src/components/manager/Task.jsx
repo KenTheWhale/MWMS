@@ -31,17 +31,16 @@ function GenerateTable() {
         mainMarginTop: 1,
         searchFunc: HandleKeyword,
         height: 5,
-        // searchInputParams: {
-        //     grow: 5,
-        //     mr: 2,
-        //     ph: "Enter keyword to search...",
-        // },
-        // searchSelectorParams: {
-        //     value: ["name", "code"],
-        //     grow: 1,
-        //     mr: 0,
-        // }
-        ph: "Enter keyword..."
+        searchInputParams: {
+            grow: 5,
+            mr: 2,
+            ph: "Enter keyword to search...",
+        },
+        searchSelectorParams: {
+            value: ["name", "code"],
+            grow: 1,
+            mr: 0,
+        }
     }
 
     useEffect(() => {

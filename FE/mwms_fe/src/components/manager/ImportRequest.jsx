@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
-import style from '../../styles/ImportRequest.module.css'
+import style from '../../styles/manager/ImportRequest.module.css'
 import {BsFilter} from "react-icons/bs";
 import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
 

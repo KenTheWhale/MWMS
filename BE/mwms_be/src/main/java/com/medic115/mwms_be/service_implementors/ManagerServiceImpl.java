@@ -94,267 +94,278 @@ public class ManagerServiceImpl implements ManagerService {
 
     //-----------------------------------------------STAFF-----------------------------------------------//
 
-    @Override
-    public ResponseEntity<ResponseObject> getTaskList() {
-        List<Map<String, Object>> data = taskRepo.findAll().stream()
-                .map(
-                        task -> {
-                            Map<String, Object> dataItem = new HashMap<>();
-                            dataItem.put("code", task.getCode());
-                            dataItem.put("name", task.getName());
-                            dataItem.put("desc", task.getDescription());
-                            dataItem.put("status", task.getStatus());
-                            dataItem.put("assigned", task.getAssignedDate());
-                            dataItem.put("staff", task.getStaff().getUsername());
-                            return dataItem;
-                        }
-                )
-                .toList();
-
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("")
-                        .data(data)
-                        .build()
-        );
-    }
+//    @Override
+//    public ResponseEntity<ResponseObject> getTaskList() {
+//        List<Map<String, Object>> data = taskRepo.findAll().stream()
+//                .map(
+//                        task -> {
+//                            Map<String, Object> dataItem = new HashMap<>();
+//                            dataItem.put("code", task.getCode());
+//                            dataItem.put("name", task.getName());
+//                            dataItem.put("desc", task.getDescription());
+//                            dataItem.put("status", task.getStatus());
+//                            dataItem.put("assigned", task.getAssignedDate());
+//                            dataItem.put("staff", task.getStaff().getUsername());
+//                            return dataItem;
+//                        }
+//                )
+//                .toList();
+//
+//        return ResponseEntity.ok().body(
+//                ResponseObject.builder()
+//                        .message("")
+//                        .data(data)
+//                        .build()
+//        );
+//    }
 
 
     //-----------------------------------------------STAFF-----------------------------------------------//
-    @Override
-    public ResponseEntity<ResponseObject> getStaffList() {
-        List<Map<String, Object>> data = accountRepo.findAll().stream()
-                .filter(account -> account.getRole().equals(Role.STAFF))
-                .map(
-                        account -> {
-                            Map<String, Object> item = new HashMap<>();
-                            item.put("username", account.getUsername());
-                            item.put("phone", account.getPhone());
-                            item.put("status", account.getStatus());
-                            return item;
-                        }
-                )
-                .toList();
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("")
-                        .data(data)
-                        .build()
-        );
-    }
+//    @Override
+//    public ResponseEntity<ResponseObject> getStaffList() {
+//        List<Map<String, Object>> data = accountRepo.findAll().stream()
+//                .filter(account -> account.getRole().equals(Role.STAFF))
+//                .map(
+//                        account -> {
+//                            Map<String, Object> item = new HashMap<>();
+//                            item.put("username", account.getUsername());
+//                            item.put("phone", account.getPhone());
+//                            item.put("status", account.getStatus());
+//                            return item;
+//                        }
+//                )
+//                .toList();
+//        return ResponseEntity.ok().body(
+//                ResponseObject.builder()
+//                        .message("")
+//                        .data(data)
+//                        .build()
+//        );
+//    }
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
-    @Override
-    public ResponseEntity<ResponseObject> getAllRequestImport() {
 
-        List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
-                .filter(requestApplication -> "import".equals(requestApplication.getType()))
-                .map(
-                        requestImport -> {
-                            Map<String, Object> request = new HashMap<>();
-                            request.put("code", requestImport.getCode());
-                            request.put("requestDate", requestImport.getRequestDate());
-                            request.put("deliveryDate", requestImport.getDeliveryDate());
-                            request.put("lastModifiedDate", requestImport.getLastModifiedDate());
-                            request.put("status", requestImport.getStatus());
-                            return request;
-                        }
-                ).toList();
-        if (!data.isEmpty()) {
-            return ResponseEntity.ok().body(
-                    ResponseObject
-                            .builder()
-                            .message("200 OK")
-                            .data(data)
-                            .build()
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject
-                            .builder()
-                            .message("204 No Content")
-                            .data("")
-                            .build()
-            );
-        }
-    }
+//    @Override
+//    public ResponseEntity<ResponseObject> getAllRequests() {
+//        return ResponseEntity.ok().body(
+//                ResponseObject.builder()
+//                        .message("")
+//                        .data(null)
+//                        .build()
+//        );
+//    }
 
-    @Override
-    public ResponseEntity<ResponseObject> getAllRequestExport() {
-        List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
-                .filter(requestApplication -> "export".equals(requestApplication.getType()))
-                .map(
-                        requestExport -> {
-                            Map<String, Object> request = new HashMap<>();
-                            request.put("code", requestExport.getCode());
-                            request.put("requestDate", requestExport.getRequestDate());
-                            request.put("deliveryDate", requestExport.getDeliveryDate());
-                            request.put("lastModifiedDate", requestExport.getLastModifiedDate());
-                            request.put("status", requestExport.getStatus());
-                            return request;
-                        }
-                ).toList();
-        if (!data.isEmpty()) {
-            return ResponseEntity.ok().body(
-                    ResponseObject
-                            .builder()
-                            .message("200 OK")
-                            .data(data)
-                            .build()
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject
-                            .builder()
-                            .message("204 No Content")
-                            .data("")
-                            .build()
-            );
-        }
-    }
-
-    @Override
-    public ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request) {
-        List<Map<String, Object>> data = requestApplicationRepo.findAllByRequestDate(request.getRequestDate()).stream()
-                .map(
-                        requestApplication -> {
-                            Map<String, Object> requestfilter = new HashMap<>();
-                            requestfilter.put("code", requestApplication.getCode());
-                            requestfilter.put("requestDate", requestApplication.getRequestDate());
-                            requestfilter.put("deliveryDate", requestApplication.getDeliveryDate());
-                            requestfilter.put("lastModifiedDate", requestApplication.getLastModifiedDate());
-                            requestfilter.put("status", requestApplication.getStatus());
-                            return requestfilter;
-                        }
-                ).toList();
-        if (!data.isEmpty()) {
-            return ResponseEntity.ok().body(
-                    ResponseObject
-                            .builder()
-                            .message("200 OK")
-                            .data(data)
-                            .build()
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject
-                            .builder()
-                            .message("204 No Content")
-                            .data("")
-                            .build()
-            );
-        }
-    }
-
-    @Override
-    public ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request) {
-        String newCode = generateRequestCode();
-
-        RequestApplication requestApplication = RequestApplication
-                .builder()
-                .code(newCode)
-                .requestDate(LocalDate.now())
-                .deliveryDate(null)
-                .lastModifiedDate(LocalDate.now())
-                .task(null)
-                .type("import")
-                .status(Status.REQUEST_PENDING.getValue())
-                .build();
-
-        requestApplicationRepo.save(requestApplication);
-
-        for (CreateImportRequest.RequestItemList item : request.getRequestItemList()) {
-            Equipment equipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
-            Partner partner = partnerRepo.findById(item.getPartnerId()).orElse(null);
-
-            if (equipment == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        ResponseObject.builder()
-                                .message("404 Equipment Not Found")
-                                .data(null)
-                                .build()
-                );
-            }
-
-            if (partner == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        ResponseObject.builder()
-                                .message("404 Partner Not Found")
-                                .data(null)
-                                .build()
-                );
-            }
-
-            RequestItem requestItem = RequestItem
-                    .builder()
-                    .equipment(equipment)
-                    .partner(partner)
-                    .requestApplication(requestApplication)
-                    .quantity(item.getQuantity())
-                    .carrierName("")
-                    .carrierPhone("")
-                    .unitPrice(0)
-                    .build();
-
-            requestItemRepo.save(requestItem);
-        }
-
-        Map<String, Object> requestApplicationMap = new HashMap<>();
-        requestApplicationMap.put("code", newCode);
-        requestApplicationMap.put("requestDate", LocalDate.now());
-        requestApplicationMap.put("deliveryDate", null);
-        requestApplicationMap.put("lastModifiedDate", LocalDate.now());
-        requestApplicationMap.put("status", Status.REQUEST_PENDING.getValue());
-        requestApplicationMap.put("task", null);
-        return ResponseEntity.ok().body(
-                ResponseObject
-                        .builder()
-                        .message("200 OK request create success")
-                        .data(requestApplicationMap)
-                        .build()
-        );
-    }
-
-
-    @Override
-    public ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request) {
-        RequestApplication requestApplication = requestApplicationRepo.getRequestApplicationByCode(request.getCode());
-
-        if (requestApplication == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject.builder()
-                            .message("204 No Content")
-                            .data(null)
-                            .build()
-            );
-        }
-
-        Map<String, Object> requestDetail = new HashMap<>();
-        requestDetail.put("code", requestApplication.getCode());
-        requestDetail.put("requestDate", requestApplication.getRequestDate());
-        requestDetail.put("deliveryDate", requestApplication.getDeliveryDate());
-        requestDetail.put("status", requestApplication.getStatus());
-
-
-        List<Map<String, Object>> items = requestApplication.getItems().stream()
-                .map(
-                        item -> {
-                            Map<String, Object> itemMap = new HashMap<>();
-                            itemMap.put("name", item.getEquipment().getName());
-                            itemMap.put("description", item.getEquipment().getDescription());
-                            itemMap.put("quantity", item.getQuantity());
-                            itemMap.put("partner", item.getPartner().getName());
-                            return itemMap;
-                        }
-                ).toList();
-
-        requestDetail.put("items", items);
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("200 OK")
-                        .data(requestDetail)
-                        .build());
-    }
+//    @Override
+//    public ResponseEntity<ResponseObject> getAllRequestImport() {
+//
+//        List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
+//                .filter(requestApplication -> "import".equals(requestApplication.getType()))
+//                .map(
+//                        requestImport -> {
+//                            Map<String, Object> request = new HashMap<>();
+//                            request.put("code", requestImport.getCode());
+//                            request.put("requestDate", requestImport.getRequestDate());
+//                            request.put("deliveryDate", requestImport.getDeliveryDate());
+//                            request.put("lastModifiedDate", requestImport.getLastModifiedDate());
+//                            request.put("status", requestImport.getStatus());
+//                            return request;
+//                        }
+//                ).toList();
+//        if (!data.isEmpty()) {
+//            return ResponseEntity.ok().body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("200 OK")
+//                            .data(data)
+//                            .build()
+//            );
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("204 No Content")
+//                            .data("")
+//                            .build()
+//            );
+//        }
+//    }
+//
+//    @Override
+//    public ResponseEntity<ResponseObject> getAllRequestExport() {
+//        List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
+//                .filter(requestApplication -> "export".equals(requestApplication.getType()))
+//                .map(
+//                        requestExport -> {
+//                            Map<String, Object> request = new HashMap<>();
+//                            request.put("code", requestExport.getCode());
+//                            request.put("requestDate", requestExport.getRequestDate());
+//                            request.put("deliveryDate", requestExport.getDeliveryDate());
+//                            request.put("lastModifiedDate", requestExport.getLastModifiedDate());
+//                            request.put("status", requestExport.getStatus());
+//                            return request;
+//                        }
+//                ).toList();
+//        if (!data.isEmpty()) {
+//            return ResponseEntity.ok().body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("200 OK")
+//                            .data(data)
+//                            .build()
+//            );
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("204 No Content")
+//                            .data("")
+//                            .build()
+//            );
+//        }
+//    }
+//
+//    @Override
+//    public ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request) {
+//        List<Map<String, Object>> data = requestApplicationRepo.findAllByRequestDate(request.getRequestDate()).stream()
+//                .map(
+//                        requestApplication -> {
+//                            Map<String, Object> requestfilter = new HashMap<>();
+//                            requestfilter.put("code", requestApplication.getCode());
+//                            requestfilter.put("requestDate", requestApplication.getRequestDate());
+//                            requestfilter.put("deliveryDate", requestApplication.getDeliveryDate());
+//                            requestfilter.put("lastModifiedDate", requestApplication.getLastModifiedDate());
+//                            requestfilter.put("status", requestApplication.getStatus());
+//                            return requestfilter;
+//                        }
+//                ).toList();
+//        if (!data.isEmpty()) {
+//            return ResponseEntity.ok().body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("200 OK")
+//                            .data(data)
+//                            .build()
+//            );
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                    ResponseObject
+//                            .builder()
+//                            .message("204 No Content")
+//                            .data("")
+//                            .build()
+//            );
+//        }
+//    }
+//
+//    @Override
+//    public ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request) {
+//        String newCode = generateRequestCode();
+//
+//        RequestApplication requestApplication = RequestApplication
+//                .builder()
+//                .code(newCode)
+//                .requestDate(LocalDate.now())
+//                .deliveryDate(null)
+//                .lastModifiedDate(LocalDate.now())
+//                .task(null)
+//                .type("import")
+//                .status(Status.REQUEST_PENDING.getValue())
+//                .build();
+//
+//        requestApplicationRepo.save(requestApplication);
+//
+//        for (CreateImportRequest.RequestItemList item : request.getRequestItemList()) {
+//            Equipment equipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+//            Partner partner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+//
+//            if (equipment == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                        ResponseObject.builder()
+//                                .message("404 Equipment Not Found")
+//                                .data(null)
+//                                .build()
+//                );
+//            }
+//
+//            if (partner == null) {
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                        ResponseObject.builder()
+//                                .message("404 Partner Not Found")
+//                                .data(null)
+//                                .build()
+//                );
+//            }
+//
+//            RequestItem requestItem = RequestItem
+//                    .builder()
+//                    .equipment(equipment)
+//                    .partner(partner)
+//                    .requestApplication(requestApplication)
+//                    .quantity(item.getQuantity())
+//                    .carrierName("")
+//                    .carrierPhone("")
+//                    .unitPrice(0)
+//                    .build();
+//
+//            requestItemRepo.save(requestItem);
+//        }
+//
+//        Map<String, Object> requestApplicationMap = new HashMap<>();
+//        requestApplicationMap.put("code", newCode);
+//        requestApplicationMap.put("requestDate", LocalDate.now());
+//        requestApplicationMap.put("deliveryDate", null);
+//        requestApplicationMap.put("lastModifiedDate", LocalDate.now());
+//        requestApplicationMap.put("status", Status.REQUEST_PENDING.getValue());
+//        requestApplicationMap.put("task", null);
+//        return ResponseEntity.ok().body(
+//                ResponseObject
+//                        .builder()
+//                        .message("200 OK request create success")
+//                        .data(requestApplicationMap)
+//                        .build()
+//        );
+//    }
+//
+//
+//    @Override
+//    public ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request) {
+//        RequestApplication requestApplication = requestApplicationRepo.getRequestApplicationByCode(request.getCode());
+//
+//        if (requestApplication == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                    ResponseObject.builder()
+//                            .message("204 No Content")
+//                            .data(null)
+//                            .build()
+//            );
+//        }
+//
+//        Map<String, Object> requestDetail = new HashMap<>();
+//        requestDetail.put("code", requestApplication.getCode());
+//        requestDetail.put("requestDate", requestApplication.getRequestDate());
+//        requestDetail.put("deliveryDate", requestApplication.getDeliveryDate());
+//        requestDetail.put("status", requestApplication.getStatus());
+//
+//
+//        List<Map<String, Object>> items = requestApplication.getItems().stream()
+//                .map(
+//                        item -> {
+//                            Map<String, Object> itemMap = new HashMap<>();
+//                            itemMap.put("name", item.getEquipment().getName());
+//                            itemMap.put("description", item.getEquipment().getDescription());
+//                            itemMap.put("quantity", item.getQuantity());
+//                            itemMap.put("partner", item.getPartner().getName());
+//                            return itemMap;
+//                        }
+//                ).toList();
+//
+//        requestDetail.put("items", items);
+//        return ResponseEntity.ok().body(
+//                ResponseObject.builder()
+//                        .message("200 OK")
+//                        .data(requestDetail)
+//                        .build());
+//    }
 
     @Override
     public ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request) {
@@ -472,87 +483,87 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-    @Override
-    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
-
-        RequestApplication requestApplication = requestApplicationRepo.findById(request.getRequestAppId()).orElse(null);
-
-
-        if (requestApplication == null) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(ResponseObject.builder()
-                            .message("204 No Content - Request application not found")
-                            .build());
-        }
-
-        List<RequestItem> currentItems = requestApplication.getItems();
-        List<UpdateImportRequest.Items> updatedItems = request.getItems();
-        List<Integer> itemIdsInList = currentItems.stream().map(RequestItem::getId).toList();
-        int count = 0;
-
-        for (RequestItem item : currentItems) {
-             UpdateImportRequest.Items i = getItemById(item.getId(), updatedItems);
-             Equipment equipment;
-             Partner partner;
-             if(
-                     i != null
-                             && (equipment = equipmentRepo.findById(i.getEquipmentId()).orElse(null)) != null
-                             && (partner = partnerRepo.findById(i.getPartnerId()).orElse(null)) != null) {
-
-                 item.setEquipment(equipment);
-                 item.setPartner(partner);
-                 item.setQuantity(i.getQuantity());
-
-                 requestItemRepo.save(item);
-                 count++;
-             }
-        }
-        if(count == 0){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ResponseObject.builder()
-                            .message("400 bad request - No items updated")
-                            .build());
-        }
-
-
-//        for(UpdateImportRequest.Items item : updatedItems) {
+//    @Override
+//    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
 //
-//            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
-//            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+//        RequestApplication requestApplication = requestApplicationRepo.findById(request.getRequestAppId()).orElse(null);
 //
-//            if (newEquipment == null || newPartner == null) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body(ResponseObject.builder()
-//                                .message("400 Bad Request - Equipment or Partner not found")
-//                                .build());
-//            }
 //
-//            for(RequestItem itemPresent : currentItems) {
-//                if(itemIdsInList.contains(item.getRequestItemId())){
-//                    if(item.getRequestItemId() == itemPresent.getId()){
-//                        itemPresent.setEquipment(newEquipment);
-//                        itemPresent.setPartner(newPartner);
-//                        itemPresent.setQuantity(item.getQuantity());
-//                    }
-//                }
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-//                        ResponseObject.builder()
-//                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
-//                                .build()
-//                );
-//            }
+//        if (requestApplication == null) {
+//            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+//                    .body(ResponseObject.builder()
+//                            .message("204 No Content - Request application not found")
+//                            .build());
 //        }
-
-//        requestApplication.setItems(currentItems);
-//        requestApplicationRepo.save(requestApplication);
-
-        return ResponseEntity.ok().body(
-                ResponseObject
-                        .builder()
-                        .message("200 OK update application successfully")
-                        .build()
-        );
-    }
+//
+//        List<RequestItem> currentItems = requestApplication.getItems();
+//        List<UpdateImportRequest.Items> updatedItems = request.getItems();
+//        List<Integer> itemIdsInList = currentItems.stream().map(RequestItem::getId).toList();
+//        int count = 0;
+//
+//        for (RequestItem item : currentItems) {
+//             UpdateImportRequest.Items i = getItemById(item.getId(), updatedItems);
+//             Equipment equipment;
+//             Partner partner;
+//             if(
+//                     i != null
+//                             && (equipment = equipmentRepo.findById(i.getEquipmentId()).orElse(null)) != null
+//                             && (partner = partnerRepo.findById(i.getPartnerId()).orElse(null)) != null) {
+//
+//                 item.setEquipment(equipment);
+//                 item.setPartner(partner);
+//                 item.setQuantity(i.getQuantity());
+//
+//                 requestItemRepo.save(item);
+//                 count++;
+//             }
+//        }
+//        if(count == 0){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(ResponseObject.builder()
+//                            .message("400 bad request - No items updated")
+//                            .build());
+//        }
+//
+//
+////        for(UpdateImportRequest.Items item : updatedItems) {
+////
+////            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+////            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+////
+////            if (newEquipment == null || newPartner == null) {
+////                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+////                        .body(ResponseObject.builder()
+////                                .message("400 Bad Request - Equipment or Partner not found")
+////                                .build());
+////            }
+////
+////            for(RequestItem itemPresent : currentItems) {
+////                if(itemIdsInList.contains(item.getRequestItemId())){
+////                    if(item.getRequestItemId() == itemPresent.getId()){
+////                        itemPresent.setEquipment(newEquipment);
+////                        itemPresent.setPartner(newPartner);
+////                        itemPresent.setQuantity(item.getQuantity());
+////                    }
+////                }
+////                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+////                        ResponseObject.builder()
+////                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
+////                                .build()
+////                );
+////            }
+////        }
+//
+////        requestApplication.setItems(currentItems);
+////        requestApplicationRepo.save(requestApplication);
+//
+//        return ResponseEntity.ok().body(
+//                ResponseObject
+//                        .builder()
+//                        .message("200 OK update application successfully")
+//                        .build()
+//        );
+//    }
 
 
     //-----------------------------PRIVATE FUNCTION-----------------------------//

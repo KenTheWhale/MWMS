@@ -79,8 +79,6 @@ export function SearchBarHasSelector(
         searchFunc
     }
 
-    console.log(prop)
-
     return (
         <div className={css.main} style={{width: mainWidth + 'vw', marginBottom: mainMarginBottom + 'vh', marginTop: mainMarginTop + 'vh'}}>
             <RenderSearchBar {...prop}/>
