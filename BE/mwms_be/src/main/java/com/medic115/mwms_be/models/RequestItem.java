@@ -36,7 +36,7 @@ public class RequestItem {
     ItemGroup itemGroup;
 
     @ManyToOne
-    @JoinColumn(name = "requestItem")
+    @JoinColumn(name = "partner_id")
     Partner partner;
 
     int length;

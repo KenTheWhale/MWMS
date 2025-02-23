@@ -18,8 +18,6 @@ public interface ManagerService {
 
 
     //----------------------------Request----------------------------//
-
-//    ResponseEntity<ResponseObject> getAllRequests();
 //
 //    ResponseEntity<ResponseObject> getAllRequestImport();
 //
@@ -56,5 +54,9 @@ public interface ManagerService {
 
     //----------------------------Task----------------------------//
 
-//    ResponseEntity<ResponseObject> getTaskList();
+    ResponseEntity<ResponseObject> getTaskList();
+
+    //----------------------------Item Group----------------------------//
+
+    ResponseEntity<ResponseObject> getAllUnassignedGroup();
 }

@@ -74,6 +74,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         saveAccountToken(acc, accessToken, refreshToken);
 
+        System.out.println("Token: " + accessToken);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(

@@ -18,6 +18,7 @@ public enum Status {
     AREA_AVAILABLE("available"),
     AREA_FULL("full"),
     TASK_PROCESSING("processing"),
+    TASK_ASSIGNED("assigned"),
     TASK_COMPLETED("completed"),;
     private final String value;
 }
