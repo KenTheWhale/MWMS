@@ -36,7 +36,7 @@ function RenderSearchBar(
     })
 
     useEffect(() => {
-        searchFunc(value.keyword, value.type)
+        searchFunc(value.keyword.toLowerCase(), value.type)
     }, [value])
 
     return (
