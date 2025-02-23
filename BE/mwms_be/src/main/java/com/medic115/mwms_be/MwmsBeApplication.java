@@ -288,7 +288,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .name("Task for " + group.getRequestApplication().getCode())
                             .code("TASK-" + group.getRequestApplication().getCode())
                             .description("Task description")
-                            .status("ASSIGNED")
+                            .status(Status.TASK_ASSIGNED.getValue())
                             .user(accountRepo.findAll().stream().filter(acc -> acc.getRole().name().equalsIgnoreCase(Role.STAFF.name())).findFirst().get().getUser())
                             .assignedDate(LocalDate.now())
                             .itemGroup(group)

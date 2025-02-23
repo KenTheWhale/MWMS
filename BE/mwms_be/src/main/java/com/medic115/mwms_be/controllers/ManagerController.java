@@ -42,19 +42,13 @@ public class ManagerController {
 
     //-------------------------------------------------Task-------------------------------------------------//
 
-//    @GetMapping("/task/list")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getTaskList() {
-//        return managerService.getTaskList();
-//    }
+    @GetMapping("/task/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getTaskList() {
+        return managerService.getTaskList();
+    }
 
     //-------------------------------------------------Request-------------------------------------------------//
-
-//    @GetMapping("/request")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getAllRequests() {
-//        return managerService.getAllRequests();
-//    }
 //
 //    @GetMapping("/request/import")
 //    @PreAuthorize("hasRole('manager')")
@@ -104,5 +98,12 @@ public class ManagerController {
 //        return managerService.updateImportRequest(request);
 //    }
 
+    //-------------------------------------------------Request-------------------------------------------------//
+
+    @GetMapping("/item/group/unassigned")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllUnassignedGroup() {
+        return managerService.getAllUnassignedGroup();
+    }
 
 }
