@@ -1,244 +1,181 @@
-import {useEffect, useState} from "react";
-import {Button, Modal} from "react-bootstrap";
-import style from '../../styles/manager/ImportRequest.module.css'
-import {BsFilter} from "react-icons/bs";
-import {getImportRequest, viewRequestDetail} from "../../services/RequestService.js";
+import { useEffect, useState, useCallback } from "react";
+import { Button, Modal, Table, Card } from "react-bootstrap";
+import style from "../../styles/manager/ImportRequest.module.css";
+import { BsFilter } from "react-icons/bs";
+import { getImportRequest, viewDetail } from "../../services/RequestService.js";
+import {FaSearch} from "react-icons/fa";
 
- 
 function ImportRequest() {
-
     const [requestList, setRequestList] = useState([]);
     const [filterDate, setFilterDate] = useState("");
-    const [modalMode, setModalMode] = useState("add");
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [show, setShow] = useState(false);
-    const [newRequest, setNewRequest] = useState({
-        code: "",
-        requestDate: "",
-        deliveryDate: "",
-        lastModifiedDate: "",
-        status: "Pending",
-        detail: "",
-        requestItem: []
-    });
+    const [expandedGroups, setExpandedGroups] = useState({});
 
-
+    // Lấy danh sách Import Request
     useEffect(() => {
         async function fetchData() {
-            return await getImportRequest();
+            try {
+                const response = await getImportRequest();
+                setRequestList(response.data || []);
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách request:", error);
+            }
         }
-
-        fetchData().then((response) => {
-            setRequestList(response)
-        });
+        fetchData();
     }, []);
+
+    const handleViewDetail = useCallback(async (code) => {
+        try {
+            const response = await viewDetail(code);
+            setSelectedRequest(response.data);
+            setShow(true);
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết request:", error);
+        }
+    }, []);
+
+    const toggleGroup = (groupId) => {
+        setExpandedGroups((prev) => ({
+            ...prev,
+            [groupId]: !prev[groupId],
+        }));
+    };
 
     const handleDateChange = (event) => {
         setFilterDate(event.target.value);
     };
 
-    const handleViewDetail = async (code, request) => {
-            setModalMode("view")
-            setSelectedRequest(request);
-            setShow(true)
-
-        const requestDetail = await viewRequestDetail(code);
-        console.log(requestDetail);
-    }
-
-    const handleAddShow = () => {
-        setNewRequest(
-            {
-                code: "",
-                requestDate: "",
-                deliveryDate: "",
-                status: "Pending",
-                detail: "",
-                requestItem: []
-            }
-        )
-        setModalMode("add")
-        setShow(true)
-    };
-
     const handleClose = () => setShow(false);
 
-
     return (
-        <div className={`container-fluid`}>
-            <div className={`row`}>
-                <h1 className={`d-flex justify-content-center text-light`}>Import Request</h1>
+        <div className="container-fluid">
+            <div className="row">
+                <h1 className="d-flex justify-content-center text-light">Import Request</h1>
             </div>
-            <div className={`row`}>
+
+            <div className="row">
                 <div className="col-12 d-flex justify-content-end align-items-center gap-2">
-                    <label className={`text-light`}>RequestDate : </label>
-                    <input type="date"
-                           className="form-control w-auto"
-                           onChange={handleDateChange}
-                           value={filterDate}/>
-                    <button className="btn btn-outline-light">
-                        <BsFilter size={20}/>
-                    </button>
-                    <Button className={`${style.addRequestBtn}`}>Add Request</Button>
+                    <label className="text-light">Request Date: </label>
+                    <input
+                        type="date"
+                        className="form-control w-auto"
+                        onChange={handleDateChange}
+                        value={filterDate}
+                    />
+                    <Button className={style.addRequestBtn}>Add Request</Button>
                 </div>
             </div>
-            <div className={`row`}>
-                <div className={`${style.importTable}`}>
+
+            <div className="row">
+                <div className={style.importTable}>
                     <table>
                         <thead>
                         <tr>
                             <th>Code</th>
                             <th>Request Date</th>
-                            <th>Delivery Date</th>
                             <th>Last Modified</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {
-                            requestList.filter(item => item.requestDate.includes(filterDate))
-                                .map((item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.code}</td>
-                                        <td>{item.requestDate}</td>
-                                        <td>{item.deliveryDate}</td>
-                                        <td>{item.lastModifiedDate}</td>
-                                        <td>{item.status}</td>
-                                        <td><Button onClick={() => handleViewDetail(item.code, item)}>View Detail</Button>
-                                        </td>
-                                    </tr>
-                                ))
-                        }
+                        {requestList
+                            .filter((item) => item.requestDate.includes(filterDate))
+                            .map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.code}</td>
+                                    <td>{item.requestDate}</td>
+                                    <td>{item.lastModifiedDate}</td>
+                                    <td>{item.status}</td>
+                                    <td>
+                                        <Button onClick={() => handleViewDetail(item.code)}>View Detail</Button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div className={`container-fluid`}>
-                <Modal
-                    size={`xl`}
-                    show={show}
-                    onHide={handleClose}
-                    backdrop="static"
-                    keyboard={false}>
-                    <Modal.Header closeButton>
-                        {
-                            modalMode === "add" ? (
-                                <Modal.Title>Request application</Modal.Title>
-                            ) : (
-                                <Modal.Title>Detail</Modal.Title>
-                            )
-                        }
-                    </Modal.Header>
-                    <Modal.Body className={``}>
+
+            <Modal
+                size="xl"
+                show={show}
+                onHide={handleClose}
+                backdrop="static"
+                keyboard={false}
+
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className={style.modalBody}>
+                    {selectedRequest ? (
                         <div>
-                            {
-                                modalMode === "add" ? (
-                                    <div>
-                                        <table className="table">
-                                            <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Description</th>
-                                                <th>Quantity</th>
-                                                <th>Partner</th>
-                                                <th></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {
+                            <div className="mb-3">
+                                <p><strong>Request Date:</strong> {selectedRequest.requestDate}</p>
+                                <p><strong>Last Modified:</strong> {selectedRequest.lastModified}</p>
+                                <p><strong>Status:</strong> {selectedRequest.status}</p>
+                            </div>
 
-                                            }
-                                            </tbody>
-                                        </table>
-                                        <button>+</button>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        {
-                                            selectedRequest !== null ? (
-                                                <div>
-                                                    <h5>Request Code: {selectedRequest.code}</h5>
-                                                    <h6>Status: {selectedRequest.status}</h6>
-                                                    <h6>Request Date: {selectedRequest.requestDate}</h6>
-                                                    <h6>Delivery Date: {selectedRequest.deliveryDate}</h6>
-                                                </div>
-                                            ) : (
-                                                <p> no request detail</p>
-                                            )
-                                        }
+                            {selectedRequest.itemGroups && selectedRequest.itemGroups.length > 0 ? (
+                                selectedRequest.itemGroups.map((group) => (
+                                    <Card key={group.groupId} className="mb-3">
+                                        <Card.Body>
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <Card.Title>
+                                                    {group.partner} - {group.carrierName}
+                                                </Card.Title>
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => toggleGroup(group.groupId)}
+                                                >
+                                                    <FaSearch /> View
+                                                </Button>
+                                            </div>
 
-                                        <div>
-                                            <table className="table">
-                                                <thead>
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Description</th>
-                                                    <th>Quantity</th>
-                                                    <th>Partner</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {
-                                                    "requestItem" in selectedRequest ? selectedRequest.requestItem.map(
-                                                        (item, index) => (
-                                                            <tr key={index}>
-                                                                <td>{item.name}</td>
-                                                                <td>{item.description}</td>
-                                                                <td>{item.quantity}</td>
-                                                                <td>{item.partner}</td>
-                                                            </tr>
-                                                        )
-                                                    ) : (
-                                                        <>Not have item in request</>
-                                                    )
-                                                }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                )
-                            }
-                        < /div>
-                    </Modal.Body>
+                                            <Card.Subtitle className="mb-2 text-muted">
+                                                Carrier Phone: {group.carrierPhone}
+                                            </Card.Subtitle>
+                                            <Card.Text>Delivery Date: {group.deliveryDate}</Card.Text>
 
-                    <Modal.Footer>
-                        {
-                            modalMode === "add" ? (
-                                <div>
-                                    <Button variant="secondary"
-                                            onClick={handleClose}
-                                            className={`ms-2`}>
-                                        Close
-                                    </Button>
-                                    <Button variant="primary"
-                                            className={`ms-2`}>submit</Button>
-                                </div>
+                                            {expandedGroups[group.groupId] && (
+                                                <Table striped bordered hover className="mt-3 table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Equipment Name</th>
+                                                        <th>Description</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {group.requestItems.map((item, index) => (
+                                                        <tr key={index}>
+                                                            <td>{item.equipmentName}</td>
+                                                            <td>{item.equipmentDescription}</td>
+                                                            <td>{item.quantity}</td>
+                                                            <td>{item.unit}</td>
+                                                        </tr>
+                                                    ))}
+                                                    </tbody>
+                                                </Table>
+                                            )}
+                                        </Card.Body>
+                                    </Card>
+                                ))
                             ) : (
-                                selectedRequest.status === "Pending" ? (
-                                    <div>
-                                        <Button variant="danger"
-                                                > Cancel</Button>
-                                        <Button variant="secondary"
-                                                onClick={handleClose}
-                                                className={`ms-2`}>
-                                            Close
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <Button variant="secondary" onClick={handleClose}>
-                                            Close
-                                        </Button>
-                                    </div>
-                                )
-                            )
-                        }
-                    </Modal.Footer>
-                </Modal>
-            </div>
+                                <p className="text-center">No groups available</p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-center">No request detail</p>
+                    )}
+                </Modal.Body>
+            </Modal>
         </div>
-    )
+    );
 }
 
 export default ImportRequest;
