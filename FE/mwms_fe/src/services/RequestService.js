@@ -1,50 +1,26 @@
-import {axiosClient} from "../config/api.jsx";
+import { axiosClient } from "../config/api";
 
 export const getImportRequest = async () => {
-    try {
-        const response = await axiosClient.get("/manager/request/import")
-        if (response) {
-            const body = response.data;
-            return body.data;
-        }
-    } catch (error) {
-        throw error;
-    }
-}
+    const response = await axiosClient.get("/manager/request/import");
+    return response && response.status === 200 ? response.data : null;
+};
 
 export const getExportRequest = async () => {
-    try {
-        const response = await axiosClient.get("/manager/request/export");
-
-        if (response && response.status === 200) {
-            const body = response.data;
-            return  body.data;
-        }
-    } catch (error) {
-        // console.error("Error fetching export requests:", error.response.status);
-        // alert(error.response.data.message);
-        return { error: "Can not fetch export requests" };
-    }
+    const response = await axiosClient.get("/manager/request/export");
+    return response && response.status === 200 ? response.data : null;
 };
 
 export const filterRequest = async () => {
-    try {
-        const response = await axiosClient.post("/manager/request/filter");
-        if (response && response.status === 200) {
-            const body = response.data;
-            return body.data;
-        }else {
-            throw new Error("Failed to filter requests");
-        }
-    } catch (error) {
-        console.error("Error filtering request:", error);
-        return { error: "Can not filter requests" };
-    }
-}
+    const response = await axiosClient.post("/manager/request/filter");
+    return response && response.status === 200 ? response.data : null;
+};
 
 export const viewRequestDetail = async (code) => {
-    const data = { code: code };
-    const response = await axiosClient.post("/manager/request/detail", data);
-    const body = response.data;
-    return body.data;
+    const response = await axiosClient.post("/manager/request/detail", { code });
+    return response && response.status === 200 ? response.data : null;
+};
+
+export const viewDetail = async (code) => {
+    const response = await axiosClient.post("/manager/request/detail", { code });
+    return response && response.status === 200 ? response.data : null;
 }
