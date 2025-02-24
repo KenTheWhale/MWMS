@@ -18,15 +18,15 @@ public interface ManagerService {
 
     //----------------------------Request----------------------------//
 //
-//    ResponseEntity<ResponseObject> getAllRequestImport();
+    ResponseEntity<ResponseObject> getAllRequestImport();
+
+    ResponseEntity<ResponseObject> getAllRequestExport();
 //
-//    ResponseEntity<ResponseObject> getAllRequestExport();
-//
-//    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
+    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
 //
 //    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
 //
-//    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
+    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
 
     ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
 
