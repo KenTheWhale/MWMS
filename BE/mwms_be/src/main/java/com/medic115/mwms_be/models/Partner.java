@@ -18,20 +18,19 @@ public class Partner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
-
-    String email;
-
-    String address;
-
     String type;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "`account_id`")
-    Account account;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "`user_id`")
+    User user;
 
     @OneToMany(mappedBy = "partner")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<RequestItem> items;
+    List<RequestItem> requestItems;
+
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<PartnerEquipment> partnerEquipments;
 }

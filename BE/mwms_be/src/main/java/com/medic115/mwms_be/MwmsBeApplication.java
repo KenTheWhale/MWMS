@@ -22,29 +22,35 @@ public class MwmsBeApplication implements CommandLineRunner {
 
     private final AccountRepo accountRepo;
 
-    private final TokenRepo tokenRepo;
-
-    private final JWTService jwtService;
-
-    private final PartnerRepo partnerRepo;
-
-    private final RequestApplicationRepo requestApplicationRepo;
-
-    private final RequestItemRepo requestItemRepo;
+    private final AreaRepo areaRepo;
 
     private final BatchRepo batchRepo;
 
     private final BatchItemRepo batchItemRepo;
 
-    private final EquipmentRepo equipmentRepo;
-
     private final CategoryRepo categoryRepo;
 
-    private final AreaRepo areaRepo;
+    private final EquipmentRepo equipmentRepo;
+
+    private final ItemGroupRepo itemGroupRepo;
+
+    private final PartnerRepo partnerRepo;
+
+    private final PartnerEquipmentRepo partnerEquipmentRepo;
 
     private final PositionRepo positionRepo;
 
+    private final RequestApplicationRepo requestApplicationRepo;
+
+    private final RequestItemRepo requestItemRepo;
+
     private final TaskRepo taskRepo;
+
+    private final TokenRepo tokenRepo;
+
+    private final UserRepo userRepo;
+
+    private final JWTService jwtService;
 
     public static void main(String[] args) {
         SpringApplication.run(MwmsBeApplication.class, args);
@@ -60,544 +66,236 @@ public class MwmsBeApplication implements CommandLineRunner {
             @Override
             public void run(String... args) throws Exception {
                 List<Account> accounts = new ArrayList<>();
+                List<Area> areas = new ArrayList<>();
+                List<Batch> batches = new ArrayList<>();
+                List<BatchItem> batchItems = new ArrayList<>();
+                List<Category> categories = new ArrayList<>();
+                List<Equipment> equipments = new ArrayList<>();
+                List<ItemGroup> itemGroups = new ArrayList<>();
+                List<Partner> partners = new ArrayList<>();
+                List<PartnerEquipment> partnerEquipments = new ArrayList<>();
+                List<Position> positions = new ArrayList<>();
                 List<RequestApplication> requestApplications = new ArrayList<>();
                 List<RequestItem> requestItems = new ArrayList<>();
-                List<Batch> batches = new ArrayList<>();
-                List<Equipment> equipments = new ArrayList<>();
-                List<Category> categories = new ArrayList<>();
-                List<Area> areas = new ArrayList<>();
-                List<Position> positions = new ArrayList<>();
-                List<BatchItem> batchItems = new ArrayList<>();
                 List<Task> tasks = new ArrayList<>();
+                List<Token> tokens = new ArrayList<>();
+                List<User> users = new ArrayList<>();
+                List<String> accountName = List.of("admin", "manager", "staff1", "staff2", "supplier1", "supplier2", "requester1", "requester2");
+                List<String> roles = List.of("admin", "manager", "staff", "staff", "partner", "partner", "partner", "partner");
 
-                //init account
-                if (accountRepo.findAll().isEmpty()) {
-                    Account admin = Account.builder()
-                            .username("admin")
-                            .password("123")
-                            .role(Role.ADMIN)
-                            .phone("0909")
+                //-----------------------------Account-----------------------------//
+                accountName.forEach(acc -> {
+                    Account a = Account.builder()
+                            .username(acc)
+                            .password("1")
+                            .role(Role.valueOf(roles.get(accountName.indexOf(acc)).toUpperCase()))
                             .status(Status.ACCOUNT_ACTIVE.getValue())
                             .build();
+                    accounts.add(a);
+                    accountRepo.save(a);
+                });
 
-                    Account manager = Account.builder()
-                            .username("manager")
-                            .password("123")
-                            .role(Role.MANAGER)
+                //-----------------------------User-----------------------------//
+                accounts.forEach(acc -> {
+                    User u = User.builder()
+                            .account(acc)
+                            .name(acc.getUsername())
+                            .email(acc.getUsername() + "@bulldozer.com")
                             .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
                             .build();
 
-                    Account staff = Account.builder()
-                            .username("staff")
-                            .password("123")
-                            .role(Role.STAFF)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
+                    users.add(u);
+                    userRepo.save(u);
+                });
 
-                    Account supplier = Account.builder()
-                            .username("supplier")
-                            .password("123")
-                            .role(Role.PARTNER)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
+                //-----------------------------Partner-----------------------------//
+                accounts.forEach(acc -> {
+                    if (acc.getRole().name().equals(Role.PARTNER.name())) {
+                        Partner p = Partner.builder()
+                                .user(users.get(accounts.indexOf(acc)))
+                                .type(acc.getUsername().contains("requester") ? "requester" : "supplier")
+                                .build();
 
-                    Account requester = Account.builder()
-                            .username("requester")
-                            .password("123")
-                            .role(Role.PARTNER)
-                            .phone("0909")
-                            .status(Status.ACCOUNT_ACTIVE.getValue())
-                            .build();
-
-                    accounts.add(admin);
-                    accounts.add(manager);
-                    accounts.add(staff);
-                    accounts.add(supplier);
-                    accounts.add(requester);
-
-                    accountRepo.saveAll(accounts);
-
-                    Partner sp = partnerRepo.save(
-                            Partner.builder()
-                                    .name("supplier")
-                                    .email("supplier@medic115.com")
-                                    .address("123 Some Street")
-                                    .type("supplier")
-                                    .account(supplier)
-                                    .build()
-                    );
-
-                    Partner rq = partnerRepo.save(
-                            Partner.builder()
-                                    .name("requester")
-                                    .email("requester@medic115.com")
-                                    .address("123 Some Street")
-                                    .type("requester")
-                                    .account(requester)
-                                    .build()
-                    );
-
-                    requester.setPartner(rq);
-                    supplier.setPartner(sp);
-
-                    accountRepo.save(requester);
-                    accountRepo.save(supplier);
-
-                    for (Account account : accounts) {
-                        String access = jwtService.generateAccessToken(account);
-                        String refresh = jwtService.generateRefreshToken(account);
-                        tokenRepo.save(
-                                Token.builder()
-                                        .value(access)
-                                        .type(TokenType.ACCESS.getValue())
-                                        .status(Status.TOKEN_ACTIVE.getValue())
-                                        .account(account)
-                                        .expiredDate(jwtService.extractExpiration(access))
-                                        .createdDate(jwtService.extractIssuedAt(access))
-                                        .build()
-                        );
-
-                        tokenRepo.save(
-                                Token.builder()
-                                        .value(refresh)
-                                        .type(TokenType.REFRESH.getValue())
-                                        .status(Status.TOKEN_ACTIVE.getValue())
-                                        .account(account)
-                                        .expiredDate(jwtService.extractExpiration(refresh))
-                                        .createdDate(jwtService.extractIssuedAt(refresh))
-                                        .build()
-                        );
+                        partners.add(p);
+                        partnerRepo.save(p);
                     }
+                });
 
-                    Task task1 = Task
-                            .builder()
-                            .code("TASK1")
-                            .name("CHECK BATCH 1")
-                            .staff(staff)
-                            .description("This is a check batch task")
-                            .status(Status.TASK_PROCESSING.getValue())
-                            .assignedDate(LocalDate.now())
-                            .build();
-                    Task task2 = Task
-                            .builder()
-                            .code("TASK2")
-                            .name("CHECK BATCH 2")
-                            .staff(staff)
-                            .description("This is a check batch task")
-                            .status(Status.TASK_PROCESSING.getValue())
-                            .assignedDate(LocalDate.now())
-                            .build();
-                    Task task3 = Task
-                            .builder()
-                            .code("TASK3")
-                            .name("CHECK BATCH")
-                            .staff(staff)
-                            .description("This is a check batch task")
-                            .status(Status.TASK_PROCESSING.getValue())
-                            .assignedDate(LocalDate.now())
-                            .build();
-                    Task task4 = Task
-                            .builder()
-                            .code("TASK4")
-                            .name("CHECK BATCH")
-                            .staff(staff)
-                            .description("This is a check batch task")
-                            .status(Status.TASK_PROCESSING.getValue())
-                            .assignedDate(LocalDate.now())
-                            .build();
-                    Task task5 = Task
-                            .builder()
-                            .code("TASK5")
-                            .name("CHECK BATCH")
-                            .staff(staff)
-                            .description("This is a check batch task")
-                            .status(Status.TASK_PROCESSING.getValue())
-                            .assignedDate(LocalDate.now())
+                //-----------------------------Token-----------------------------//
+                accounts.forEach(acc -> {
+                    String accessValue = jwtService.generateAccessToken(accountRepo.findByUsername(acc.getUsername()).get());
+                    String refreshValue = jwtService.generateRefreshToken(accountRepo.findByUsername(acc.getUsername()).get());
+
+                    Token access = Token.builder()
+                            .account(acc)
+                            .value(accessValue)
+                            .type(TokenType.ACCESS.getValue())
+                            .createdDate(jwtService.extractIssuedAt(accessValue))
+                            .expiredDate(jwtService.extractExpiration(accessValue))
+                            .status(Status.TOKEN_ACTIVE.getValue())
                             .build();
 
-                    tasks.add(task1);
-                    tasks.add(task2);
-                    tasks.add(task3);
-                    tasks.add(task4);
-                    tasks.add(task5);
-                    taskRepo.saveAll(tasks);
-
-
-                    RequestApplication requestApplication1 = RequestApplication
-                            .builder()
-                            .code("REQ1")
-                            .task(task1)
-                            .type("import")
-                            .requestDate(LocalDate.now())
-                            .lastModifiedDate(LocalDate.now())
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .deliveryDate(LocalDate.now())
-                            .build();
-                    RequestApplication requestApplication2 = RequestApplication
-                            .builder()
-                            .code("REQ2")
-                            .task(task2)
-                            .type("import")
-                            .requestDate(LocalDate.now())
-                            .lastModifiedDate(LocalDate.now())
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .deliveryDate(LocalDate.now())
-                            .build();
-                    RequestApplication requestApplication3 = RequestApplication
-                            .builder()
-                            .code("REQ3")
-                            .task(task3)
-                            .type("import")
-                            .requestDate(LocalDate.now())
-                            .lastModifiedDate(LocalDate.now())
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .deliveryDate(LocalDate.now())
-                            .build();
-                    RequestApplication requestApplication4 = RequestApplication
-                            .builder()
-                            .code("REQ4")
-                            .task(task4)
-                            .type("import")
-                            .requestDate(LocalDate.now())
-                            .lastModifiedDate(LocalDate.now())
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .deliveryDate(LocalDate.now())
-                            .build();
-                    RequestApplication requestApplication5 = RequestApplication
-                            .builder()
-                            .code("REQ5")
-                            .task(task5)
-                            .type("import")
-                            .requestDate(LocalDate.now())
-                            .lastModifiedDate(LocalDate.now())
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .deliveryDate(LocalDate.now())
+                    Token refresh = Token.builder()
+                            .account(acc)
+                            .value(refreshValue)
+                            .type(TokenType.REFRESH.getValue())
+                            .createdDate(jwtService.extractIssuedAt(refreshValue))
+                            .expiredDate(jwtService.extractExpiration(refreshValue))
+                            .status(Status.TOKEN_ACTIVE.getValue())
                             .build();
 
-                    requestApplications.add(requestApplication1);
-                    requestApplications.add(requestApplication2);
-                    requestApplications.add(requestApplication3);
-                    requestApplications.add(requestApplication4);
-                    requestApplications.add(requestApplication5);
-                    requestApplicationRepo.saveAll(requestApplications);
+                    tokens.add(access);
+                    tokens.add(refresh);
 
-                    Category category1 = Category
-                            .builder()
-                            .code("CATEGORY1")
-                            .description("Description1")
-                            .name("Category name 1")
-                            .build();
-                    Category category2 = Category
-                            .builder()
-                            .code("CATEGORY1")
-                            .description("Description1")
-                            .name("Category name 1")
-                            .build();
-                    Category category3 = Category
-                            .builder()
-                            .code("CATEGORY1")
-                            .description("Description1")
-                            .name("Category name 1")
-                            .build();
-                    Category category4 = Category
-                            .builder()
-                            .code("CATEGORY1")
-                            .description("Description1")
-                            .name("Category name 1")
-                            .build();
-                    Category category5 = Category
-                            .builder()
-                            .code("CATEGORY1")
-                            .description("Description1")
-                            .name("Category name 1")
-                            .build();
+                    tokenRepo.save(access);
+                    tokenRepo.save(refresh);
+                });
 
-                    categories.add(category1);
-                    categories.add(category2);
-                    categories.add(category3);
-                    categories.add(category4);
-                    categories.add(category5);
-                    categoryRepo.saveAll(categories);
-
-                    Equipment equipment1 = Equipment
-                            .builder()
-                            .name("EQUIPMENT1")
-                            .category(category1)
-                            .description("This is Eq1")
-                            .price(300)
-                            .unit("batch")
+                //-----------------------------Area-----------------------------//
+                for (int i = 1; i <= 5; i++) {
+                    Area area = Area.builder()
+                            .name("Area " + i)
+                            .status("ACTIVE")
+                            .square(100 * i)
                             .build();
-                    Equipment equipment2 = Equipment
-                            .builder()
-                            .name("EQUIPMENT2")
-                            .category(category2)
-                            .description("This is Eq2")
-                            .price(300)
-                            .unit("batch")
-                            .build();
-                    Equipment equipment3 = Equipment
-                            .builder()
-                            .name("EQUIPMENT3")
-                            .category(category3)
-                            .description("This is Eq3")
-                            .price(300)
-                            .unit("batch")
-                            .build();
-                    Equipment equipment4 = Equipment
-                            .builder()
-                            .name("EQUIPMENT4")
-                            .category(category4)
-                            .description("This is Eq4")
-                            .price(300)
-                            .unit("batch")
-                            .build();
-                    Equipment equipment5 = Equipment
-                            .builder()
-                            .name("EQUIPMENT5")
-                            .category(category5)
-                            .description("This is Eq5")
-                            .price(300)
-                            .unit("batch")
-                            .build();
-
-                    equipments.add(equipment1);
-                    equipments.add(equipment2);
-                    equipments.add(equipment3);
-                    equipments.add(equipment4);
-                    equipments.add(equipment5);
-                    equipmentRepo.saveAll(equipments);
-
-
-                    RequestItem requestItem1 = RequestItem
-                            .builder()
-                            .requestApplication(requestApplication1)
-                            .equipment(equipment1)
-                            .batch(null)
-                            .quantity(10)
-                            .unitPrice(300)
-                            .partner(supplier.getPartner())
-                            .carrierName("MWMS")
-                            .carrierPhone("123456789")
-                            .build();
-                    RequestItem requestItem2 = RequestItem
-                            .builder()
-                            .requestApplication(requestApplication1)
-                            .equipment(equipment2)
-                            .batch(null)
-                            .quantity(10)
-                            .unitPrice(300)
-                            .partner(supplier.getPartner())
-                            .carrierName("MWMS")
-                            .carrierPhone("123456789")
-                            .build();
-                    RequestItem requestItem3 = RequestItem
-                            .builder()
-                            .requestApplication(requestApplication1)
-                            .equipment(equipment3)
-                            .batch(null)
-                            .quantity(10)
-                            .unitPrice(300)
-                            .partner(supplier.getPartner())
-                            .carrierName("MWMS")
-                            .carrierPhone("123456789")
-                            .build();
-                    RequestItem requestItem4 = RequestItem
-                            .builder()
-                            .requestApplication(requestApplication1)
-                            .equipment(equipment4)
-                            .batch(null)
-                            .quantity(10)
-                            .unitPrice(300)
-                            .partner(supplier.getPartner())
-                            .carrierName("MWMS")
-                            .carrierPhone("123456789")
-                            .build();
-                    RequestItem requestItem5 = RequestItem
-                            .builder()
-                            .requestApplication(requestApplication1)
-                            .equipment(equipment5)
-                            .batch(null)
-                            .quantity(10)
-                            .unitPrice(300)
-                            .partner(supplier.getPartner())
-                            .carrierName("MWMS")
-                            .carrierPhone("123456789")
-                            .build();
-
-                    requestItems.add(requestItem1);
-                    requestItems.add(requestItem2);
-                    requestItems.add(requestItem3);
-                    requestItems.add(requestItem4);
-                    requestItems.add(requestItem5);
-                    requestItemRepo.saveAll(requestItems);
-
-
-                    //------------------Area-----------------//
-                    Area area1 = Area
-                            .builder()
-                            .name("AREA1")
-                            .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
-                            .build();
-                    Area area2 = Area
-                            .builder()
-                            .name("AREA1")
-                            .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
-                            .build();
-                    Area area3 = Area
-                            .builder()
-                            .name("AREA1")
-                            .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
-                            .build();
-                    Area area4 = Area
-                            .builder()
-                            .name("AREA1")
-                            .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
-                            .build();
-                    Area area5 = Area
-                            .builder()
-                            .name("AREA1")
-                            .status(Status.AREA_AVAILABLE.getValue())
-                            .maxQty(100)
-                            .build();
-
-                    areas.add(area1);
-                    areas.add(area2);
-                    areas.add(area3);
-                    areas.add(area4);
-                    areas.add(area5);
-                    areaRepo.saveAll(areas);
-
-                    Position position1 = Position
-                            .builder()
-                            .name("POSITION1")
-                            .area(area1)
-                            .build();
-                    Position position2 = Position
-                            .builder()
-                            .name("POSITION2")
-                            .area(area1)
-                            .build();
-                    Position position3 = Position
-                            .builder()
-                            .name("POSITION3")
-                            .area(area1)
-                            .build();
-
-                    positions.add(position1);
-                    positions.add(position2);
-                    positions.add(position3);
-                    positionRepo.saveAll(positions);
-
-                    Batch batch1 = Batch
-                            .builder()
-                            .code("BATCH1")
-                            .requestItem(requestItem1)
-                            .createdDate(LocalDate.now())
-                            .equipmentQty(10)
-                            .position(position1)
-                            .build();
-                    Batch batch2 = Batch
-                            .builder()
-                            .code("BATCH2")
-                            .requestItem(requestItem2)
-                            .createdDate(LocalDate.now())
-                            .equipmentQty(10)
-                            .position(position1)
-                            .build();
-                    Batch batch3 = Batch
-                            .builder()
-                            .code("BATCH3")
-                            .requestItem(requestItem3)
-                            .createdDate(LocalDate.now())
-                            .equipmentQty(10)
-                            .position(position2)
-                            .build();
-                    Batch batch4 = Batch
-                            .builder()
-                            .code("BATCH4")
-                            .requestItem(requestItem4)
-                            .createdDate(LocalDate.now())
-                            .equipmentQty(10)
-                            .position(position3)
-                            .build();
-                    Batch batch5 = Batch
-                            .builder()
-                            .code("BATCH5")
-                            .requestItem(requestItem5)
-                            .createdDate(LocalDate.now())
-                            .equipmentQty(10)
-                            .position(position3)
-                            .build();
-
-                    batches.add(batch1);
-                    batches.add(batch2);
-                    batches.add(batch3);
-                    batches.add(batch4);
-                    batches.add(batch5);
-                    batchRepo.saveAll(batches);
-
-                    BatchItem batchItem1 = BatchItem
-                            .builder()
-                            .batch(batch1)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT1")
-                            .build();
-                    BatchItem batchItem2 = BatchItem
-                            .builder()
-                            .batch(batch1)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT2")
-                            .build();
-
-                    BatchItem batchItem3 = BatchItem
-                            .builder()
-                            .batch(batch2)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT3")
-                            .build();
-                    BatchItem batchItem4 = BatchItem
-                            .builder()
-                            .batch(batch2)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT4")
-                            .build();
-                    BatchItem batchItem5 = BatchItem
-                            .builder()
-                            .batch(batch3)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT5")
-                            .build();
-                    BatchItem batchItem6 = BatchItem
-                            .builder()
-                            .batch(batch4)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT6")
-                            .build();
-                    BatchItem batchItem7 = BatchItem
-                            .builder()
-                            .batch(batch5)
-                            .importedDate(LocalDate.now())
-                            .serialNumber("BAIT7")
-                            .build();
-
-                    batchItems.add(batchItem1);
-                    batchItems.add(batchItem2);
-                    batchItems.add(batchItem3);
-                    batchItems.add(batchItem4);
-                    batchItems.add(batchItem5);
-                    batchItems.add(batchItem6);
-                    batchItems.add(batchItem7);
-                    batchItemRepo.saveAll(batchItems);
-
-
+                    areas.add(area);
+                    areaRepo.save(area);
                 }
+
+                //-----------------------------Position-----------------------------//
+                areas.forEach(area -> {
+                    for (int i = 1; i <= 3; i++) {
+                        Position position = Position.builder()
+                                .name("Position " + i + " in " + area.getName())
+                                .area(area)
+                                .build();
+                        positions.add(position);
+                        positionRepo.save(position);
+                    }
+                });
+
+                //-----------------------------Category-----------------------------//
+                for (int i = 1; i <= 5; i++) {
+                    Category category = Category.builder()
+                            .code("CAT-" + i)
+                            .name("Category " + i)
+                            .description("Description for category " + i)
+                            .build();
+                    categories.add(category);
+                    categoryRepo.save(category);
+                }
+
+                //-----------------------------Equipment-----------------------------//
+                categories.forEach(category -> {
+                    for (int i = 1; i <= 2; i++) {
+                        Equipment equipment = Equipment.builder()
+                                .code("EQ-" + i + "-" + category.getCode())
+                                .name("Equipment " + i)
+                                .description("Description for equipment " + i)
+                                .price(100.0 * i)
+                                .unit("pcs")
+                                .category(category)
+                                .build();
+                        equipments.add(equipment);
+                        equipmentRepo.save(equipment);
+                    }
+                });
+
+                //-----------------------------RequestApplication-----------------------------//
+                for (int i = 1; i <= 3; i++) {
+                    RequestApplication requestApplication = RequestApplication.builder()
+                            .code("REQ-" + i)
+                            .status("PENDING")
+                            .type("ORDER")
+                            .requestDate(LocalDate.now())
+                            .lastModifiedDate(LocalDate.now())
+                            .build();
+                    requestApplications.add(requestApplication);
+                    requestApplicationRepo.save(requestApplication);
+                }
+
+                //-----------------------------ItemGroup-----------------------------//
+                requestApplications.forEach(request -> {
+                    ItemGroup itemGroup = ItemGroup.builder()
+                            .requestApplication(request)
+                            .deliveryDate(LocalDate.now().plusDays(3))
+                            .carrierName("Carrier " + request.getCode())
+                            .carrierPhone("0909-" + request.getCode())
+                            .build();
+                    itemGroups.add(itemGroup);
+                    itemGroupRepo.save(itemGroup);
+                });
+
+                //-----------------------------RequestItem-----------------------------//
+                itemGroups.forEach(group -> equipments.forEach(equipment -> {
+                    Partner partner = partners.stream()
+                            .filter(p -> "supplier".equals(p.getType()))
+                            .findFirst()
+                            .orElse(null);
+
+                    RequestItem requestItem = RequestItem.builder()
+                            .quantity(5)
+                            .unitPrice(100.0)
+                            .equipment(equipment)
+                            .itemGroup(group)
+                            .partner(partner)
+                            .length(10)
+                            .width(5)
+                            .build();
+
+                    requestItems.add(requestItem);
+                    requestItemRepo.save(requestItem);
+                }));
+
+                //-----------------------------Batch-----------------------------//
+                positions.forEach(position -> {
+                    for (int i = 1; i == 1; i++) {
+                        if (requestItems.isEmpty()) {
+                            break;
+                        }
+
+                        RequestItem requestItem = requestItems.remove(0);
+
+                        Batch batch = Batch.builder()
+                                .code("BATCH-" + i)
+                                .equipmentQty(10 * i)
+                                .createdDate(LocalDate.now())
+                                .position(position)
+                                .requestItem(requestItem)
+                                .build();
+
+                        batches.add(batch);
+                        batchRepo.save(batch);
+                    }
+                });
+
+                //-----------------------------BatchItem-----------------------------//
+                batches.forEach(batch -> {
+                    for (int i = 1; i <= 3; i++) {
+                        BatchItem batchItem = BatchItem.builder()
+                                .serialNumber("SN-" + i + "-" + batch.getCode())
+                                .importedDate(LocalDate.now())
+                                .batch(batch)
+                                .build();
+                        batchItems.add(batchItem);
+                        batchItemRepo.save(batchItem);
+                    }
+                });
+
+                //-----------------------------Task-----------------------------//
+                itemGroups.forEach(group -> {
+                    Task task = Task.builder()
+                            .name("Task for " + group.getRequestApplication().getCode())
+                            .code("TASK-" + group.getRequestApplication().getCode())
+                            .description("Task description")
+                            .status(Status.TASK_ASSIGNED.getValue())
+                            .user(accountRepo.findAll().stream().filter(acc -> acc.getRole().name().equalsIgnoreCase(Role.STAFF.name())).findFirst().get().getUser())
+                            .assignedDate(LocalDate.now())
+                            .itemGroup(group)
+                            .build();
+                    tasks.add(task);
+                    taskRepo.save(task);
+                });
             }
         };
     }

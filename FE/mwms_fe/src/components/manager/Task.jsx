@@ -1,12 +1,47 @@
 import style from '../../styles/manager/TaskPage.module.css'
-import {Button, Form, Modal, Table} from "react-bootstrap";
+import {Button, Modal, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
 import {getStaffList} from "../../services/StaffService.js";
 import {getTaskList} from "../../services/TaskService.js";
+import {SearchBarHasSelector} from "../ui/SearchBarHasSelector.jsx";
 
 /* eslint-disable react/prop-types */
 function GenerateTable() {
     const [tasks, setTasks] = useState([]);
+    const [search, setSearch] = useState({
+        value: "",
+        name: true,
+        code: false
+    });
+
+    function HandleKeyword(keyword, type){
+        setSearch(
+            {
+                ...search,
+                value: keyword,
+                name: type === "name",
+                code: type === "code"
+            }
+        );
+    }
+
+    const prop = {
+        mainWidth: (0.9 * 83),
+        mainMarginBottom: 2,
+        mainMarginTop: 1,
+        searchFunc: HandleKeyword,
+        height: 5,
+        searchInputParams: {
+            grow: 5,
+            mr: 2,
+            ph: "Enter keyword to search...",
+        },
+        searchSelectorParams: {
+            value: ["name", "code"],
+            grow: 1,
+            mr: 0,
+        }
+    }
 
     useEffect(() => {
         async function fetchTasks() {
@@ -17,36 +52,44 @@ function GenerateTable() {
     }, [])
 
     return (
-        <Table striped bordered hover>
-            <thead>
-            <tr>
-                <th>No</th>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Assigned date</th>
-                <th>Staff</th>
-            </tr>
-            </thead>
-            <tbody>
-            {
-                tasks.map((task, index) => {
-                    return (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{task.code}</td>
-                            <td>{task.name}</td>
-                            <td>{task.description}</td>
-                            <td>{task.status}</td>
-                            <td>{task.assignedDate}</td>
-                            <td>{task.staff ? task.staff : ""}</td>
-                        </tr>
-                    )
-                })
-            }
-            </tbody>
-        </Table>
+        <>
+            <SearchBarHasSelector {...prop}/>
+            <Table striped bordered hover>
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Assigned date</th>
+                    <th>Staff</th>
+                </tr>
+                </thead>
+                <tbody>
+                {
+                    tasks.filter(
+                        task => search.name ?
+                            task.name.toLowerCase().includes(search.value)
+                            :
+                            task.code.toLowerCase().includes(search.value)
+                    ).map((task, index) => {
+                        return (
+                            <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{task.code}</td>
+                                <td>{task.name}</td>
+                                <td>{task.desc}</td>
+                                <td>{task.status}</td>
+                                <td>{task.assigned}</td>
+                                <td>{task.staff}</td>
+                            </tr>
+                        )
+                    })
+                }
+                </tbody>
+            </Table>
+        </>
     )
 }
 
@@ -87,19 +130,12 @@ function GenerateRequestViewModal({modalVisible, setModalVisible}) {
                     </tr>
                     </thead>
                     <tbody>
-                    {tasks.filter(task => task.staff === "").map((task, index) => (
+                    {tasks.map((task, index) => (
                         <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{task.code}</td>
                             <td>{task.name}</td>
-                            <td>
-                                <Form.Select>
-                                    <option disabled selected>Select a staff...</option>
-                                    {staffs.map((staff, index) => (
-                                        <option key={index} value={staff.username}>{staff.username}</option>
-                                    ))}
-                                </Form.Select>
-                            </td>
+                            <td>{task.assigned}</td>
                         </tr>
                     ))}
                     </tbody>
@@ -112,7 +148,7 @@ function GenerateRequestViewModal({modalVisible, setModalVisible}) {
     )
 }
 
-export default function TaskPage() {
+export default function Task() {
     const [modalVisible, setModalVisible] = useState(false);
 
     return (

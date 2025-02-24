@@ -23,7 +23,7 @@ public class AreaServiceImpl implements AreaService {
         areaRepo.save(Area.builder()
                 .name(request.name())
                 .status(request.status())
-                .maxQty(request.maxQty())
+                .square(request.square())
                 .build()
         );
     }
@@ -53,7 +53,7 @@ public class AreaServiceImpl implements AreaService {
 
         area.setName(request.name());
         area.setStatus(request.status());
-        area.setMaxQty(request.maxQty());
+        area.setSquare(request.square());
 
         areaRepo.save(area);
 
@@ -64,7 +64,7 @@ public class AreaServiceImpl implements AreaService {
     private AreaResponse mapToDto(Area area) {
         return AreaResponse.builder()
                 .id(area.getId())
-                .maxQty(area.getMaxQty())
+                .square(area.getSquare())
                 .name(area.getName())
                 .status(area.getStatus())
                 .build();

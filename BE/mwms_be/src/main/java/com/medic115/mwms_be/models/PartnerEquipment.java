@@ -4,29 +4,24 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "`area`")
+@Table(name = "`partner_equipment`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Area {
+public class PartnerEquipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
+    @ManyToOne
+    @JoinColumn(name = "`partner_id`")
+    Partner partner;
 
-    String status;
-
-    int square;
-
-    @OneToMany(mappedBy = "area")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    List<Position> positions;
+    @ManyToOne
+    @JoinColumn(name = "`equipment_id`")
+    Equipment equipment;
 }

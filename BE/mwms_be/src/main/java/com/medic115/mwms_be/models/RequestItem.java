@@ -19,22 +19,8 @@ public class RequestItem {
 
     int quantity;
 
-    @Column(name = "`carrier_name`")
-    String carrierName;
-
-    @Column(name = "`carrier_phone`")
-    String carrierPhone;
-
     @Column(name = "`unit_price`")
     double unitPrice;
-
-    @ManyToOne
-    @JoinColumn(name = "`request_id`")
-    RequestApplication requestApplication;
-
-    @ManyToOne
-    @JoinColumn(name = "`partner_id`")
-    Partner partner;
 
     @ManyToOne
     @JoinColumn(name = "`equipment_id`")
@@ -44,4 +30,16 @@ public class RequestItem {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Batch batch;
+
+    @ManyToOne
+    @JoinColumn(name = "`group_id`")
+    ItemGroup itemGroup;
+
+    @ManyToOne
+    @JoinColumn(name = "partner_id")
+    Partner partner;
+
+    int length;
+
+    int width;
 }

@@ -14,23 +14,25 @@ public interface ManagerService {
 
     //----------------------------Staff----------------------------//
 
-    ResponseEntity<ResponseObject> getStaffList();
+//    ResponseEntity<ResponseObject> getStaffList();
 
     //----------------------------Request----------------------------//
-
-    ResponseEntity<ResponseObject> getAllRequestImport();
-
-    ResponseEntity<ResponseObject> getAllRequestExport();
-
-    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
-
-    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
-
-    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
+//
+//    ResponseEntity<ResponseObject> getAllRequestImport();
+//
+//    ResponseEntity<ResponseObject> getAllRequestExport();
+//
+//    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
+//
+//    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
+//
+//    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
 
     ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
 
     ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
+
+//    ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
     //----------------------------Category----------------------------//
     ViewCategoryResponse viewCategory();
@@ -40,4 +42,12 @@ public interface ManagerService {
     UpdateCategoryResponse updateCategory(UpdateCategoryRequest request);
 
     DeleteCategoryResponse deleteCategory(int id);
+
+    //----------------------------Task----------------------------//
+
+    ResponseEntity<ResponseObject> getTaskList();
+
+    //----------------------------Item Group----------------------------//
+
+    ResponseEntity<ResponseObject> getAllUnassignedGroup();
 }
