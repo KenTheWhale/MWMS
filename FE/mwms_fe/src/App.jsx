@@ -18,6 +18,8 @@ import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
 import AreaPage from "./components/manager/AreaPage.jsx";
+import { ToastContainer } from "react-toastify"; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const router = createBrowserRouter([
@@ -191,6 +193,7 @@ function App() {
     return (
         <Provider store={store}>
             <RouterProvider router={router}/>
+            <ToastContainer/>
         </Provider>
     )
 }
