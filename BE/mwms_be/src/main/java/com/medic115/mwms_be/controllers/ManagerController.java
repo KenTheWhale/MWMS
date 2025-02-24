@@ -56,29 +56,29 @@ public class ManagerController {
 
     //-------------------------------------------------Request-------------------------------------------------//
 //
-//    @GetMapping("/request/import")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getAllRequestImport() {
-//        return managerService.getAllRequestImport();
-//    }
-//
-//    @GetMapping("/request/export")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getAllRequestExport() {
-//        return managerService.getAllRequestExport();
-//    }
+    @GetMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllRequestImport() {
+        return managerService.getAllRequestImport();
+    }
 
-//    @PostMapping("/request/filter")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
-//        return managerService.filterRequestByRequestDate(request);
-//    }
-//
-//    @PostMapping("/request/detail")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
-//        return managerService.getRequestDetailByCode(request);
-//    }
+    @GetMapping("/request/export")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllRequestExport() {
+        return managerService.getAllRequestExport();
+    }
+
+    @PostMapping("/request/filter")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
+        return managerService.filterRequestByRequestDate(request);
+    }
+
+    @PostMapping("/request/detail")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
+        return managerService.getRequestDetailByCode(request);
+    }
 
     @PutMapping("/request/approve")
     @PreAuthorize("hasRole('manager')")
