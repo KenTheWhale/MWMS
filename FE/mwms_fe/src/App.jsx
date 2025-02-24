@@ -54,7 +54,7 @@ const router = createBrowserRouter([
       {
         path: "area",
         element: (
-          <h1 className={`d-flex justify-content-center text-light`}>Area</h1>
+          <AreaPage/>
         ),
       },
       {
