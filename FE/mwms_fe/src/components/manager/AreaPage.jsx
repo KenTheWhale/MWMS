@@ -12,12 +12,12 @@ const AreaPage = () => {
     id: "",
     name: "",
     status: "",
-    maxQty: 0
+    maxQty: 0,
   });
 
   const fetchData = async () => {
     try {
-      const response = await axiosClient.get("/area");
+      const response = await axiosClient.get("/manager/area");
       if (response.data) {
         setData(response.data);
       }
@@ -28,7 +28,7 @@ const AreaPage = () => {
 
   const handleOpen = async (areaId) => {
     try {
-      const response = await axiosClient.get(`/area/${areaId}`);
+      const response = await axiosClient.get(`/manager/area/${areaId}`);
       if (response.data) {
         setForm(response.data);
         setSelectedArea(areaId);
@@ -46,7 +46,7 @@ const AreaPage = () => {
 
   const handleUpdate = async () => {
     try {
-      await axiosClient.put(`/area/${selectedArea}`, form);
+      await axiosClient.put(`/manager/area/${selectedArea}`, form);
       setShow(false);
       fetchData(); // Làm mới dữ liệu sau khi cập nhật
     } catch (error) {
@@ -60,33 +60,40 @@ const AreaPage = () => {
 
   return (
     <>
-      <Table className="text-center" style={{ marginLeft: "10px", marginTop: "50px" }}>
+      <Table
+        className="text-center"
+        style={{ marginLeft: "10px", marginTop: "50px" }}
+      >
         <thead>
           <tr className="table-success">
             <th>ID</th>
             <th>Name</th>
             <th>Status</th>
-            <th>Max Quantity</th>
+            {/* <th>Max Quantity</th> */}
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {data.length > 0
-            ? data.map((area) => (
-                <tr key={area.id}>
-                  <td>{area.id}</td>
-                  <td>{area.name}</td>
-                  <td>{area.status}</td>
-                  <td>{area.maxQty}</td>
-                  <td>
-                    <MdModeEditOutline
-                      onClick={() => handleOpen(area.id)}
-                      style={{ cursor: "pointer", fontSize: "30px" }}
-                    />
-                  </td>
-                </tr>
-              ))
-            : "Data is loading....."}
+          {data.length > 0 ? (
+            data.map((area) => (
+              <tr key={area.id}>
+                <td>{area.id}</td>
+                <td>{area.name}</td>
+                <td>{area.status}</td>
+                {/* <td>{area.maxQty}</td> */}
+                <td>
+                  <MdModeEditOutline
+                    onClick={() => handleOpen(area.id)}
+                    style={{ cursor: "pointer", fontSize: "30px" }}
+                  />
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4}>Data is loading.....</td>
+            </tr>
+          )}
         </tbody>
       </Table>
 
