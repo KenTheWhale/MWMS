@@ -17,6 +17,7 @@ import Task from "./components/manager/Task.jsx";
 import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
+import AreaPage from "./pages/manager/AreaPage.jsx";
 
 const router = createBrowserRouter([
   {
