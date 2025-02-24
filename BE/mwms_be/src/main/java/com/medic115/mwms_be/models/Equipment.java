@@ -23,8 +23,6 @@ public class Equipment {
 
     String name;
 
-    String code;
-
     String description;
 
     double price;

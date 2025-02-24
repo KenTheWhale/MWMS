@@ -45,8 +45,6 @@ public class ManagerServiceImpl implements ManagerService {
 
     ItemGroupRepo itemGroupRepo;
 
-    RequestItemRepo requestItemRepo;
-
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
     public ResponseEntity<ResponseObject> viewCategory() {

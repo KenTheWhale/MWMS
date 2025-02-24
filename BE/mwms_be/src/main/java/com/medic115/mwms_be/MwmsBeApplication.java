@@ -206,7 +206,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     RequestApplication requestApplication = RequestApplication.builder()
                             .code("REQ-" + i)
                             .status("PENDING")
-                            .type("ORDER")
+                            .type("import")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
                             .build();

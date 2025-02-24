@@ -75,11 +75,11 @@ public class ManagerController {
         return managerService.deleteEquipment(request);
     }
 
-    @GetMapping("/staff/list")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getStaffList() {
-        return managerService.getStaffList();
-    }
+//    @GetMapping("/staff/list")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getStaffList() {
+//        return managerService.getStaffList();
+//    }
 
     //-------------------------------------------------Task-------------------------------------------------//
 
