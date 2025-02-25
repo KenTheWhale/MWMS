@@ -20,6 +20,7 @@ import ProtectedRoute from "./config/ProtectedRoute.jsx";
 import AreaPage from "./components/manager/AreaPage.jsx";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';
+import "react-datepicker/dist/react-datepicker.css";
 
 
 const router = createBrowserRouter([

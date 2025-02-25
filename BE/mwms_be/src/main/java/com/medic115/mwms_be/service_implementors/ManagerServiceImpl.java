@@ -37,15 +37,15 @@ public class ManagerServiceImpl implements ManagerService {
 
     EquipmentRepo equipmentRepo;
 
-    BatchRepo batchRepo;
-
     CategoryRepo categoryRepo;
 
-    PartnerRepo partnerRepo;
-
     ItemGroupRepo itemGroupRepo;
-    private final PartnerEquipmentRepo partnerEquipmentRepo;
 
+    PartnerEquipmentRepo partnerEquipmentRepo;
+
+    UserRepo userRepo;
+
+    PartnerRepo partnerRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -326,7 +326,6 @@ public class ManagerServiceImpl implements ManagerService {
                         task -> {
                             Map<String, Object> dataItem = new HashMap<>();
                             dataItem.put("code", task.getCode());
-                            dataItem.put("name", task.getName());
                             dataItem.put("desc", task.getDescription());
                             dataItem.put("status", task.getStatus());
                             dataItem.put("assigned", task.getAssignedDate());
@@ -353,6 +352,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .map(
                         account -> {
                             Map<String, Object> item = new HashMap<>();
+                            item.put("id", account.getUser().getId());
                             item.put("username", account.getUser().getName());
                             item.put("phone", account.getUser().getPhone());
                             item.put("status", account.getStatus());
@@ -366,6 +366,49 @@ public class ManagerServiceImpl implements ManagerService {
                         .data(data)
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request) {
+        User staff = userRepo.findById(request.getStaffId()).orElse(null);
+        if (staff == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ResponseObject.builder()
+                            .message("Staff not found")
+                            .data("")
+                            .build()
+                    );
+        }
+
+        ItemGroup group = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+        if (group == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ResponseObject.builder()
+                            .message("Item group not found")
+                            .data("")
+                            .build()
+                    );
+        }
+
+        taskRepo.save(
+                Task.builder()
+                        .user(staff)
+                        .itemGroup(group)
+                        .code(generateTaskCode())
+                        .description(request.getDescription())
+                        .status(Status.TASK_ASSIGNED.getValue())
+                        .assignedDate(request.getAssignDate())
+                        .build()
+        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseObject.builder()
+                        .message("Assign staff successfully")
+                        .data("")
+                        .build()
+                );
     }
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
@@ -915,4 +958,9 @@ public class ManagerServiceImpl implements ManagerService {
         return group.getRequestItems().get(0).getPartner();
     }
 
+    private String generateTaskCode() {
+        List<Task> tasks = taskRepo.findAll();
+        String latestCode = tasks.get(tasks.size() - 1).getCode();
+        return latestCode.substring(0, 7) + (Integer.parseInt(latestCode.substring(7, 8)) + 1);
+    }
 }
