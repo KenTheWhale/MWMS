@@ -38,16 +38,13 @@ public class ManagerServiceImpl implements ManagerService {
 
     EquipmentRepo equipmentRepo;
 
-    BatchRepo batchRepo;
-
     CategoryRepo categoryRepo;
 
-    PartnerRepo partnerRepo;
-
     ItemGroupRepo itemGroupRepo;
-    private final PartnerEquipmentRepo partnerEquipmentRepo;
 
-    private final AccountRepo accountRepo;
+    PartnerEquipmentRepo partnerEquipmentRepo;
+
+    UserRepo userRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -189,7 +186,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .map(PartnerEquipment::getEquipment)
                 .distinct()
                 .toList();
-        for (Equipment eq : equipmentList){
+        for (Equipment eq : equipmentList) {
             System.out.println(eq.getId());
         }
         if (equipmentList.isEmpty()) {
@@ -330,7 +327,6 @@ public class ManagerServiceImpl implements ManagerService {
                         task -> {
                             Map<String, Object> dataItem = new HashMap<>();
                             dataItem.put("code", task.getCode());
-                            dataItem.put("name", task.getName());
                             dataItem.put("desc", task.getDescription());
                             dataItem.put("status", task.getStatus());
                             dataItem.put("assigned", task.getAssignedDate());
@@ -357,6 +353,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .map(
                         account -> {
                             Map<String, Object> item = new HashMap<>();
+                            item.put("id", account.getUser().getId());
                             item.put("username", account.getUser().getName());
                             item.put("phone", account.getUser().getPhone());
                             item.put("status", account.getStatus());
@@ -370,6 +367,49 @@ public class ManagerServiceImpl implements ManagerService {
                         .data(data)
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request) {
+        User staff = userRepo.findById(request.getStaffId()).orElse(null);
+        if (staff == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ResponseObject.builder()
+                            .message("Staff not found")
+                            .data("")
+                            .build()
+                    );
+        }
+
+        ItemGroup group = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+        if (group == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .body(ResponseObject.builder()
+                            .message("Item group not found")
+                            .data("")
+                            .build()
+                    );
+        }
+
+        taskRepo.save(
+                Task.builder()
+                        .user(staff)
+                        .itemGroup(group)
+                        .code(generateTaskCode())
+                        .description(request.getDescription())
+                        .status(Status.TASK_ASSIGNED.getValue())
+                        .assignedDate(request.getAssignDate())
+                        .build()
+        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseObject.builder()
+                        .message("Assign staff successfully")
+                        .data("")
+                        .build()
+                );
     }
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
@@ -565,31 +605,31 @@ public class ManagerServiceImpl implements ManagerService {
 
         List<Map<String, Object>> itemGroupList = requestApplication.getItemGroups().stream()
                 .map(group -> {
-                            Map<String, Object> groupDetail = new HashMap<>();
+                    Map<String, Object> groupDetail = new HashMap<>();
 
-                            groupDetail.put("groupId", group.getId());
-                            groupDetail.put("deliveryDate", group.getDeliveryDate());
-                            groupDetail.put("carrierName", group.getCarrierName());
-                            groupDetail.put("carrierPhone", group.getCarrierPhone());
+                    groupDetail.put("groupId", group.getId());
+                    groupDetail.put("deliveryDate", group.getDeliveryDate());
+                    groupDetail.put("carrierName", group.getCarrierName());
+                    groupDetail.put("carrierPhone", group.getCarrierPhone());
 
-                            List<Map<String, Object>> requestItemList = group.getRequestItems().stream()
-                                    .map(
-                                            item -> {
-                                                Map<String, Object> itemDetail = new HashMap<>();
-                                                itemDetail.put("equipmentName",item.getEquipment().getName());
-                                                itemDetail.put("equipmentDescription",item.getEquipment().getDescription());
-                                                itemDetail.put("quantity", item.getQuantity());
-                                                itemDetail.put("unit", item.getEquipment().getUnit());
+                    List<Map<String, Object>> requestItemList = group.getRequestItems().stream()
+                            .map(
+                                    item -> {
+                                        Map<String, Object> itemDetail = new HashMap<>();
+                                        itemDetail.put("equipmentName", item.getEquipment().getName());
+                                        itemDetail.put("equipmentDescription", item.getEquipment().getDescription());
+                                        itemDetail.put("quantity", item.getQuantity());
+                                        itemDetail.put("unit", item.getEquipment().getUnit());
 
 
-                                                if (item.getPartner() != null) {
-                                                    groupDetail.put("partner", item.getPartner().getUser().getName());
-                                                }
-                                                return itemDetail;
-                                            }).toList();
-                            groupDetail.put("requestItems", requestItemList);
-                            return groupDetail;
-                        }).toList();
+                                        if (item.getPartner() != null) {
+                                            groupDetail.put("partner", item.getPartner().getUser().getName());
+                                        }
+                                        return itemDetail;
+                                    }).toList();
+                    groupDetail.put("requestItems", requestItemList);
+                    return groupDetail;
+                }).toList();
 
         requestDetail.put("itemGroups", itemGroupList);
         return ResponseEntity.ok().body(
@@ -839,8 +879,6 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
 
-
-
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//
     private String generateRequestCode() {
         RequestApplication lastRequest = requestApplicationRepo.findTopByOrderByIdDesc();
@@ -886,4 +924,9 @@ public class ManagerServiceImpl implements ManagerService {
         return group.getRequestItems().get(0).getPartner();
     }
 
+    private String generateTaskCode() {
+        List<Task> tasks = taskRepo.findAll();
+        String latestCode = tasks.get(tasks.size() - 1).getCode();
+        return latestCode.substring(0, 7) + (Integer.parseInt(latestCode.substring(7, 8)) + 1);
+    }
 }

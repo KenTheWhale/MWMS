@@ -63,6 +63,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             JwtAuthenticationResponse.builder()
                                     .message("Username or password is incorrect")
                                     .token("")
+                                    .name("")
                                     .build()
                     );
         }
@@ -82,6 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         JwtAuthenticationResponse.builder()
                                 .message("Sign in successfully")
                                 .token(accessToken)
+                                .name(acc.getUser().getName())
                                 .build()
                 );
     }

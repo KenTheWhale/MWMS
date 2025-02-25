@@ -1,6 +1,7 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
+import com.medic115.mwms_be.dto.response.AreaResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
@@ -96,6 +97,12 @@ public class ManagerController {
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> getStaffList() {
         return managerService.getStaffList();
+    }
+
+    @PostMapping("/staff/assign")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> assignStaff(@RequestBody AssignStaffRequest request) {
+        return managerService.assignStaff(request);
     }
 
     //-------------------------------------------------Task-------------------------------------------------//

@@ -10,6 +10,8 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> getStaffList();
 
+    ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request);
+
 
     //----------------------------Request----------------------------//
 //
