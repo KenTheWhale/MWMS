@@ -49,22 +49,11 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> viewCategory() {
         List<Category> categories = categoryRepo.findAll();
-        List<Map<String, Object>> data = categories.stream()
-                .map(
-                        category -> {
-                            Map<String, Object> item = new HashMap<>();
-                            item.put("id", category.getId());
-                            item.put("code", category.getCode());
-                            item.put("name", category.getName());
-                            item.put("description", category.getDescription());
-                            return item;
-                        }
-                )
-                .toList();
+
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Get category successfully")
-                        .data(data)
+                        .data(MapToCategory(categories))
                         .build()
         );
     }
@@ -133,28 +122,57 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-    //-----------------------------------------------EQUIPMENT-----------------------------------------------//
     @Override
-    public ResponseEntity<ResponseObject> viewEquipment() {
-        List<Equipment> equipments = equipmentRepo.findAll();
-        List<Map<String, Object>> data = equipments.stream()
+    public ResponseEntity<ResponseObject> searchCategory(SearchRequest request) {
+        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .message("Keyword cannot be empty")
+                    .build());
+        }
+
+        List<Category> result = categoryRepo.findAll().stream()
+                .filter(cate -> cate.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
+                        || cate.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
+                .toList();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Search successful")
+                .data(MapToCategory(result))
+                .build());
+    }
+
+    private Object MapToCategory(List<Category> result) {
+        return result.stream()
                 .map(
-                        equipment -> {
+                        category -> {
                             Map<String, Object> item = new HashMap<>();
-                            item.put("id", equipment.getId());
-                            item.put("name", equipment.getName());
-                            item.put("code", equipment.getCode());
-                            item.put("description", equipment.getDescription());
-                            item.put("unit", equipment.getUnit());
-                            item.put("price", equipment.getPrice());
+                            item.put("id", category.getId());
+                            item.put("name", category.getName());
+                            item.put("code", category.getCode());
+                            item.put("description", category.getDescription());
                             return item;
                         }
                 )
                 .toList();
+    }
+
+    //-----------------------------------------------EQUIPMENT-----------------------------------------------//
+    @Override
+    public ResponseEntity<ResponseObject> viewEquipment() {
+        List<Equipment> equipments = equipmentRepo.findAll().stream()
+                .filter(equipment -> equipment.getStatus().equals(Status.EQUIPMENT_ACTIVE.getValue()))
+                .toList();
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Get equipment successfully")
-                        .data(data)
+                        .data(MapToEquipment(equipments))
                         .build()
         );
     }
@@ -228,6 +246,50 @@ public class ManagerServiceImpl implements ManagerService {
                         .message("Delete equipment successfully")
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> searchEquipment(SearchRequest request) {
+        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .message("Keyword cannot be empty")
+                    .build());
+        }
+
+        List<Equipment> result = equipmentRepo.findAll().stream()
+                .filter(equipment -> equipment.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
+                        || equipment.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
+                .toList();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Search successful")
+                .data(MapToEquipment(result))
+                .build());
+    }
+
+    private Object MapToEquipment(List<Equipment> result) {
+        return result.stream()
+                .map(
+                        equipment -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("id", equipment.getId());
+                            item.put("name", equipment.getName());
+                            item.put("code", equipment.getCode());
+                            item.put("description", equipment.getDescription());
+                            item.put("unit", equipment.getUnit());
+                            item.put("price", equipment.getPrice());
+                            item.put("category", equipment.getCategory().getName());
+                            return item;
+                        }
+                )
+                .toList();
     }
 
     //-----------------------------------------------TASK-----------------------------------------------//
@@ -746,6 +808,8 @@ public class ManagerServiceImpl implements ManagerService {
                         .build()
         );
     }
+
+
 
 
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//

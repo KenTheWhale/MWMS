@@ -196,6 +196,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                                 .price(100.0 * i)
                                 .unit("pcs")
                                 .category(category)
+                                .status(Status.EQUIPMENT_ACTIVE.getValue())
                                 .build();
                         equipments.add(equipment);
                         equipmentRepo.save(equipment);

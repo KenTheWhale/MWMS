@@ -29,6 +29,8 @@ public class Equipment {
 
     String unit;
 
+    String status;
+
     @OneToMany(mappedBy = "equipment")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

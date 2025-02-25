@@ -1,8 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.ManagerService;
 import lombok.RequiredArgsConstructor;
@@ -44,13 +42,14 @@ public class ManagerController {
         return managerService.deleteCategory(request);
     }
 
-    //-------------------------------------------------Staff-------------------------------------------------//
+    @PostMapping("/category/search")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> searchCategory(@RequestBody SearchRequest request) {
+        return managerService.searchCategory(request);
+    }
 
-//    @GetMapping("/staff/list")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getStaffList() {
-//        return managerService.getStaffList();
-//    }
+    //-------------------------------------------------Equipment-------------------------------------------------//
+
     @GetMapping("/equipment")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> viewEquipment() {
@@ -75,6 +74,13 @@ public class ManagerController {
         return managerService.deleteEquipment(request);
     }
 
+    @PostMapping("/equipment/search")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> searchEquipment(@RequestBody SearchRequest request) {
+        return managerService.searchEquipment(request);
+    }
+
+    //-------------------------------------------------Staff-------------------------------------------------//
 //    @GetMapping("/staff/list")
 //    @PreAuthorize("hasRole('manager')")
 //    public ResponseEntity<ResponseObject> getStaffList() {
