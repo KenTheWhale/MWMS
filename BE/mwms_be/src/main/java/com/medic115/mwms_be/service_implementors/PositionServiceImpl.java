@@ -21,12 +21,12 @@ public class PositionServiceImpl implements PositionService {
     private final AreaRepo areaRepo;
 
     @Override
-    public void createPosition(Integer areaId, PositionRequest request) {
-        if(request == null || areaId == null){
+    public void createPosition(PositionRequest request) {
+        if(request == null || request.areaId() == null){
             throw new IllegalArgumentException("request and id cannot be null");
         }
 
-        Area area = areaRepo.findById(areaId).orElseThrow(() -> new EntityNotFoundException("Area not found"));
+        Area area = areaRepo.findById(request.areaId()).orElseThrow(() -> new EntityNotFoundException("Area not found"));
 
         Position position = Position.builder()
                 .name(request.name())
@@ -59,6 +59,9 @@ public class PositionServiceImpl implements PositionService {
 
         Position position = positionRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
         position.setName(request.name());
+
+        Area area = areaRepo.findById(request.areaId()).orElseThrow(() -> new EntityNotFoundException("Area not found"));
+        position.setArea(area);
 
         return mapToDto(positionRepo.save(position));
     }
