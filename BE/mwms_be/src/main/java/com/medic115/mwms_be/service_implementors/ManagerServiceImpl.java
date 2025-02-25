@@ -2,6 +2,7 @@ package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.*;
+import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
@@ -45,6 +46,8 @@ public class ManagerServiceImpl implements ManagerService {
 
     ItemGroupRepo itemGroupRepo;
     private final PartnerEquipmentRepo partnerEquipmentRepo;
+
+    private final AccountRepo accountRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -347,27 +350,27 @@ public class ManagerServiceImpl implements ManagerService {
 
 
     //-----------------------------------------------STAFF-----------------------------------------------//
-//    @Override
-//    public ResponseEntity<ResponseObject> getStaffList() {
-//        List<Map<String, Object>> data = accountRepo.findAll().stream()
-//                .filter(account -> account.getRole().equals(Role.STAFF))
-//                .map(
-//                        account -> {
-//                            Map<String, Object> item = new HashMap<>();
-//                            item.put("username", account.getUsername());
-//                            item.put("phone", account.getPhone());
-//                            item.put("status", account.getStatus());
-//                            return item;
-//                        }
-//                )
-//                .toList();
-//        return ResponseEntity.ok().body(
-//                ResponseObject.builder()
-//                        .message("")
-//                        .data(data)
-//                        .build()
-//        );
-//    }
+    @Override
+    public ResponseEntity<ResponseObject> getStaffList() {
+        List<Map<String, Object>> data = accountRepo.findAll().stream()
+                .filter(account -> account.getRole().equals(Role.STAFF))
+                .map(
+                        account -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("username", account.getUser().getName());
+                            item.put("phone", account.getUser().getPhone());
+                            item.put("status", account.getStatus());
+                            return item;
+                        }
+                )
+                .toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("")
+                        .data(data)
+                        .build()
+        );
+    }
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
 
@@ -872,6 +875,8 @@ public class ManagerServiceImpl implements ManagerService {
                     map.put("price", item.getUnitPrice());
                     map.put("length", item.getLength());
                     map.put("width", item.getWidth());
+                    map.put("category", item.getEquipment().getCategory().getName());
+                    map.put("unit", item.getEquipment().getUnit());
                     return map;
                 })
                 .toList();
