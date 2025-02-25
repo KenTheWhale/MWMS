@@ -1,8 +1,9 @@
 package com.medic115.mwms_be.service_implementors;
 
-import com.medic115.mwms_be.dto.requests.ApproveWarehouseRequest;
+import com.medic115.mwms_be.dto.requests.ChangeWarehouseRequestStatusRequest;
 import com.medic115.mwms_be.dto.requests.GetWarehouseRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.ItemGroup;
 import com.medic115.mwms_be.models.RequestApplication;
 import com.medic115.mwms_be.repositories.PartnerRepo;
@@ -15,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,8 +63,22 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> approveRequest(ApproveWarehouseRequest request) {
-//        RequestApplication requestApplication = requestApplicationRepo.findByCode(request.getCode());
-        return null;
+    public ResponseEntity<ResponseObject> changeRequestStatus(ChangeWarehouseRequestStatusRequest request) {
+        RequestApplication requestApplication = requestApplicationRepo.findByCode(request.getCode());
+
+        if (Status.REQUEST_CANCELLED.getValue().equals(requestApplication.getStatus())) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .message("Cannot change status of a cancelled request")
+                    .build());
+        }
+
+        requestApplication.setStatus(request.getStatus());
+        requestApplication.setLastModifiedDate(LocalDate.now());
+        requestApplicationRepo.save(requestApplication);
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Request status updated successfully")
+                .data(null)
+                .build());
     }
 }

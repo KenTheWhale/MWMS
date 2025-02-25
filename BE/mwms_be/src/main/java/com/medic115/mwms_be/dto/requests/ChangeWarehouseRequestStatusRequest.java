@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ApproveWarehouseRequest {
+public class ChangeWarehouseRequestStatusRequest {
     String code;
+    String status;
 }
