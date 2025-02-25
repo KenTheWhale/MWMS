@@ -101,3 +101,10 @@
 .detail h6 span{
     font-weight: bold;
 }
+
+.detail h5 input,
+.detail h5 select,
+.detail h5 textarea{
+    width: 100% !important;
+    margin-top: 1vh;
+}
