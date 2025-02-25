@@ -58,7 +58,7 @@ public class ManagerController {
 
     @PostMapping("/equipment/supplier")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(@RequestBody ViewSupplierEquipmentRequest request) {
         return managerService.viewSupplierEquipment(request);
     }
 
@@ -139,11 +139,11 @@ public class ManagerController {
         return managerService.cancelImportRequest(request);
     }
 
-//    @PostMapping("/request/import")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
-//        return managerService.createImportRequest(request);
-//    }
+    @PostMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
+        return managerService.createImportRequest(request);
+    }
 //
 //    @PutMapping("/request/import")
 //    @PreAuthorize("hasRole('manager')")
@@ -159,4 +159,11 @@ public class ManagerController {
         return managerService.getAllUnassignedGroup();
     }
 
+    //-------------------------------------------------Supplier-------------------------------------------------//
+    @GetMapping("/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getListSupplier() {
+        return managerService.getListSupplier();
+    }
 }
+
