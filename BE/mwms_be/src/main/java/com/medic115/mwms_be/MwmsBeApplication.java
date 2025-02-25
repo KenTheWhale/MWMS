@@ -1,6 +1,5 @@
 package com.medic115.mwms_be;
 
-import com.medic115.mwms_be.enums.RequestType;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.TokenType;
@@ -156,7 +155,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                 for (int i = 1; i <= 5; i++) {
                     Area area = Area.builder()
                             .name("Area " + i)
-                            .status(Status.AREA_AVAILABLE.getValue())
+                            .status("ACTIVE")
                             .square(100 * i)
                             .build();
                     areas.add(area);
@@ -207,8 +206,8 @@ public class MwmsBeApplication implements CommandLineRunner {
                 for (int i = 1; i <= 3; i++) {
                     RequestApplication requestApplication = RequestApplication.builder()
                             .code("REQ-" + i)
-                            .status(Status.REQUEST_PENDING.getValue())
-                            .type(RequestType.IMPORT.getValue())
+                            .status("PENDING")
+                            .type("ORDER")
                             .requestDate(LocalDate.now())
                             .lastModifiedDate(LocalDate.now())
                             .build();
@@ -222,7 +221,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .requestApplication(request)
                             .deliveryDate(LocalDate.now().plusDays(3))
                             .carrierName("Carrier " + request.getCode())
-                            .carrierPhone("0909")
+                            .carrierPhone("0909-" + request.getCode())
                             .build();
                     itemGroups.add(itemGroup);
                     itemGroupRepo.save(itemGroup);
