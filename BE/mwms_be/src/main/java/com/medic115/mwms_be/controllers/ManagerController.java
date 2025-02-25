@@ -1,6 +1,7 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
+import com.medic115.mwms_be.dto.response.AreaResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
@@ -168,7 +169,7 @@ public class ManagerController {
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<List<AreaResponse>> getAllAreas() {
+    public ResponseEntity<List< AreaResponse>> getAllAreas() {
         List<AreaResponse> response = areaService.getAllAreas();
         return ResponseEntity.ok(response);
     }
