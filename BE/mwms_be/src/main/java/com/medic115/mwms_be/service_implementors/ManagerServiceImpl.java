@@ -45,6 +45,8 @@ public class ManagerServiceImpl implements ManagerService {
 
     UserRepo userRepo;
 
+    PartnerRepo partnerRepo;
+
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
     public ResponseEntity<ResponseObject> viewCategory() {
