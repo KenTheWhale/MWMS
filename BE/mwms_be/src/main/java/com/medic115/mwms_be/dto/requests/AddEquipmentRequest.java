@@ -18,9 +18,7 @@ public class AddEquipmentRequest {
 
     String description;
 
-    LocalDate expiredDate;
-
-    String category;
+    int categoryId;
 
     String unit;
 
