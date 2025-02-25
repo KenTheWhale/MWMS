@@ -11,4 +11,6 @@ public interface RequestApplicationRepo extends JpaRepository<RequestApplication
     List<RequestApplication> findAllByRequestDate(LocalDate requestDate);
 
     RequestApplication findTopByOrderByIdDesc();
+
+    RequestApplication findByCode(String code);
 }

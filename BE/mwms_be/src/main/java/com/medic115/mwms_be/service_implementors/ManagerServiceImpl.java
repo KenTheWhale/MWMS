@@ -7,6 +7,9 @@ import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.CategoryValidation;
+import com.medic115.mwms_be.validations.DeleteCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,42 +27,47 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerServiceImpl implements ManagerService {
 
-    private final RequestApplicationRepo requestApplicationRepo;
+    AccountRepo accountRepo;
 
-    private final TaskRepo taskRepo;
+    RequestApplicationRepo requestApplicationRepo;
 
-    private final CategoryRepo categoryRepo;
+    RequestItemRepo requestItemRepo;
 
-    private final ItemGroupRepo itemGroupRepo;
+    TaskRepo taskRepo;
 
-    private final RequestItemRepo requestItemRepo;
+    EquipmentRepo equipmentRepo;
+
+    BatchRepo batchRepo;
+
+    CategoryRepo categoryRepo;
+
+    PartnerRepo partnerRepo;
+
+    ItemGroupRepo itemGroupRepo;
+    private final PartnerEquipmentRepo partnerEquipmentRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
-    public ViewCategoryResponse viewCategory() {
+    public ResponseEntity<ResponseObject> viewCategory() {
         List<Category> categories = categoryRepo.findAll();
-        return ViewCategoryResponse.builder()
-                .status("200")
-                .message("Categories retrieved successfully")
-                .categorieList(categories.stream()
-                        .map(cate -> ViewCategoryResponse.Cate.builder()
-                                .id(cate.getId())
-                                .code(cate.getCode())
-                                .name(cate.getName())
-                                .description(cate.getDescription())
-                                .build())
-                        .toList())
-                .build();
+
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get category successfully")
+                        .data(MapToCategory(categories))
+                        .build()
+        );
     }
 
     @Override
-    public AddCategoryResponse addCategory(AddCategoryRequest request) {
+    public ResponseEntity<ResponseObject> addCategory(AddCategoryRequest request) {
         String error = CategoryValidation.validateCategory(request, categoryRepo);
         if (error != null) {
-            return AddCategoryResponse.builder()
-                    .status("400")
-                    .message(error)
-                    .build();
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
         }
         categoryRepo.save(
                 Category.builder()
@@ -68,20 +76,246 @@ public class ManagerServiceImpl implements ManagerService {
                         .description(request.getDescription())
                         .build()
         );
-        return AddCategoryResponse.builder()
-                .status("400")
-                .message("Category added successfully")
-                .build();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Add category successfully")
+                        .build()
+        );
     }
 
     @Override
-    public UpdateCategoryResponse updateCategory(UpdateCategoryRequest request) {
-        return null;
+    public ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request) {
+        String error = UpdateCategoryValidation.validate(request, categoryRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        Category category = categoryRepo.findByCode(request.getCode());
+        category.setCode(request.getCode());
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        categoryRepo.save(category);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Update category successfully")
+                        .build()
+        );
     }
 
     @Override
-    public DeleteCategoryResponse deleteCategory(int id) {
-        return null;
+    public ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request) {
+        String error = DeleteCategoryValidation.validate(request, categoryRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        categoryRepo.deleteByCode(request.getCateCode());
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Delete category successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> searchCategory(SearchRequest request) {
+        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .message("Keyword cannot be empty")
+                    .build());
+        }
+
+        List<Category> result = categoryRepo.findAll().stream()
+                .filter(cate -> cate.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
+                        || cate.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
+                .toList();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Search successful")
+                .data(MapToCategory(result))
+                .build());
+    }
+
+    private Object MapToCategory(List<Category> result) {
+        return result.stream()
+                .map(
+                        category -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("id", category.getId());
+                            item.put("name", category.getName());
+                            item.put("code", category.getCode());
+                            item.put("description", category.getDescription());
+                            return item;
+                        }
+                )
+                .toList();
+    }
+
+    //-----------------------------------------------EQUIPMENT-----------------------------------------------//
+    @Override
+    public ResponseEntity<ResponseObject> viewEquipment() {
+        List<Equipment> equipments = equipmentRepo.findAll().stream()
+                .filter(equipment -> equipment.getStatus().equals(Status.EQUIPMENT_ACTIVE.getValue()))
+                .toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get equipment successfully")
+                        .data(MapToEquipment(equipments))
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+
+        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
+        List<Equipment> equipmentList = peList.stream()
+                .map(PartnerEquipment::getEquipment)
+                .distinct()
+                .toList();
+        for (Equipment eq : equipmentList){
+            System.out.println(eq.getId());
+        }
+        if (equipmentList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found for this supplier")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Supplier equipment retrieved successfully")
+                .data(MapToEquipment(equipmentList))
+                .build());
+    }
+
+
+    @Override
+    public ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request) {
+        Category category = categoryRepo.findByName(request.getCategory());
+//        String error = CategoryValidation.validateCategory(request, equipmentRepo);
+//        if (error != null) {
+//            return ResponseEntity.badRequest().body(
+//                    ResponseObject.builder()
+//                            .message(error)
+//                            .build()
+//            );
+//        }
+        equipmentRepo.save(
+                Equipment.builder()
+                        .code(request.getCode())
+                        .name(request.getName())
+                        .description(request.getDescription())
+                        .category(category)
+                        .unit(request.getUnit())
+                        .price(request.getPrice())
+                        .build()
+        );
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Add equipment successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request) {
+        Category category = categoryRepo.findByName(request.getCategory());
+        String error = UpdateEquipmentValidation.validate(request, equipmentRepo);
+        if (error != null) {
+            return ResponseEntity.badRequest().body(
+                    ResponseObject.builder()
+                            .message(error)
+                            .build()
+            );
+        }
+        Equipment equipment = equipmentRepo.findByCode(request.getCode());
+        equipment.setPrice(request.getPrice());
+        equipment.setUnit(request.getUnit());
+        equipment.setCategory(category);
+        equipment.setName(request.getName());
+        equipment.setDescription(request.getDescription());
+        equipmentRepo.save(equipment);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Update category successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request) {
+//        String error = DeleteCategoryValidation.validate(request, categoryRepo);
+//        if (error != null) {
+//            return ResponseEntity.badRequest().body(
+//                    ResponseObject.builder()
+//                            .message(error)
+//                            .build()
+//            );
+//        }
+        equipmentRepo.deleteByCode(request.getCode());
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Delete equipment successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> searchEquipment(SearchRequest request) {
+        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .message("Keyword cannot be empty")
+                    .build());
+        }
+
+        List<Equipment> result = equipmentRepo.findAll().stream()
+                .filter(equipment -> equipment.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
+                        || equipment.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
+                .toList();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Search successful")
+                .data(MapToEquipment(result))
+                .build());
+    }
+
+    private Object MapToEquipment(List<Equipment> result) {
+        return result.stream()
+                .map(
+                        equipment -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("id", equipment.getId());
+                            item.put("name", equipment.getName());
+                            item.put("code", equipment.getCode());
+                            item.put("description", equipment.getDescription());
+                            item.put("unit", equipment.getUnit());
+                            item.put("price", equipment.getPrice());
+                            item.put("category", equipment.getCategory().getName());
+                            return item;
+                        }
+                )
+                .toList();
     }
 
     //-----------------------------------------------TASK-----------------------------------------------//
@@ -600,6 +834,8 @@ public class ManagerServiceImpl implements ManagerService {
                         .build()
         );
     }
+
+
 
 
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//

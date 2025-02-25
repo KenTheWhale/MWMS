@@ -195,6 +195,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                                 .price(100.0 * i)
                                 .unit("pcs")
                                 .category(category)
+                                .status(Status.EQUIPMENT_ACTIVE.getValue())
                                 .build();
                         equipments.add(equipment);
                         equipmentRepo.save(equipment);
@@ -295,6 +296,22 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .build();
                     tasks.add(task);
                     taskRepo.save(task);
+                });
+
+                //-----------------------------PartnerEquipment-----------------------------//
+                accounts.forEach(acc -> {
+                    if (acc.getRole() == Role.PARTNER) {
+                        for (Partner partner : partners) {
+                            for (Equipment equipment : equipments) {
+                                PartnerEquipment pe = PartnerEquipment.builder()
+                                        .partner(partner)
+                                        .equipment(equipment)
+                                        .build();
+                                partnerEquipments.add(pe);
+                            }
+                        }
+                        partnerEquipmentRepo.saveAll(partnerEquipments);
+                    }
                 });
             }
         };

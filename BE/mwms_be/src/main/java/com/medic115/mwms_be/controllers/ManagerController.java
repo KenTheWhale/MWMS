@@ -1,9 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.AreaResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
@@ -28,18 +25,73 @@ public class ManagerController {
 
     @GetMapping("/category")
     @PreAuthorize("hasRole('manager')")
-    public ViewCategoryResponse viewCategory() {
+    public ResponseEntity<ResponseObject> viewCategory() {
         return managerService.viewCategory();
     }
 
     @PostMapping("/category")
     @PreAuthorize("hasRole('manager')")
-    public AddCategoryResponse addCategory(@RequestBody AddCategoryRequest request) {
+    public ResponseEntity<ResponseObject> addCategory(@RequestBody AddCategoryRequest request) {
         return managerService.addCategory(request);
     }
 
-    //-------------------------------------------------Staff-------------------------------------------------//
+    @PutMapping("/category")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> updateCategory(@RequestBody UpdateCategoryRequest request) {
+        return managerService.updateCategory(request);
+    }
 
+    @DeleteMapping("/category")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> deleteCategory(@RequestBody DeleteCategoryRequest request) {
+        return managerService.deleteCategory(request);
+    }
+
+    @PostMapping("/category/search")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> searchCategory(@RequestBody SearchRequest request) {
+        return managerService.searchCategory(request);
+    }
+
+    //-------------------------------------------------Equipment-------------------------------------------------//
+
+    @GetMapping("/equipment")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> viewEquipment() {
+        return managerService.viewEquipment();
+    }
+
+    @PostMapping("/equipment/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+        return managerService.viewSupplierEquipment(request);
+    }
+
+    @PostMapping("/equipment")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> addEquipment(@RequestBody AddEquipmentRequest request) {
+        return managerService.addEquipment(request);
+    }
+
+    @PutMapping("/equipment")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> updateEquipment(@RequestBody UpdateEquipmentRequest request) {
+        return managerService.updateEquipment(request);
+    }
+
+    @DeleteMapping("/equipment")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> deleteEquipment(@RequestBody DeleteEquipmentRequest request) {
+        return managerService.deleteEquipment(request);
+    }
+
+    @PostMapping("/equipment/search")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> searchEquipment(@RequestBody SearchRequest request) {
+        return managerService.searchEquipment(request);
+    }
+
+    //-------------------------------------------------Staff-------------------------------------------------//
 //    @GetMapping("/staff/list")
 //    @PreAuthorize("hasRole('manager')")
 //    public ResponseEntity<ResponseObject> getStaffList() {
