@@ -44,6 +44,7 @@ public class ManagerServiceImpl implements ManagerService {
     PartnerRepo partnerRepo;
 
     ItemGroupRepo itemGroupRepo;
+    private final PartnerEquipmentRepo partnerEquipmentRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -176,6 +177,31 @@ public class ManagerServiceImpl implements ManagerService {
                         .build()
         );
     }
+
+    @Override
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+
+        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
+        List<Equipment> equipmentList = peList.stream()
+                .map(PartnerEquipment::getEquipment)
+                .distinct()
+                .toList();
+        for (Equipment eq : equipmentList){
+            System.out.println(eq.getId());
+        }
+        if (equipmentList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found for this supplier")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Supplier equipment retrieved successfully")
+                .data(MapToEquipment(equipmentList))
+                .build());
+    }
+
 
     @Override
     public ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request) {

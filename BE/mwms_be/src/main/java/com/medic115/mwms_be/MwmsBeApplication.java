@@ -298,6 +298,22 @@ public class MwmsBeApplication implements CommandLineRunner {
                     tasks.add(task);
                     taskRepo.save(task);
                 });
+
+                //-----------------------------PartnerEquipment-----------------------------//
+                accounts.forEach(acc -> {
+                    if (acc.getRole() == Role.PARTNER) {
+                        for (Partner partner : partners) {
+                            for (Equipment equipment : equipments) {
+                                PartnerEquipment pe = PartnerEquipment.builder()
+                                        .partner(partner)
+                                        .equipment(equipment)
+                                        .build();
+                                partnerEquipments.add(pe);
+                            }
+                        }
+                        partnerEquipmentRepo.saveAll(partnerEquipments);
+                    }
+                });
             }
         };
     }

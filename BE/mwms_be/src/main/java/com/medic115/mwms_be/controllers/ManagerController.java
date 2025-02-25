@@ -56,6 +56,12 @@ public class ManagerController {
         return managerService.viewEquipment();
     }
 
+    @PostMapping("/equipment/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+        return managerService.viewSupplierEquipment(request);
+    }
+
     @PostMapping("/equipment")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> addEquipment(@RequestBody AddEquipmentRequest request) {

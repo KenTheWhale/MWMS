@@ -41,6 +41,8 @@ public interface ManagerService {
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();
 
+    ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request);
+
     ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request);
 
     ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request);
