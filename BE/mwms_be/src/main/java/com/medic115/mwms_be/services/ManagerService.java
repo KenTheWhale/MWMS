@@ -8,7 +8,7 @@ public interface ManagerService {
 
     //----------------------------Staff----------------------------//
 
-//    ResponseEntity<ResponseObject> getStaffList();
+    ResponseEntity<ResponseObject> getStaffList();
 
 
     //----------------------------Request----------------------------//

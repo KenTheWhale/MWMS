@@ -92,11 +92,11 @@ public class ManagerController {
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
-//    @GetMapping("/staff/list")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getStaffList() {
-//        return managerService.getStaffList();
-//    }
+    @GetMapping("/staff/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getStaffList() {
+        return managerService.getStaffList();
+    }
 
     //-------------------------------------------------Task-------------------------------------------------//
 
