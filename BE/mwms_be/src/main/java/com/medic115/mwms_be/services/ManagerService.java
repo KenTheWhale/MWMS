@@ -21,7 +21,7 @@ public interface ManagerService {
 //
     ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
 //
-//    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
+    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
 //
     ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
 
@@ -31,6 +31,9 @@ public interface ManagerService {
 
 //    ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
+    //----------------------------Supplier----------------------------//
+
+    ResponseEntity<ResponseObject> getListSupplier();
     //----------------------------Category----------------------------//
     ResponseEntity<ResponseObject> viewCategory();
 

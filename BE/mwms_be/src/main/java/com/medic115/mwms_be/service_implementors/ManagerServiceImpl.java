@@ -2,6 +2,7 @@ package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.*;
+import com.medic115.mwms_be.enums.RequestType;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.*;
@@ -19,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -186,9 +185,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .map(PartnerEquipment::getEquipment)
                 .distinct()
                 .toList();
-        for (Equipment eq : equipmentList) {
-            System.out.println(eq.getId());
-        }
+
         if (equipmentList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ResponseObject.builder()
@@ -513,76 +510,81 @@ public class ManagerServiceImpl implements ManagerService {
         }
     }
 
-    //    @Override
-//    public ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request) {
-//        String newCode = generateRequestCode();
-//
-//        RequestApplication requestApplication = RequestApplication
-//                .builder()
-//                .code(newCode)
-//                .requestDate(LocalDate.now())
-//                .deliveryDate(null)
-//                .lastModifiedDate(LocalDate.now())
-//                .task(null)
-//                .type("import")
-//                .status(Status.REQUEST_PENDING.getValue())
-//                .build();
-//
-//        requestApplicationRepo.save(requestApplication);
-//
-//        for (CreateImportRequest.RequestItemList item : request.getRequestItemList()) {
-//            Equipment equipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
-//            Partner partner = partnerRepo.findById(item.getPartnerId()).orElse(null);
-//
-//            if (equipment == null) {
-//                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-//                        ResponseObject.builder()
-//                                .message("404 Equipment Not Found")
-//                                .data(null)
-//                                .build()
-//                );
-//            }
-//
-//            if (partner == null) {
-//                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-//                        ResponseObject.builder()
-//                                .message("404 Partner Not Found")
-//                                .data(null)
-//                                .build()
-//                );
-//            }
-//
-//            RequestItem requestItem = RequestItem
-//                    .builder()
-//                    .equipment(equipment)
-//                    .partner(partner)
-//                    .requestApplication(requestApplication)
-//                    .quantity(item.getQuantity())
-//                    .carrierName("")
-//                    .carrierPhone("")
-//                    .unitPrice(0)
-//                    .build();
-//
-//            requestItemRepo.save(requestItem);
-//        }
-//
-//        Map<String, Object> requestApplicationMap = new HashMap<>();
-//        requestApplicationMap.put("code", newCode);
-//        requestApplicationMap.put("requestDate", LocalDate.now());
-//        requestApplicationMap.put("deliveryDate", null);
-//        requestApplicationMap.put("lastModifiedDate", LocalDate.now());
-//        requestApplicationMap.put("status", Status.REQUEST_PENDING.getValue());
-//        requestApplicationMap.put("task", null);
-//        return ResponseEntity.ok().body(
-//                ResponseObject
-//                        .builder()
-//                        .message("200 OK request create success")
-//                        .data(requestApplicationMap)
-//                        .build()
-//        );
-//    }
-//
-//
+    @Override
+    public ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request) {
+        RequestApplication requestApplication = RequestApplication
+                .builder()
+                .code(generateRequestCode())
+                .status(Status.REQUEST_PENDING.getValue())
+                .requestDate(LocalDate.now())
+                .lastModifiedDate(LocalDate.now())
+                .type(RequestType.IMPORT.getValue())
+                .build();
+
+        requestApplicationRepo.save(requestApplication);
+
+        List<CreateImportRequest.RequestItemList> sortedItems = new ArrayList<>(request.getRequestItemList());
+        sortedItems.sort(Comparator.comparingInt(CreateImportRequest.RequestItemList::getPartnerId));
+
+        List<ItemGroup> itemGroups = new ArrayList<>();
+        List<RequestItem> requestItems = new ArrayList<>();
+
+        int currentPartnerId = 0;
+        ItemGroup currentGroup = null;
+
+        List<RequestItem> itemsInCurrentGroup = new ArrayList<>();
+
+        for (CreateImportRequest.RequestItemList item : sortedItems) {
+            if (item.getPartnerId() != currentPartnerId) {
+                if (currentGroup != null) {
+                    currentGroup.setRequestItems(new ArrayList<>(itemsInCurrentGroup));
+                    itemGroups.add(currentGroup);
+                }
+
+                currentGroup = ItemGroup.builder()
+                        .requestApplication(requestApplication)
+                        .deliveryDate(null)
+                        .carrierName("")
+                        .carrierPhone("")
+                        .build();
+                currentGroup = itemGroupRepo.save(currentGroup);
+
+                currentPartnerId = item.getPartnerId();
+                itemsInCurrentGroup.clear();
+            }
+
+            RequestItem requestItem = RequestItem.builder()
+                    .quantity(item.getQuantity())
+                    .unitPrice(0)
+                    .equipment(equipmentRepo.findById(item.getEquipmentId()).orElse(null))
+                    .partner(partnerRepo.findById(item.getPartnerId()).orElse(null))
+                    .itemGroup(currentGroup)
+                    .build();
+
+            requestItems.add(requestItem);
+            itemsInCurrentGroup.add(requestItem);
+        }
+
+        if (currentGroup != null) {
+            currentGroup.setRequestItems(new ArrayList<>(itemsInCurrentGroup));
+            itemGroups.add(currentGroup);
+        }
+
+        requestItemRepo.saveAll(requestItems);
+        itemGroupRepo.saveAll(itemGroups);
+
+        requestApplication.setItemGroups(itemGroups);
+        requestApplicationRepo.save(requestApplication);
+
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK Created Application successfully")
+                        .build()
+        );
+    }
+
+
     @Override
     public ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request) {
         RequestApplication requestApplication = requestApplicationRepo.findAll().stream()
@@ -757,6 +759,36 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    @Override
+    public ResponseEntity<ResponseObject> getListSupplier() {
+
+        List<Map<String, Object>> partnerList = partnerRepo.findAll().stream().filter(p -> p.getType().equals("supplier"))
+                .map(supplier -> {
+                            Map<String, Object> partnerDetail = new HashMap<>();
+                            partnerDetail.put("partnerName", supplier.getUser().getName());
+                            partnerDetail.put("partnerId", supplier.getId());
+                            return partnerDetail;
+                        }
+
+                ).toList();
+        if (partnerList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    ResponseObject
+                            .builder()
+                            .message("204 No Content - don't have any supplier")
+                            .build()
+            );
+        }
+
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK")
+                        .data(partnerList)
+                        .build()
+        );
+    }
+
 //    @Override
 //    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
 //
@@ -884,11 +916,11 @@ public class ManagerServiceImpl implements ManagerService {
         RequestApplication lastRequest = requestApplicationRepo.findTopByOrderByIdDesc();
 
         if (lastRequest == null) {
-            return "REQ1";
+            return "REQ-1";
         }
         String lastCode = lastRequest.getCode();
-        int lastNumber = Integer.parseInt(lastCode.replace("REQ", ""));
-        return "REQ" + (lastNumber + 1);
+        int lastNumber = Integer.parseInt(lastCode.replace("REQ-", ""));
+        return "REQ-" + (lastNumber + 1);
     }
 
     private UpdateImportRequest.Items getItemById(int id, List<UpdateImportRequest.Items> items) {
