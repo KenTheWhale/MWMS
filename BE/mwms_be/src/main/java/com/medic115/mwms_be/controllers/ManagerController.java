@@ -1,6 +1,7 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
+import com.medic115.mwms_be.dto.response.AreaResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
@@ -63,7 +64,7 @@ public class ManagerController {
 
     @PostMapping("/equipment/supplier")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(@RequestBody ViewSupplierEquipmentRequest request) {
         return managerService.viewSupplierEquipment(request);
     }
 
@@ -144,11 +145,11 @@ public class ManagerController {
         return managerService.cancelImportRequest(request);
     }
 
-//    @PostMapping("/request/import")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
-//        return managerService.createImportRequest(request);
-//    }
+    @PostMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
+        return managerService.createImportRequest(request);
+    }
 //
 //    @PutMapping("/request/import")
 //    @PreAuthorize("hasRole('manager')")
@@ -193,5 +194,11 @@ public class ManagerController {
         AreaResponse response = areaService.updateArea(id, areaRequest);
         return ResponseEntity.ok(response);
     }
-
+    @GetMapping("/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getListSupplier() {
+        return managerService.getListSupplier();
+    }
 }
+
+
