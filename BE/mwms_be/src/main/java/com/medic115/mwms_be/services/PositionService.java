@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface PositionService {
 
-    void createPosition(Integer areaId, PositionRequest request);
+    void createPosition(PositionRequest request);
 
     List<PositionResponse> getAllPosition();
 

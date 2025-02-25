@@ -18,6 +18,10 @@ import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
 import Request from "./components/partner/Request.jsx";
+import AreaPage from "./components/manager/AreaPage.jsx";
+import { ToastContainer } from "react-toastify"; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const router = createBrowserRouter([
   {
@@ -55,7 +59,7 @@ const router = createBrowserRouter([
       {
         path: "area",
         element: (
-          <h1 className={`d-flex justify-content-center text-light`}>Area</h1>
+          <AreaPage/>
         ),
       },
       {
@@ -186,6 +190,7 @@ function App() {
     return (
         <Provider store={store}>
             <RouterProvider router={router}/>
+            <ToastContainer/>
         </Provider>
     )
 }
