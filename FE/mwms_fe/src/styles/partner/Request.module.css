@@ -1,0 +1,105 @@
+.main{
+    width: 83vw !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.add_button_area,
+.title_area{
+    width: var(--outlet-width) !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.search_area{
+    width: var(--outlet-width) !important;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 1vh;
+}
+
+.search_input{
+    width: calc(0.9 * var(--outlet-width));
+    margin-left: 1vw;
+}
+
+.search_button{
+    width: calc(0.1 * var(--outlet-width));
+    margin-left: 1vw;
+    margin-right: 1vw;
+}
+
+.search_button button{
+    margin-bottom: 0;
+}
+
+.table_area{
+    width: var(--outlet-width) !important;
+    overflow-y: scroll;
+    max-height: 80vh;
+}
+
+.table_area::-webkit-scrollbar {
+    display: none;
+}
+
+.table_area table {
+    width: var(--outlet-width) !important;
+    border: 0;
+}
+
+.table_area table thead {
+    position: sticky;
+    top: -0.9px;
+}
+
+.table_area table tbody tr td {
+    vertical-align: middle;
+}
+
+
+.table_area table thead tr th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table_area table thead tr th:nth-child(1) {
+    width: 5%;
+}
+.table_area table thead tr th:nth-child(2) {
+    width: 30%;
+}
+.table_area table thead tr th:nth-child(3) {
+    width: 30%;
+}
+.table_area table thead tr th:nth-child(4) {
+    width: 10%;
+}
+.table_area table thead tr th:nth-child(5) {
+    width: 10%;
+}
+.table_area table thead tr th:nth-child(6) {
+    width: 15%;
+}
+
+.table_area table tbody tr td:nth-child(1) {
+    text-align: center;
+}
+.table_area table tbody tr td:nth-child(2) {
+    text-align: left;
+}
+.table_area table tbody tr td:nth-child(3) {
+    text-align: left;
+}
+.table_area table tbody tr td:nth-child(4) {
+    text-align: left;
+}
+.table_area table tbody tr td:nth-child(5) {
+    text-align: right;
+}
+.table_area table tbody tr td:nth-child(6) {
+    text-align: center;
+}
+

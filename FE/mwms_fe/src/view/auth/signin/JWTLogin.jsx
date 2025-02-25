@@ -18,6 +18,7 @@ const JWTLogin = () => {
     try {
       await dispatch(loginUser(values.username, values.password));
       const permission = localStorage.getItem("role");
+      const type = localStorage.getItem("type") ? localStorage.getItem("type") : null;
       switch (permission) {
         case "ADMIN":
           navigate("/admin");
@@ -27,6 +28,15 @@ const JWTLogin = () => {
           break;
         case "MANAGER":
           navigate("/manager");
+          break;
+        case "PARTNER":
+          if(type !== null){
+            if (type === "supplier") {
+              navigate("/sp/request");
+            } else {
+              navigate("/rq");
+            }
+          }
           break;
         default:
           navigate("/login");

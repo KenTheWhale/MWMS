@@ -1,7 +1,7 @@
 import style from "../../styles/manager/Category.module.css";
 import {Button, Form, Table} from "react-bootstrap";
-import {useState} from "react";
-import CategoryPopup from "../CategoryPopup.jsx";
+import {useEffect, useState} from "react";
+import CategoryPopup from "../popup/CategoryPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import {getCategoryList} from "../../services/CategoryService.js";
 
@@ -73,7 +73,6 @@ function Category() {
     // );
 
     const [categories, setCategories] = useState([]);
-    const navigate = useNavigate();
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [actionType, setActionType] = useState('');

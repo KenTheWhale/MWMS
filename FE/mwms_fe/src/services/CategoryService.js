@@ -1,9 +1,9 @@
-import axiosClient from "../config/api.jsx";
+import {axiosClient} from "../config/api";
 
 export const getCategoryList = async () => {
     try{
      const response = await axiosClient.get("/manager/category")
-        if (response) {
+        if (response.status === 200) {
             const body = response.data;
             return body.data;
         }

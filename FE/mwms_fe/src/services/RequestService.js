@@ -24,3 +24,8 @@ export const viewDetail = async (code) => {
     const response = await axiosClient.post("/manager/request/detail", { code });
     return response && response.status === 200 ? response.data : null;
 }
+
+export const getSupplierRequestList = async (username) => {
+    const response = await axiosClient.post("/supplier/request/list", { username });
+    return response && response.status === 200 ? response.data : null;
+}

@@ -38,6 +38,10 @@ export const loginUser = (username, password) => async (dispatch) => {
         localStorage.setItem('accessToken', response.data.token);
         const decode = jwtDecode(response.data.token);
         localStorage.setItem('role', decode.role);
+        if (decode.type) {
+            localStorage.setItem('type', decode.type);
+        }
+        localStorage.setItem('username', decode.username)
         dispatch(loginSuccess(response.data, decode.role));
         return response.data;
     } catch (error) {
