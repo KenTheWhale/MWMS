@@ -287,7 +287,6 @@ public class MwmsBeApplication implements CommandLineRunner {
                 //-----------------------------Task-----------------------------//
                 itemGroups.forEach(group -> {
                     Task task = Task.builder()
-                            .name("Task for " + group.getRequestApplication().getCode())
                             .code("TASK-" + group.getRequestApplication().getCode())
                             .description("Task description")
                             .status(Status.TASK_ASSIGNED.getValue())

@@ -10,10 +10,21 @@
 }
 
 .importTable {
+    max-height: 400px;
     width: 100%;
     overflow-x: auto;
     display: block;
     padding: 20px 0;
+}
+.importTable::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+.importTable thead {
+    width: 100%;
+    position: sticky;
+    top: -25px;
+    background-color: var(--table-background);
 }
 
 .importTable table {
@@ -99,6 +110,20 @@
 .modalBody::-webkit-scrollbar {
     width: 0;
     background: transparent;
+}
+.addCard{
+    max-height: 450px;
+    overflow-x: auto;
+    display: block;
+}
+.addCard::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+
+.addCard h3 {
+    display: flex;
+    justify-content: center;
 }
 
 

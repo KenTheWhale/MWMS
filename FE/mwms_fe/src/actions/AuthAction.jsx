@@ -42,6 +42,7 @@ export const loginUser = (username, password) => async (dispatch) => {
             localStorage.setItem('type', decode.type);
         }
         localStorage.setItem('username', decode.username)
+        localStorage.setItem('name', response.data.name)
         dispatch(loginSuccess(response.data, decode.role));
         return response.data;
     } catch (error) {

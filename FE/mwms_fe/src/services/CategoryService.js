@@ -1,4 +1,4 @@
-import {axiosClient} from "../config/api";
+import {axiosClient} from "../config/api.jsx";
 
 export const getCategoryList = async () => {
     try{
