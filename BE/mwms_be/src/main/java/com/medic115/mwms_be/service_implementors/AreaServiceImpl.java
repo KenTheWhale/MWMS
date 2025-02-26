@@ -60,6 +60,17 @@ public class AreaServiceImpl implements AreaService {
         return mapToDto(area);
     }
 
+    @Override
+    public AreaResponse deleteArea(Integer id, String status) {
+        if(id == null || status == null) throw new IllegalArgumentException("Id and status cannot be null");
+
+        Area area = areaRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Dont have area with: " + id));
+        area.setStatus(status);
+        areaRepo.save(area);
+
+        return mapToDto(area);
+    }
+
 
     private AreaResponse mapToDto(Area area) {
         return AreaResponse.builder()

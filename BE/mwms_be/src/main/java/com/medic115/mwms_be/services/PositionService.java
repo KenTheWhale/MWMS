@@ -9,9 +9,10 @@ public interface PositionService {
 
     void createPosition(PositionRequest request);
 
-    List<PositionResponse> getAllPosition();
+    List<PositionResponse> getAllPosition(Integer areaId);
 
     PositionResponse getPosition(Integer id);
 
     PositionResponse updatePosition(Integer id, PositionRequest request);
+    
 }

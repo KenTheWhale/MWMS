@@ -1,12 +1,10 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.AreaResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.dto.response.*;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
+import com.medic115.mwms_be.services.PositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +21,8 @@ public class ManagerController {
     private final ManagerService managerService;
 
     private final AreaService areaService;
+
+    private final PositionService positionService;
 
     //-------------------------------------------------Category-------------------------------------------------//
 
@@ -141,5 +141,43 @@ public class ManagerController {
         AreaResponse response = areaService.updateArea(id, areaRequest);
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/area/{id}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<AreaResponse> deleteArea(@PathVariable("id") Integer id, @RequestParam String status) {
+        AreaResponse response = areaService.deleteArea(id, status);
+        return ResponseEntity.ok(response);
+    }
+
+    //----------------------------------------------------------Position------------------------------------------//
+    @GetMapping("/position/{areaId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<List<PositionResponse>> getAllPositions(@PathVariable("areaId") Integer areaId) {
+        List<PositionResponse> responses = positionService.getAllPosition(areaId);
+        return ResponseEntity.ok(responses);
+    }
+
+
+    @GetMapping("/position/individual/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<PositionResponse> getPositionById(@PathVariable("positionId") Integer positionId) {
+        PositionResponse response = positionService.getPosition(positionId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/position")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> createPosition(@RequestBody PositionRequest positionRequest) {
+        positionService.createPosition(positionRequest);
+        return ResponseEntity.ok("Create position successful");
+    }
+
+    @PutMapping("/position/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
+        positionService.updatePosition(positionId, positionRequest);
+        return ResponseEntity.ok("Update position successful");
+    }
+
 
 }
