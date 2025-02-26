@@ -72,20 +72,18 @@
     width: 30%;
 }
 .table_area table thead tr th:nth-child(3) {
-    width: 30%;
+    width:20%;
 }
 .table_area table thead tr th:nth-child(4) {
-    width: 10%;
+    width: 20%;
 }
 .table_area table thead tr th:nth-child(5) {
     width: 10%;
 }
-.table_area table thead tr th:nth-child(6) {
-    width: 15%;
-}
+
 
 .table_area table tbody tr td:nth-child(1) {
-    text-align: center;
+    text-align: left;
 }
 .table_area table tbody tr td:nth-child(2) {
     text-align: left;
@@ -97,9 +95,6 @@
     text-align: left;
 }
 .table_area table tbody tr td:nth-child(5) {
-    text-align: right;
-}
-.table_area table tbody tr td:nth-child(6) {
-    text-align: center;
+    text-align: left;
 }
 

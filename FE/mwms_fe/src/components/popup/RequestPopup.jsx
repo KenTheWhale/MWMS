@@ -1,27 +1,16 @@
-import { Modal, Button, Form } from 'react-bootstrap';
+import {Modal, Button, Form} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import {useState} from 'react';
 
-const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
-    // const [editedRequest, setEditedRequest] = useState({
-    //     id: '',
-    //     name: '',
-    //     code: '',
-    //     category: '',
-    //     unit: '',
-    //     price: '',
-    //     description: ''
-    // });
-    //
+const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
+
     // const handleChange = (e) => {
-    //     setEditedRequest({
-    //         ...editedRequest,
-    //         [e.target.name]: e.target.value,
-    //     });
+    //
     // };
     //
     // const handleSave = async () => {
-    //
+    //     onAccept(request.id);
+    //     handleClose();
     // };
     //
     // const handleDelete = () => {
@@ -32,35 +21,35 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
     // };
     //
     // const renderContent = () => {
-    //     if (actionType === 'view' && !request) return null;
-    //             return (
-    //                 <>
-    //                     <p><strong>Name:</strong> {request.code}</p>
-    //                     <p><strong>Category:</strong> {request.requestDate}</p>
-    //                     <p><strong>Unit:</strong> {request.lastModifiedDate}</p>
-    //                     <p><strong>Price:</strong> {request.status}</p>
-    //                 </>
-    //             );
-    // };
     //
-    // return (
-    //     <Modal show={show} onHide={handleClose}>
-    //         <Modal.Header closeButton>
-    //             <Modal.Title>Approve Request</Modal.Title>
-    //         </Modal.Header>
-    //         <Modal.Body>
-    //             {renderContent()}
-    //         </Modal.Body>
-    //         <Modal.Footer>
-    //                 <Button variant="primary">
-    //                     Accept
-    //                 </Button>
-    //             <Button variant="primary">
-    //                     Reject
-    //                 </Button>
-    //         </Modal.Footer>
-    //     </Modal>
-    // );
+    //     return (
+    //         <>
+    //             <p><strong>Name:</strong> {request.code}</p>
+    //             <p><strong>Category:</strong> {request.requestDate}</p>
+    //             <p><strong>Unit:</strong> {request.lastModifiedDate}</p>
+    //             <p><strong>Price:</strong> {request.status}</p>
+    //         </>
+    //     )
+    // };
+
+    return (
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Approve Request</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {/*{renderContent()}*/}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="primary" >
+                    Accept
+                </Button>
+                <Button variant="primary">
+                    Reject
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 RequestPopup.propTypes = {
