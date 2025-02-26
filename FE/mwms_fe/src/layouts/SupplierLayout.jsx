@@ -17,7 +17,7 @@ function GenerateNavbar() {
             </Sidebar>
             <div className={style.profile}>
                 <div className={style.label_area}>
-                    <label>Account Name</label>
+                    <label>{localStorage.getItem('name')}</label>
                     <p>PARTNER</p>
                 </div>
                 <CgLogOut onClick={() => {

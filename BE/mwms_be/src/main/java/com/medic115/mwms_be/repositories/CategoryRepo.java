@@ -8,4 +8,6 @@ public interface CategoryRepo extends JpaRepository<Category, Integer> {
     Category findByName(String name);
 
     Category findByCode(String code);
+
+    void deleteByCode(String code);
 }

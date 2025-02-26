@@ -4,16 +4,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCategoryRequest {
-
+public class ChangeWarehouseRequestStatusRequest {
     String code;
-
-    String name;
-
-    String description;
-
+    String status;
 }

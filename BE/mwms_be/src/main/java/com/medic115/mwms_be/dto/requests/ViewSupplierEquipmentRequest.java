@@ -8,12 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCategoryRequest {
+public class ViewSupplierEquipmentRequest {
 
-    String code;
-
-    String name;
-
-    String description;
-
+    int partnerId;
 }

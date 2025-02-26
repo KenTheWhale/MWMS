@@ -1,9 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
-import { Button, Modal, Table, Card } from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {Button, Card, Form, Modal, Table} from "react-bootstrap";
 import style from "../../styles/manager/ImportRequest.module.css";
-import { BsFilter } from "react-icons/bs";
-import { getImportRequest, viewDetail } from "../../services/RequestService.js";
+import {
+    createRequestApplication,
+    getImportRequest,
+    getSupplierEquipment,
+    getSupplierList,
+    viewDetail
+} from "../../services/RequestService.js";
 import {FaSearch} from "react-icons/fa";
+import {GrView} from "react-icons/gr";
+import {CgAddR} from "react-icons/cg";
+import CustomAlert from "../CustomAlert.jsx";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -11,29 +19,28 @@ function ImportRequest() {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [show, setShow] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
+    const [showAddCard, setShowAddCard] = useState(false);
+    const [partners, setPartners] = useState([]);
+    const [equipments, setEquipments] = useState([]);
+    const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertType, setAlertType] = useState("");
 
-    // Lấy danh sách Import Request
+
     useEffect(() => {
         async function fetchData() {
-            try {
-                const response = await getImportRequest();
-                setRequestList(response.data || []);
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách request:", error);
-            }
+            const response = await getImportRequest();
+            setRequestList(response.data || []);
         }
+
         fetchData();
     }, []);
 
-    const handleViewDetail = useCallback(async (code) => {
-        try {
-            const response = await viewDetail(code);
-            setSelectedRequest(response.data);
-            setShow(true);
-        } catch (error) {
-            console.error("Lỗi khi lấy chi tiết request:", error);
-        }
-    }, []);
+    const handleViewDetail = async (code) => {
+        const response = await viewDetail(code);
+        setSelectedRequest(response.data);
+        setShow(true);
+    };
 
     const toggleGroup = (groupId) => {
         setExpandedGroups((prev) => ({
@@ -48,8 +55,97 @@ function ImportRequest() {
 
     const handleClose = () => setShow(false);
 
+    const handleAddClick = () => {
+
+        async function GetSuppliers() {
+            const response = await getSupplierList();
+            console.log(response.data);
+            if (response && response.data) {
+                setPartners(response.data);
+            } else {
+                setPartners([]);
+            }
+        }
+
+        GetSuppliers();
+        setShowAddCard(!showAddCard);
+    };
+
+    const handleAddRow = () => {
+        setRows([
+            ...rows,
+            {name: "", description: "", quantity: "", unit: "", partner: ""}
+        ]);
+    };
+
+
+    const handleInputRow = (index, field, value) => {
+        const updatedRows = [...rows];
+        updatedRows[index][field] = value;
+
+        if (field === "name") {
+            const selectedEquipment = equipments.find(e => e.name === value);
+            if (selectedEquipment) {
+                updatedRows[index]["description"] = selectedEquipment.description || "";
+                updatedRows[index]["unit"] = selectedEquipment.unit || "";
+            }
+        }
+        if (field === "partner") {
+            async function getSupplierEq() {
+                const response = await getSupplierEquipment(value)
+                console.log(response.data);
+                setEquipments(response.data || []);
+            }
+
+            getSupplierEq();
+        }
+
+        setRows(updatedRows);
+    };
+
+
+    const handleRemoveRow = (index) => {
+        const updatedRows = rows.filter((_, i) => i !== index);
+        setRows(updatedRows);
+    };
+
+    const handleSubmit = () => {
+        async function createRequest() {
+
+            for (const row of rows) {
+                if (!row.partner || !row.name || !row.quantity) {
+                    setAlertMessage("Please fill in all required fields.");
+                    setAlertType("danger");
+                    return;
+                }
+            }
+
+            const requestItems = rows.map(row => ({
+                equipmentId: equipments.find(e => e.name === row.name)?.id,
+                partnerId: row.partner,
+                quantity: parseInt(row.quantity, 10),
+            }))
+            const response = await createRequestApplication(requestItems);
+
+            if (response) {
+                setAlertMessage(response.message);
+                setAlertType("success");
+                const updatedRequests = await getImportRequest();
+                setRequestList(updatedRequests.data || []);
+            } else {
+                setAlertMessage(response.message);
+                setAlertType("danger");
+            }
+        }
+
+        createRequest();
+        setShowAddCard(false);
+
+    }
+
     return (
         <div className="container-fluid">
+            <CustomAlert message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
             <div className="row">
                 <h1 className="d-flex justify-content-center text-light">Import Request</h1>
             </div>
@@ -63,7 +159,7 @@ function ImportRequest() {
                         onChange={handleDateChange}
                         value={filterDate}
                     />
-                    <Button className={style.addRequestBtn}>Add Request</Button>
+                    <Button onClick={handleAddClick}><CgAddR/></Button>
                 </div>
             </div>
 
@@ -82,6 +178,7 @@ function ImportRequest() {
                         <tbody>
                         {requestList
                             .filter((item) => item.requestDate.includes(filterDate))
+                            .reverse()
                             .map((item, index) => (
                                 <tr key={index}>
                                     <td>{item.code}</td>
@@ -89,7 +186,8 @@ function ImportRequest() {
                                     <td>{item.lastModifiedDate}</td>
                                     <td>{item.status}</td>
                                     <td>
-                                        <Button onClick={() => handleViewDetail(item.code)}>View Detail</Button>
+                                        <Button onClick={() => handleViewDetail(item.code)}><GrView/></Button>
+
                                     </td>
                                 </tr>
                             ))}
@@ -97,6 +195,86 @@ function ImportRequest() {
                     </table>
                 </div>
             </div>
+
+            {showAddCard && (
+                <Card className={`${style.addCard} mt-3 p-3`}>
+                    <Form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
+                    }}>
+                        <Table striped bordered hover>
+                            <thead>
+                            <tr>
+                                <th>Partner Name</th>
+                                <th>Equipment Name</th>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {rows.map((row, index) => (
+                                <tr key={index}>
+                                    <td>
+                                        <Form.Select className="m-2" value={row.partner}
+                                                     onChange={(e) => handleInputRow(index, "partner", e.target.value)}
+                                                     required>
+                                            <option value="">Select Partner</option>
+                                            {partners.map((partner) => (
+                                                <option key={partner.partnerId} value={partner.partnerId}>
+                                                    {partner.partnerName}
+                                                </option>
+                                            ))}
+                                        </Form.Select>
+                                    </td>
+
+                                    <td>
+                                        <Form.Select className="m-2" value={row.name}
+                                                     onChange={(e) => handleInputRow(index, "name", e.target.value)}
+                                                     required>
+                                            <option value="">Select Equipment</option>
+                                            {equipments.map((equipment) => (
+                                                <option key={equipment.id} value={equipment.name}>
+                                                    {equipment.name}
+                                                </option>
+                                            ))}
+                                        </Form.Select>
+                                    </td>
+
+                                    <td>
+                                        <Form.Control className="m-2" type="text" value={row.description} readOnly/>
+                                    </td>
+
+                                    <td>
+                                        <Form.Control className="m-2" type="number" min="1" value={row.quantity}
+                                                      onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
+                                                      required/>
+                                    </td>
+
+                                    <td>
+                                        <Form.Control className="m-2" type="text" value={row.unit} readOnly/>
+                                    </td>
+
+                                    <td>
+                                        <Button variant="danger" className="m-2" onClick={() => handleRemoveRow(index)}>
+                                            -
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+
+                        <Button variant="primary" onClick={handleAddRow}>+</Button>
+
+                        <Card.Footer>
+                            <Button type="submit">Submit</Button>
+                        </Card.Footer>
+                    </Form>
+                </Card>
+            )}
+
 
             <Modal
                 size="xl"
@@ -124,17 +302,21 @@ function ImportRequest() {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <Card.Title>
-                                                    {group.partner} - {group.carrierName}
+                                                    Partner : {group.partner}
                                                 </Card.Title>
                                                 <Button
                                                     variant="outline-primary"
                                                     size="sm"
                                                     onClick={() => toggleGroup(group.groupId)}
                                                 >
-                                                    <FaSearch /> View
+                                                    <FaSearch/> View
                                                 </Button>
                                             </div>
 
+                                            <Card.Subtitle className="mb-2 text-muted">
+                                                Carrier Name : {group.carrierName}
+
+                                            </Card.Subtitle>
                                             <Card.Subtitle className="mb-2 text-muted">
                                                 Carrier Phone: {group.carrierPhone}
                                             </Card.Subtitle>
@@ -173,8 +355,13 @@ function ImportRequest() {
                         <p className="text-center">No request detail</p>
                     )}
                 </Modal.Body>
+                <Modal.Footer>
+                    <Button>Update</Button>
+                    <Button className={`btn btn-danger`} onClick={handleClose}>Close</Button>
+                </Modal.Footer>
             </Modal>
         </div>
+
     );
 }
 

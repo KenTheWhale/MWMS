@@ -1,31 +1,35 @@
 import { Modal, Button, Form } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
+import {addEquipment} from "../../services/EquipmentService.js";
+import {getCategoryList} from "../../services/CategoryService.js";
 
 const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDelete }) => {
     const [editedEquipment, setEditedEquipment] = useState({
+        id: '',
         name: '',
-        category: '',
-        quantity: '',
-        price: '',
-        description: '',
         code: '',
-        expired_date: ''
+        category: '',
+        unit: '',
+        price: '',
+        description: ''
     });
 
-    const categories = [
-        'Diagnostic Equipment',
-        'Surgical Equipment',
-        'Monitoring Equipment',
-        'Anesthesia Equipment',
-        'Therapeutic Equipment',
-        'Rehabilitation Equipment',
-        'Imaging Equipment',
-        'Infusion Equipment',
-        'Respiratory Equipment',
-        'Laboratory Equipment',
-        'Other'
-    ];
+    // const categories = [
+    //     'Diagnostic Equipment',
+    //     'Surgical Equipment',
+    //     'Monitoring Equipment',
+    //     'Anesthesia Equipment',
+    //     'Therapeutic Equipment',
+    //     'Rehabilitation Equipment',
+    //     'Imaging Equipment',
+    //     'Infusion Equipment',
+    //     'Respiratory Equipment',
+    //     'Laboratory Equipment',
+    //     'Other'
+    // ];
+
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         if (actionType === 'edit' && equipment) {
@@ -33,25 +37,33 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                 id: equipment.id,
                 name: equipment.name || '',
                 category: equipment.category || '',
-                quantity: equipment.quantity || '',
+                unit: equipment.unit || '',
                 price: equipment.price || '',
                 description: equipment.description || '',
-                code: equipment.code || '',
-                expired_date: equipment.expired_date || ''
+                code: equipment.code || ''
             });
         } else if (actionType === 'add') {
+
             setEditedEquipment({
                 id: null,
                 name: '',
-                category: '',
-                quantity: '',
-                price: '',
-                description: '',
                 code: '',
-                expired_date: ''
+                category: '',
+                unit: '',
+                price: '',
+                description: ''
             });
         }
     }, [equipment, actionType]);
+
+    useEffect(() => {
+        async function fetchData() {
+            return await getCategoryList();
+        }
+        fetchData().then((data) => {
+            setCategories(data);
+        });
+    }, []);
 
     const handleChange = (e) => {
         setEditedEquipment({
@@ -60,9 +72,24 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
         });
     };
 
-    const handleSave = () => {
-        onSave(editedEquipment);
-        handleClose();
+    const handleSave = async () => {
+        try {
+            let updatedEquipment = editedEquipment;
+            if (actionType === 'add') {
+                await addEquipment(
+                    editedEquipment.code,
+                    editedEquipment.name,
+                    editedEquipment.description,
+                    editedEquipment.category,
+                    editedEquipment.unit,
+                    editedEquipment.price
+                );
+            }
+            onSave(updatedEquipment);
+            handleClose();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleDelete = () => {
@@ -79,12 +106,12 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
             case 'view':
                 return (
                     <>
+                        <p><strong>Name:</strong> {equipment.name}</p>
+                        <p><strong>Code:</strong> {equipment.code}</p>
                         <p><strong>Category:</strong> {equipment.category}</p>
-                        <p><strong>Quantity:</strong> {equipment.quantity}</p>
+                        <p><strong>Unit:</strong> {equipment.unit}</p>
                         <p><strong>Price:</strong> {equipment.price}</p>
                         <p><strong>Description:</strong> {equipment.description}</p>
-                        <p><strong>Code:</strong> {equipment.code}</p>
-                        <p><strong>Expired Date:</strong> {new Date(equipment.expired_date).toDateString()}</p>
                     </>
                 );
             case 'add':
@@ -102,6 +129,16 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
+                            <Form.Label>Code</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="code"
+                                value={editedEquipment.code}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
                             <Form.Label>Category</Form.Label>
                             <Form.Select
                                 name="category"
@@ -110,19 +147,19 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                             >
                                 <option value="">Select a category</option>
                                 {categories.map((category, index) => (
-                                    <option key={index} value={category}>
-                                        {category}
+                                    <option key={index} value={category.id}>
+                                        {category.name}
                                     </option>
                                 ))}
                             </Form.Select>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Quantity</Form.Label>
+                            <Form.Label>Unit</Form.Label>
                             <Form.Control
-                                type="number"
-                                name="quantity"
-                                value={editedEquipment.quantity}
+                                type="text"
+                                name="unit"
+                                value={editedEquipment.unit}
                                 onChange={handleChange}
                             />
                         </Form.Group>
@@ -146,26 +183,6 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 onChange={handleChange}
                             />
                         </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Code</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="code"
-                                value={editedEquipment.code}
-                                onChange={handleChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Expired Date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="expired_date"
-                                value={editedEquipment.expired_date}
-                                onChange={handleChange}
-                            />
-                        </Form.Group>
                     </Form>
                 );
 
@@ -177,7 +194,6 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         <Button variant="danger" onClick={handleDelete}>Delete</Button>
                     </>
                 );
-
             default:
                 return null;
         }

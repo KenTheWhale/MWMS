@@ -8,12 +8,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCategoryRequest {
-
-    String code;
-
-    String name;
-
-    String description;
-
+public class SearchRequest {
+    String keyword;
 }

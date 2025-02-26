@@ -3,17 +3,16 @@ package com.medic115.mwms_be.dto.requests;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCategoryRequest {
-
-    String code;
-
-    String name;
-
+public class AssignStaffRequest {
+    int staffId;
+    int groupId;
     String description;
-
+    LocalDate assignDate;
 }

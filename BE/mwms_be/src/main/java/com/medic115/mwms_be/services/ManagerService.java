@@ -1,12 +1,6 @@
 package com.medic115.mwms_be.services;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
-import com.medic115.mwms_be.dto.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.dto.response.AddCategoryResponse;
-import com.medic115.mwms_be.dto.response.DeleteCategoryResponse;
-import com.medic115.mwms_be.dto.response.UpdateCategoryResponse;
-import com.medic115.mwms_be.dto.response.ViewCategoryResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import org.springframework.http.ResponseEntity;
 
@@ -14,7 +8,10 @@ public interface ManagerService {
 
     //----------------------------Staff----------------------------//
 
-//    ResponseEntity<ResponseObject> getStaffList();
+    ResponseEntity<ResponseObject> getStaffList();
+
+    ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request);
+
 
     //----------------------------Request----------------------------//
 //
@@ -24,7 +21,7 @@ public interface ManagerService {
 //
     ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
 //
-//    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
+    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
 //
     ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
 
@@ -34,14 +31,30 @@ public interface ManagerService {
 
 //    ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
+    //----------------------------Supplier----------------------------//
+
+    ResponseEntity<ResponseObject> getListSupplier();
     //----------------------------Category----------------------------//
-    ViewCategoryResponse viewCategory();
+    ResponseEntity<ResponseObject> viewCategory();
 
-    AddCategoryResponse addCategory(AddCategoryRequest request);
+    ResponseEntity<ResponseObject> addCategory(AddCategoryRequest request);
 
-    UpdateCategoryResponse updateCategory(UpdateCategoryRequest request);
+    ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request);
 
-    DeleteCategoryResponse deleteCategory(int id);
+    ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
+
+    //----------------------------Equipment----------------------------//
+    ResponseEntity<ResponseObject> viewEquipment();
+
+    ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
+
+    ResponseEntity<ResponseObject> searchEquipment(SearchRequest request);
 
     //----------------------------Task----------------------------//
 
@@ -50,4 +63,6 @@ public interface ManagerService {
     //----------------------------Item Group----------------------------//
 
     ResponseEntity<ResponseObject> getAllUnassignedGroup();
+
+    ResponseEntity<ResponseObject> searchCategory(SearchRequest request);
 }

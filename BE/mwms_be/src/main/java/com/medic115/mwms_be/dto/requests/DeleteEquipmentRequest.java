@@ -8,12 +8,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCategoryRequest {
+public class DeleteEquipmentRequest {
 
     String code;
-
-    String name;
-
-    String description;
 
 }
