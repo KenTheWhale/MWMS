@@ -2,16 +2,17 @@ package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.AreaResponse;
+import com.medic115.mwms_be.dto.response.PositionResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.ManagerService;
+import com.medic115.mwms_be.services.PositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/v1/manager")
@@ -21,6 +22,8 @@ public class ManagerController {
     private final ManagerService managerService;
 
     private final AreaService areaService;
+
+    private final PositionService positionService;
 
     //-------------------------------------------------Category-------------------------------------------------//
 
@@ -170,7 +173,7 @@ public class ManagerController {
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<List< AreaResponse>> getAllAreas() {
+    public ResponseEntity<List<AreaResponse>> getAllAreas() {
         List<AreaResponse> response = areaService.getAllAreas();
         return ResponseEntity.ok(response);
     }
@@ -195,12 +198,6 @@ public class ManagerController {
         AreaResponse response = areaService.updateArea(id, areaRequest);
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/supplier")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getListSupplier() {
-        return managerService.getListSupplier();
-    }
-}
 
     @PatchMapping("/area/{id}")
     @PreAuthorize("hasRole('manager')")
@@ -239,5 +236,9 @@ public class ManagerController {
         return ResponseEntity.ok("Update position successful");
     }
 
-
+    @GetMapping("/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getListSupplier() {
+        return managerService.getListSupplier();
+    }
 }

@@ -1,22 +1,22 @@
 package com.medic115.mwms_be;
 
-import com.medic115.mwms_be.enums.RequestType;
-import com.medic115.mwms_be.enums.Role;
-import com.medic115.mwms_be.enums.Status;
-import com.medic115.mwms_be.enums.TokenType;
-import com.medic115.mwms_be.models.*;
-import com.medic115.mwms_be.repositories.*;
-import com.medic115.mwms_be.services.JWTService;
+//import com.medic115.mwms_be.enums.RequestType;
+//import com.medic115.mwms_be.enums.Role;
+//import com.medic115.mwms_be.enums.Status;
+//import com.medic115.mwms_be.enums.TokenType;
+//import com.medic115.mwms_be.models.*;
+//import com.medic115.mwms_be.repositories.*;
+//import com.medic115.mwms_be.services.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+//import org.springframework.context.annotation.Bean;
+//
+//import java.time.LocalDate;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Random;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -68,18 +68,7 @@ public class MwmsBeApplication implements CommandLineRunner {
 //            @Override
 //            public void run(String... args) throws Exception {
 //                List<Account> accounts = new ArrayList<>();
-//                List<Area> areas = new ArrayList<>();
-//                List<Batch> batches = new ArrayList<>();
-//                List<BatchItem> batchItems = new ArrayList<>();
-//                List<Category> categories = new ArrayList<>();
-//                List<Equipment> equipments = new ArrayList<>();
-//                List<ItemGroup> itemGroups = new ArrayList<>();
 //                List<Partner> partners = new ArrayList<>();
-//                List<PartnerEquipment> partnerEquipments = new ArrayList<>();
-//                List<Position> positions = new ArrayList<>();
-//                List<RequestApplication> requestApplications = new ArrayList<>();
-//                List<RequestItem> requestItems = new ArrayList<>();
-//                List<Task> tasks = new ArrayList<>();
 //                List<Token> tokens = new ArrayList<>();
 //                List<User> users = new ArrayList<>();
 //                List<String> accountName = List.of("admin", "manager", "staff1", "staff2", "supplier1", "supplier2", "requester1", "requester2");
@@ -153,126 +142,156 @@ public class MwmsBeApplication implements CommandLineRunner {
 //                    tokenRepo.save(refresh);
 //                });
 //
-//                //-----------------------------Area-----------------------------//
-//                for (int i = 1; i <= 5; i++) {
+//                // ----------------------------- Area ----------------------------- //
+//                List<String> areaNames = List.of("Storage A", "Storage B", "Receiving Dock", "Quality Check", "Dispatch Zone");
+//                List<Area> areas = new ArrayList<>();
+//
+//                for (String name : areaNames) {
 //                    Area area = Area.builder()
-//                            .name("Area " + i)
-//                            .status("ACTIVE")
-//                            .square(100 * i)
+//                            .name(name)
+//                            .status(Status.AREA_AVAILABLE.getValue())
+//                            .square(200)
 //                            .build();
 //                    areas.add(area);
 //                    areaRepo.save(area);
 //                }
 //
-//                //-----------------------------Position-----------------------------//
-//                areas.forEach(area -> {
+//                // ----------------------------- Position ----------------------------- //
+//                List<Position> positions = new ArrayList<>();
+//                int index = 1;
+//                for (Area area : areas) {
 //                    for (int i = 1; i <= 3; i++) {
 //                        Position position = Position.builder()
-//                                .name("Position " + i + " in " + area.getName())
+//                                .name("Shelf " + index + " in " + area.getName())
 //                                .area(area)
 //                                .build();
 //                        positions.add(position);
 //                        positionRepo.save(position);
+//                        index++;
 //                    }
-//                });
+//                }
 //
-//                //-----------------------------Category-----------------------------//
-//                for (int i = 1; i <= 5; i++) {
+//                // ----------------------------- Category & Equipment ----------------------------- //
+//                List<String> categoryNames = List.of("Medical Devices", "Laboratory Equipment", "Personal Protective Equipment");
+//                List<Category> categories = new ArrayList<>();
+//
+//                for (String categoryName : categoryNames) {
 //                    Category category = Category.builder()
-//                            .code("CAT-" + i)
-//                            .name("Category " + i)
-//                            .description("Description for category " + i)
+//                            .code("CAT-" + categoryName.replace(" ", "-").toUpperCase())
+//                            .name(categoryName)
+//                            .description("Various types of " + categoryName)
 //                            .build();
 //                    categories.add(category);
 //                    categoryRepo.save(category);
 //                }
 //
-//                //-----------------------------Equipment-----------------------------//
-//                categories.forEach(category -> {
+//                List<Equipment> equipments = new ArrayList<>();
+//                for (Category category : categories) {
 //                    for (int i = 1; i <= 2; i++) {
 //                        Equipment equipment = Equipment.builder()
 //                                .code("EQ-" + i + "-" + category.getCode())
-//                                .name("Equipment " + i)
-//                                .description("Description for equipment " + i)
-//                                .price(100.0 * i)
+//                                .name(category.getName() + " Model " + i)
+//                                .description("High-quality " + category.getName() + " Model " + i)
+//                                .price(5000.0 * i)
 //                                .unit("pcs")
 //                                .category(category)
+//                                .status(Status.EQUIPMENT_ACTIVE.getValue())
 //                                .build();
 //                        equipments.add(equipment);
 //                        equipmentRepo.save(equipment);
 //                    }
-//                });
+//                }
 //
-//                //-----------------------------RequestApplication-----------------------------//
+//                // ----------------------------- Request Application ----------------------------- //
+//                List<RequestApplication> requestApplications = new ArrayList<>();
 //                for (int i = 1; i <= 3; i++) {
 //                    RequestApplication requestApplication = RequestApplication.builder()
 //                            .code("REQ-" + i)
-//                            .status("PENDING")
-//                            .type("ORDER")
-//                            .requestDate(LocalDate.now())
+//                            .status(Status.REQUEST_PENDING.getValue())
+//                            .type(RequestType.IMPORT.getValue())
+//                            .requestDate(LocalDate.now().minusDays(i))
 //                            .lastModifiedDate(LocalDate.now())
 //                            .build();
 //                    requestApplications.add(requestApplication);
 //                    requestApplicationRepo.save(requestApplication);
 //                }
 //
-//                //-----------------------------ItemGroup-----------------------------//
-//                requestApplications.forEach(request -> {
-//                    ItemGroup itemGroup = ItemGroup.builder()
-//                            .requestApplication(request)
-//                            .deliveryDate(LocalDate.now().plusDays(3))
-//                            .carrierName("Carrier " + request.getCode())
-//                            .carrierPhone("0909-" + request.getCode())
-//                            .build();
-//                    itemGroups.add(itemGroup);
-//                    itemGroupRepo.save(itemGroup);
-//                });
+//                // ----------------------------- Item Group ----------------------------- //
+//                List<ItemGroup> itemGroups = new ArrayList<>();
+//                Random random = new Random();
 //
-//                //-----------------------------RequestItem-----------------------------//
-//                itemGroups.forEach(group -> equipments.forEach(equipment -> {
-//                    Partner partner = partners.stream()
-//                            .filter(p -> "supplier".equals(p.getType()))
-//                            .findFirst()
-//                            .orElse(null);
+//                for (RequestApplication request : requestApplications) {
+//                    int numGroups = random.nextInt(3) + 1;
 //
-//                    RequestItem requestItem = RequestItem.builder()
-//                            .quantity(5)
-//                            .unitPrice(100.0)
-//                            .equipment(equipment)
-//                            .itemGroup(group)
-//                            .partner(partner)
-//                            .length(10)
-//                            .width(5)
-//                            .build();
-//
-//                    requestItems.add(requestItem);
-//                    requestItemRepo.save(requestItem);
-//                }));
-//
-//                //-----------------------------Batch-----------------------------//
-//                positions.forEach(position -> {
-//                    for (int i = 1; i == 1; i++) {
-//                        if (requestItems.isEmpty()) {
-//                            break;
-//                        }
-//
-//                        RequestItem requestItem = requestItems.remove(0);
-//
-//                        Batch batch = Batch.builder()
-//                                .code("BATCH-" + i)
-//                                .equipmentQty(10 * i)
-//                                .createdDate(LocalDate.now())
-//                                .position(position)
-//                                .requestItem(requestItem)
+//                    for (int i = 1; i <= numGroups; i++) {
+//                        ItemGroup itemGroup = ItemGroup.builder()
+//                                .requestApplication(request)
+//                                .deliveryDate(LocalDate.now().plusDays(random.nextInt(5) + 3))
+//                                .carrierName("Carrier " + i + " for " + request.getCode())
+//                                .carrierPhone("0912-345-" + (600 + random.nextInt(400)))
 //                                .build();
 //
-//                        batches.add(batch);
-//                        batchRepo.save(batch);
+//                        itemGroups.add(itemGroup);
+//                        itemGroupRepo.save(itemGroup);
 //                    }
-//                });
+//                }
 //
-//                //-----------------------------BatchItem-----------------------------//
-//                batches.forEach(batch -> {
+//
+//                // ----------------------------- Request Items ----------------------------- //
+//                List<RequestItem> requestItems = new ArrayList<>();
+//                List<Partner> suppliers = partnerRepo.findAll()
+//                        .stream()
+//                        .filter(p -> "supplier".equalsIgnoreCase(p.getType()))
+//                        .toList();
+//
+//                Random random2 = new Random();
+//
+//                for (ItemGroup group : itemGroups) {
+//                    for (Equipment equipment : equipments) {
+//                        if (suppliers.isEmpty()) {
+//                            continue;
+//                        }
+//
+//                        Partner randomPartner = suppliers.get(random.nextInt(suppliers.size()));
+//
+//                        RequestItem requestItem = RequestItem.builder()
+//                                .quantity(random2.nextInt(16) + 5)
+//                                .unitPrice(500.0 + (random.nextDouble() * 4500.0))
+//                                .equipment(equipment)
+//                                .itemGroup(group)
+//                                .partner(randomPartner)
+//                                .length(random2.nextInt(41) + 10)
+//                                .width(random2.nextInt(21) + 10)
+//                                .build();
+//
+//                        requestItems.add(requestItem);
+//                        requestItemRepo.save(requestItem);
+//                    }
+//                }
+//
+//
+//                // ----------------------------- Batch ----------------------------- //
+//                List<Batch> batches = new ArrayList<>();
+//                int batchIndex = 1;
+//                for (Position position : positions) {
+//                    if (requestItems.isEmpty()) break;
+//
+//                    RequestItem requestItem = requestItems.remove(0);
+//                    Batch batch = Batch.builder()
+//                            .code("BATCH-" + batchIndex)
+//                            .equipmentQty(20)
+//                            .createdDate(LocalDate.now())
+//                            .position(position)
+//                            .requestItem(requestItem)
+//                            .build();
+//                    batches.add(batch);
+//                    batchRepo.save(batch);
+//                    batchIndex++;
+//                }
+//
+//                // ----------------------------- Batch Item ----------------------------- //
+//                List<BatchItem> batchItems = new ArrayList<>();
+//                for (Batch batch : batches) {
 //                    for (int i = 1; i <= 3; i++) {
 //                        BatchItem batchItem = BatchItem.builder()
 //                                .serialNumber("SN-" + i + "-" + batch.getCode())
@@ -282,23 +301,55 @@ public class MwmsBeApplication implements CommandLineRunner {
 //                        batchItems.add(batchItem);
 //                        batchItemRepo.save(batchItem);
 //                    }
-//                });
+//                }
 //
-//                //-----------------------------Task-----------------------------//
-//                itemGroups.forEach(group -> {
+//                // ----------------------------- Task ----------------------------- //
+//                List<Task> tasks = new ArrayList<>();
+//                int count = 1;
+//
+//                for (ItemGroup group : itemGroups) {
+//                    User staff = userRepo.findAll()
+//                            .stream()
+//                            .filter(u -> u.getAccount().getRole() == Role.STAFF)
+//                            .findFirst()
+//                            .orElse(null);
+//
+//                    String baseCode = "TASK-" + group.getRequestApplication().getCode();
+//                    String uniqueCode = baseCode + "-" + count;
+//
+//                    while (taskRepo.existsByCode(uniqueCode)) {
+//                        count++;
+//                        uniqueCode = baseCode + "-" + count;
+//                    }
+//
 //                    Task task = Task.builder()
-//                            .name("Task for " + group.getRequestApplication().getCode())
-//                            .code("TASK-" + group.getRequestApplication().getCode())
-//                            .description("Task description")
+//                            .code(uniqueCode)
+//                            .description("Verify and check items")
 //                            .status(Status.TASK_ASSIGNED.getValue())
-//                            .user(accountRepo.findAll().stream().filter(acc -> acc.getRole().name().equalsIgnoreCase(Role.STAFF.name())).findFirst().get().getUser())
+//                            .user(staff)
 //                            .assignedDate(LocalDate.now())
 //                            .itemGroup(group)
 //                            .build();
 //                    tasks.add(task);
 //                    taskRepo.save(task);
-//                });
-//            }
+//                }
+//
+//
+//                // ----------------------------- Partner Equipment ----------------------------- //
+//                List<PartnerEquipment> partnerEquipments = new ArrayList<>();
+//                List<Partner> partnerList = partnerRepo.findAll();
+//
+//                for (Partner partner : partnerList) {
+//                    for (Equipment equipment : equipments) {
+//                        PartnerEquipment pe = PartnerEquipment.builder()
+//                                .partner(partner)
+//                                .equipment(equipment)
+//                                .build();
+//                        partnerEquipments.add(pe);
+//                    }
+//                }
+//                partnerEquipmentRepo.saveAll(partnerEquipments);
+//            };
 //        };
 //    }
 }
