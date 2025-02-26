@@ -10,12 +10,13 @@
 }
 
 .importTable {
-    max-height: 400px;
+    max-height: 300px;
     width: 100%;
     overflow-x: auto;
     display: block;
     padding: 20px 0;
 }
+
 .importTable::-webkit-scrollbar {
     width: 0;
     background: transparent;
@@ -112,7 +113,7 @@
     background: transparent;
 }
 .addCard{
-    max-height: 450px;
+    max-height: 350px;
     overflow-x: auto;
     display: block;
 }
