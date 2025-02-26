@@ -73,11 +73,38 @@
     margin: 0;
 }
 
-/* detail modal */
-.detail thead tr th{
+/* group modal */
+.group_table{
+
+}
+
+.group_table thead tr th{
     text-align: center;
 }
 
-.detail tbody tr td:nth-child(n + 2):nth-child(-n + 3){
-    text-align: left;
+.group_table tbody tr td{
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* detail modal */
+.detail{
+    overflow-y: scroll;
+    max-height: 50vh;
+}
+
+.detail::-webkit-scrollbar {
+    display: none;
+}
+
+.detail h5 span,
+.detail h6 span{
+    font-weight: bold;
+}
+
+.detail h5 input,
+.detail h5 select,
+.detail h5 textarea{
+    width: 100% !important;
+    margin-top: 1vh;
 }

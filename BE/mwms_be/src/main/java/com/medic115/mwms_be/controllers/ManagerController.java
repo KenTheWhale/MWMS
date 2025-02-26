@@ -93,11 +93,17 @@ public class ManagerController {
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
-//    @GetMapping("/staff/list")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> getStaffList() {
-//        return managerService.getStaffList();
-//    }
+    @GetMapping("/staff/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getStaffList() {
+        return managerService.getStaffList();
+    }
+
+    @PostMapping("/staff/assign")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> assignStaff(@RequestBody AssignStaffRequest request) {
+        return managerService.assignStaff(request);
+    }
 
     //-------------------------------------------------Task-------------------------------------------------//
 
@@ -145,11 +151,11 @@ public class ManagerController {
         return managerService.cancelImportRequest(request);
     }
 
-//    @PostMapping("/request/import")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
-//        return managerService.createImportRequest(request);
-//    }
+    @PostMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
+        return managerService.createImportRequest(request);
+    }
 //
 //    @PutMapping("/request/import")
 //    @PreAuthorize("hasRole('manager')")
@@ -194,5 +200,11 @@ public class ManagerController {
         AreaResponse response = areaService.updateArea(id, areaRequest);
         return ResponseEntity.ok(response);
     }
-
+    @GetMapping("/supplier")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getListSupplier() {
+        return managerService.getListSupplier();
+    }
 }
+
+
