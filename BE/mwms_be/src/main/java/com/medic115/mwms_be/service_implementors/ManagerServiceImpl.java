@@ -204,7 +204,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request) {
-        Category category = categoryRepo.findByName(request.getCategory());
+        Category category = categoryRepo.findById(request.getCategoryId()).orElse(null);
 //        String error = CategoryValidation.validateCategory(request, equipmentRepo);
 //        if (error != null) {
 //            return ResponseEntity.badRequest().body(
@@ -221,6 +221,7 @@ public class ManagerServiceImpl implements ManagerService {
                         .category(category)
                         .unit(request.getUnit())
                         .price(request.getPrice())
+                        .status(Status.EQUIPMENT_ACTIVE.getValue())
                         .build()
         );
         return ResponseEntity.ok().body(

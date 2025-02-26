@@ -17,6 +17,7 @@ import Task from "./components/manager/Task.jsx";
 import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
+import Request from "./components/partner/Request.jsx";
 import AreaPage from "./components/manager/AreaPage.jsx";
 import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';
@@ -144,11 +145,7 @@ const router = createBrowserRouter([
       },
       {
         path: "request",
-        element: (
-          <h1 className={`d-flex justify-content-center text-light`}>
-            Import Request
-          </h1>
-        ),
+        element: <Request />,
       },
     ],
   },

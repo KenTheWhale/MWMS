@@ -175,7 +175,7 @@ public class ManagerController {
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<List<AreaResponse>> getAllAreas() {
+    public ResponseEntity<List< AreaResponse>> getAllAreas() {
         List<AreaResponse> response = areaService.getAllAreas();
         return ResponseEntity.ok(response);
     }

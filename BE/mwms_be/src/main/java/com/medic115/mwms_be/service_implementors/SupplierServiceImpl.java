@@ -54,13 +54,41 @@ public class SupplierServiceImpl implements SupplierService {
                             .min(LocalDate::compareTo)
                             .orElse(null);
                     map.put("deliveryDate", earliestDeliveryDate);
+
+                    List<Map<String, Object>> requestItems = request.getItemGroups().stream()
+                            .flatMap(itemGroup -> itemGroup.getRequestItems().stream())
+                            .map(requestItem -> {
+                                Map<String, Object> itemMap = new HashMap<>();
+                                itemMap.put("id", requestItem.getId());
+                                itemMap.put("quantity", requestItem.getQuantity());
+                                itemMap.put("unitPrice", requestItem.getUnitPrice());
+
+                                if (requestItem.getEquipment() != null) {
+                                    itemMap.put("equipmentName", requestItem.getEquipment().getName());
+                                }
+
+                                if (requestItem.getPartner() != null) {
+                                    itemMap.put("partnerName", requestItem.getPartner().getUser().getName());
+                                }
+
+                                itemMap.put("length", requestItem.getLength());
+                                itemMap.put("width", requestItem.getWidth());
+
+                                return itemMap;
+                            })
+                            .toList();
+
+                    map.put("requestItems", requestItems);
+
                     return map;
                 }).toList();
+
         return ResponseEntity.ok(ResponseObject.builder()
                 .message("Get request list success")
                 .data(data)
                 .build());
     }
+
 
     @Override
     public ResponseEntity<ResponseObject> changeRequestStatus(ChangeWarehouseRequestStatusRequest request) {
