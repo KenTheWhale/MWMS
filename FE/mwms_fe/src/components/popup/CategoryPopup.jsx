@@ -9,6 +9,18 @@ const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelet
         description: ''
     });
 
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        let newErrors = {};
+        if (!editedCategory.name.trim()) newErrors.name = "Name is required";
+        if (!editedCategory.code) newErrors.code = "Category is required";
+        if (!editedCategory.description.trim()) newErrors.description = "Description is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     useEffect(() => {
         if (actionType === 'edit' && category) {
             setEditedCategory({
@@ -35,9 +47,8 @@ const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelet
     };
 
     const handleSave = () => {
-        console.log(editedCategory)
+        if (!validateForm()) return;
         onSave(editedCategory);
-        console.log(editedCategory)
         handleClose();
     };
 
@@ -71,7 +82,9 @@ const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelet
                                 name="name"
                                 value={editedCategory.name}
                                 onChange={handleChange}
+                                isInvalid={errors.name}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -81,7 +94,9 @@ const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelet
                                 name="code"
                                 value={editedCategory.code}
                                 onChange={handleChange}
+                                isInvalid={errors.code}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.code}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -91,7 +106,9 @@ const CategoryPopup = ({category, show, handleClose, actionType, onSave, onDelet
                                 name="description"
                                 value={editedCategory.description}
                                 onChange={handleChange}
+                                isInvalid={errors.description}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.description}</Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 );
