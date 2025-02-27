@@ -102,6 +102,12 @@ public class ManagerController {
 
     //-------------------------------------------------Staff-------------------------------------------------//
 
+    @GetMapping("/staff/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getStaffList() {
+        return managerService.getStaffList();
+    }
+    
     @PostMapping("/staff/assign")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> assignStaff(@RequestBody AssignStaffRequest request) {
