@@ -22,7 +22,7 @@ public class Position {
     String name;
 
 
-    @OneToMany(mappedBy = "position", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "position")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Batch> batches;
