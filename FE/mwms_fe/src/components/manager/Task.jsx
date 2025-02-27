@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {getTaskList} from "../../services/TaskService.js";
 import {getUnAssignedItemGroup} from "../../services/ManagerService.js";
 import {MdOutlineAssignmentInd} from "react-icons/md";
-import {getStaffList} from "../../services/StaffService.js";
+import {assignStaff, getStaffList} from "../../services/StaffService.js";
 import {SearchBarNoSelector} from "../ui/SearchBarNoSelector.jsx";
 import {InputLabel, MenuItem, OutlinedInput, Select, TextField} from "@mui/material";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
@@ -77,7 +77,7 @@ function RenderTable({tasks}) {
 function RenderGroupModal({modalVisible, CloseGroupModal, OpenDetailModal, groups, setGroupFunc}) {
 
     return (
-        <Modal show={modalVisible} onHide={CloseGroupModal} size={"xl"} centered>
+        <Modal show={modalVisible} onHide={() => CloseGroupModal('group', false)} size={"xl"} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Group List</Modal.Title>
             </Modal.Header>
@@ -125,10 +125,26 @@ function RenderGroupModal({modalVisible, CloseGroupModal, OpenDetailModal, group
 }
 
 function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
-    const [selectedStaff, setSelectedStaff] = useState("")
-    const [assignedStaffArea, setAssignedStaffArea] = useState(false)
-    // const [selectedDate, setSelectedDate] = useState(new Date())
+    const [selectedAssignData, setSelectedAssignData] = useState({
+        staffId: 0,
+        description: '',
+        assignDate: dayjs().add(1, "day"),
+    })
+    const [isAssignOpen, setIsAssignOpen] = useState(false)
 
+    const handleAssignStaff = async (staffId, groupId, description, assignDate) => {
+        try {
+            const date = assignDate.format('YYYY-MM-DD');
+            const res = await assignStaff(staffId, groupId, description, date);
+            if (res) {
+                alert(res.message);
+                CloseDetailModal("detail", false)
+            }
+
+        } catch (err) {
+            alert(err.response.data.message)
+        }
+    }
 
     return (
         <Modal show={modalVisible} backdrop={"static"} keyboard={false} size={"lg"} centered>
@@ -220,21 +236,23 @@ function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
                         size={"small"}
                     />
                 </h5>
-                <Button variant={"primary"} onClick={() => setAssignedStaffArea(!assignedStaffArea)}>Assign</Button>
+                <Button variant={"primary"} onClick={() => setIsAssignOpen(!isAssignOpen)}>Assign</Button>
                 {
-                    assignedStaffArea &&
+                    isAssignOpen &&
                     <>
                         <h5>
                             <InputLabel shrink>Staff</InputLabel>
                             <Select
-                                value={selectedStaff}
-                                onChange={(e) => setSelectedStaff(e.target.value)}
+                                value={selectedAssignData.staffId}
+                                onChange={(e) => setSelectedAssignData({
+                                    ...selectedAssignData,
+                                    staffId: e.target.value
+                                })}
                                 autoWidth
                                 input={<OutlinedInput/>}
                                 displayEmpty
-                                className={style.select}
                             >
-                                <MenuItem value="">
+                                <MenuItem disabled value={0}>
                                     <em>None</em>
                                 </MenuItem>
                                 {staffs.map((staff, index) => (
@@ -249,14 +267,22 @@ function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
                                 maxRows={4}
                                 fullWidth
                                 size={"small"}
-
+                                onChange={(e) => setSelectedAssignData({
+                                    ...selectedAssignData,
+                                    description: e.target.value
+                                })}
+                                value={selectedAssignData.description}
                             />
                         </h5>
                         <h5>
                             <InputLabel shrink>Assign date</InputLabel>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"en"}>
                                 <DatePicker
-                                    defaultValue={dayjs()} disablePast/>
+                                    defaultValue={selectedAssignData.assignDate}
+                                    minDate={dayjs().add(1, 'day')}
+                                    format={'DD-MM-YYYY'}
+                                    onChange={(e) => setSelectedAssignData({...selectedAssignData, assignDate: e})}
+                                />
                             </LocalizationProvider>
                         </h5>
                     </>
@@ -304,7 +330,14 @@ function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="danger" onClick={() => CloseDetailModal("detail", false)}>Back</Button>
-                <Button variant="success">Save</Button>
+                <Button variant={selectedAssignData.staffId === 0 ? "dark" : "success"} onClick={
+                    () => handleAssignStaff(
+                        selectedAssignData.staffId,
+                        group.data.id,
+                        selectedAssignData.description,
+                        selectedAssignData.assignDate
+                    )
+                } disabled={selectedAssignData.staffId === 0}>Save</Button>
             </Modal.Footer>
         </Modal>
     )
@@ -333,7 +366,7 @@ export default function Task() {
         }
 
         loadGrp().then(res => setGroups(res.data));
-    }, [])
+    }, [modalVisible])
 
     //fetch staff
     useEffect(() => {
@@ -342,7 +375,7 @@ export default function Task() {
         }
 
         getStaffs().then(res => setStaffs(res.data))
-    }, [])
+    }, [modalVisible])
 
     //fetch task
     useEffect(() => {
@@ -351,14 +384,14 @@ export default function Task() {
         }
 
         fetchTasks().then(res => setTasks(res.data));
-    }, [])
+    }, [modalVisible])
 
-    function SetCurrentGroup(data, index){
+    function SetCurrentGroup(data, index) {
         setCurrentGrp({...currentGrp, data: data, index: index});
     }
 
-    function HandleModal(modalType, isOpen){
-        switch (modalType){
+    function HandleModal(modalType, isOpen) {
+        switch (modalType) {
             case "group":
                 isOpen ?
                     setModalVisible({...modalVisible, group: true, detail: false}) :
@@ -397,11 +430,11 @@ export default function Task() {
             {
                 modalVisible.detail &&
                 <RenderDetailModal
-                group={currentGrp}
-                modalVisible={modalVisible.detail}
-                staffs={staffs}
-                CloseDetailModal={HandleModal}
-            />
+                    group={currentGrp}
+                    modalVisible={modalVisible.detail}
+                    staffs={staffs}
+                    CloseDetailModal={HandleModal}
+                />
             }
         </div>
     )
