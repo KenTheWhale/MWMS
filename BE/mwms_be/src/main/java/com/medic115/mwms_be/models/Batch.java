@@ -29,14 +29,16 @@ public class Batch {
     LocalDate createdDate;
 
     @OneToOne
+            (cascade = CascadeType.MERGE)
     @JoinColumn(name = "item_id")
     RequestItem requestItem;
 
     @ManyToOne
+            (cascade = CascadeType.MERGE)
     @JoinColumn(name = "`position_id`")
     Position position;
 
-    @OneToMany(mappedBy = "batch")
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<BatchItem> batchItems;

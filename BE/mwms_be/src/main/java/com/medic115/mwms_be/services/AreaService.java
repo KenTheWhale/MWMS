@@ -15,4 +15,6 @@ public interface AreaService {
 
     AreaResponse updateArea(Integer id, AreaRequest request);
 
+    AreaResponse deleteArea(Integer id, String status);
+
 }

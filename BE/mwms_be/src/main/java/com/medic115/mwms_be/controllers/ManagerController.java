@@ -2,16 +2,19 @@ package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.AreaResponse;
+import com.medic115.mwms_be.dto.response.BatchItemResponse;
+import com.medic115.mwms_be.dto.response.PositionResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
+import com.medic115.mwms_be.services.BatchService;
 import com.medic115.mwms_be.services.ManagerService;
+import com.medic115.mwms_be.services.PositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/v1/manager")
@@ -21,6 +24,10 @@ public class ManagerController {
     private final ManagerService managerService;
 
     private final AreaService areaService;
+
+    private final PositionService positionService;
+
+    private final BatchService batchService;
 
     //-------------------------------------------------Category-------------------------------------------------//
 
@@ -93,12 +100,13 @@ public class ManagerController {
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
+
     @GetMapping("/staff/list")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> getStaffList() {
         return managerService.getStaffList();
     }
-
+    
     @PostMapping("/staff/assign")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> assignStaff(@RequestBody AssignStaffRequest request) {
@@ -114,48 +122,48 @@ public class ManagerController {
     }
 
     //-------------------------------------------------Request-------------------------------------------------//
+
+//    @GetMapping("/request/import")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestImport() {
+//        return managerService.getAllRequestImport();
+//    }
 //
-    @GetMapping("/request/import")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestImport() {
-        return managerService.getAllRequestImport();
-    }
-
-    @GetMapping("/request/export")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestExport() {
-        return managerService.getAllRequestExport();
-    }
-
-    @PostMapping("/request/filter")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
-        return managerService.filterRequestByRequestDate(request);
-    }
-
-    @PostMapping("/request/detail")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
-        return managerService.getRequestDetailByCode(request);
-    }
-
-    @PutMapping("/request/approve")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> approveImportRequest(@RequestBody ApproveImportRequest request) {
-        return managerService.approveImportRequest(request);
-    }
-
-    @PutMapping("/request/cancel")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> cancelImportRequest(@RequestBody CancelImportRequest request) {
-        return managerService.cancelImportRequest(request);
-    }
-
-    @PostMapping("/request/import")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
-        return managerService.createImportRequest(request);
-    }
+//    @GetMapping("/request/export")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestExport() {
+//        return managerService.getAllRequestExport();
+//    }
+//
+//    @PostMapping("/request/filter")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getAllRequestFilter(@RequestBody FilterRequestApplicationRequest request) {
+//        return managerService.filterRequestByRequestDate(request);
+//    }
+//
+//    @PostMapping("/request/detail")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> getRequestDetail(@RequestBody GetRequestDetailRequest request) {
+//        return managerService.getRequestDetailByCode(request);
+//    }
+//
+//    @PutMapping("/request/approve")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> approveImportRequest(@RequestBody ApproveImportRequest request) {
+//        return managerService.approveImportRequest(request);
+//    }
+//
+//    @PutMapping("/request/cancel")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> cancelImportRequest(@RequestBody CancelImportRequest request) {
+//        return managerService.cancelImportRequest(request);
+//    }
+//
+//    @PostMapping("/request/import")
+//    @PreAuthorize("hasRole('manager')")
+//    public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
+//        return managerService.createImportRequest(request);
+//    }
 //
 //    @PutMapping("/request/import")
 //    @PreAuthorize("hasRole('manager')")
@@ -175,7 +183,7 @@ public class ManagerController {
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<List< AreaResponse>> getAllAreas() {
+    public ResponseEntity<List<AreaResponse>> getAllAreas() {
         List<AreaResponse> response = areaService.getAllAreas();
         return ResponseEntity.ok(response);
     }
@@ -200,11 +208,70 @@ public class ManagerController {
         AreaResponse response = areaService.updateArea(id, areaRequest);
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/area/{id}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<AreaResponse> deleteArea(@PathVariable("id") Integer id, @RequestParam String status) {
+        AreaResponse response = areaService.deleteArea(id, status);
+        return ResponseEntity.ok(response);
+    }
+
+    //----------------------------------------------------------Position------------------------------------------//
+    @GetMapping("/position/{areaId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<List<PositionResponse>> getAllPositions(@PathVariable("areaId") Integer areaId) {
+        List<PositionResponse> responses = positionService.getAllPosition(areaId);
+        return ResponseEntity.ok(responses);
+    }
+
+
+    @GetMapping("/position/individual/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<PositionResponse> getPositionById(@PathVariable("positionId") Integer positionId) {
+        PositionResponse response = positionService.getPosition(positionId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/position")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> createPosition(@RequestBody PositionRequest positionRequest) {
+        positionService.createPosition(positionRequest);
+        return ResponseEntity.ok("Create position successful");
+    }
+
+    @PutMapping("/position/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
+        positionService.updatePosition(positionId, positionRequest);
+        return ResponseEntity.ok("Update position successful");
+    }
+
+    @DeleteMapping("/position/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> deletePosition(@PathVariable("positionId") Integer positionId) {
+        positionService.deletePosition(positionId);
+        return ResponseEntity.ok("Delete position successful");
+    }
+
+
+    //------------------------------------------BatchItem----------------------------------------------//
+
+    @GetMapping("/batch-item/{batchId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<List<BatchItemResponse>> getAlBatchItems(@PathVariable("batchId") Integer batchId) {
+        return ResponseEntity.ok(batchService.getAllBatchItems(batchId));
+    }
+    //-----------------------------------------------------
     @GetMapping("/supplier")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> getListSupplier() {
         return managerService.getListSupplier();
     }
+
+    @DeleteMapping("/batch/{batchId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> deleteBatch(@PathVariable("batchId") Integer batchId) {
+        batchService.deleteBatch(batchId);
+        return ResponseEntity.ok("Delete batch successful");
+    }
 }
-
-

@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { axiosClient } from "../../config/api";
 import { Button, Form, Modal, ModalBody, Table } from "react-bootstrap";
-import { MdModeEditOutline, MdDeleteOutline, MdRestore, MdAddCircleOutline } from "react-icons/md";
+import {
+  MdModeEditOutline,
+  MdDeleteOutline,
+  MdRestore,
+  MdAddCircleOutline,
+} from "react-icons/md";
+import { TbScanPosition } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 const AreaPage = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
-
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
@@ -21,7 +27,7 @@ const AreaPage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
-    status: "ACTIVE", 
+    status: "ACTIVE",
     square: 0,
   });
 
@@ -76,9 +82,14 @@ const AreaPage = () => {
   const handleToggleDelete = async (area) => {
     try {
       const newStatus = area.status === "DELETED" ? "ACTIVE" : "DELETED";
-      await axiosClient.put(`/manager/area/${area.id}`, { ...area, status: newStatus });
+      await axiosClient.put(`/manager/area/${area.id}`, {
+        ...area,
+        status: newStatus,
+      });
       fetchData();
-      toast.info(`Area ${newStatus === "DELETED" ? "deleted" : "restored"} successfully!`);
+      toast.info(
+        `Area ${newStatus === "DELETED" ? "deleted" : "restored"} successfully!`
+      );
     } catch (error) {
       console.error("Error toggling delete:", error);
       toast.error("Error toggling delete");
@@ -119,12 +130,17 @@ const AreaPage = () => {
     <>
       <div style={{ margin: "20px 10px" }}>
         <Button variant="success" onClick={() => setShowCreate(true)}>
-          <MdAddCircleOutline style={{ fontSize: "20px", marginRight: "5px" }} />
+          <MdAddCircleOutline
+            style={{ fontSize: "20px", marginRight: "5px" }}
+          />
           Create New Area
         </Button>
       </div>
 
-      <Table className="text-center" style={{ marginLeft: "10px", marginTop: "50px" }}>
+      <Table
+        className="text-center"
+        style={{ marginLeft: "10px", marginTop: "50px" }}
+      >
         <thead>
           <tr className="table-success">
             <th>ID</th>
@@ -137,16 +153,24 @@ const AreaPage = () => {
         <tbody>
           {data.length > 0 ? (
             data.map((area) => (
-              <tr key={area.id} style={{ opacity: area.status === "DELETED" ? 0.5 : 1 }}>
+              <tr
+                key={area.id}
+                style={{ opacity: area.status === "DELETED" ? 0.5 : 1 }}
+              >
                 <td>{area.id}</td>
                 <td>{area.name}</td>
                 <td>{area.status}</td>
                 <td>{area.square}&#178;</td>
                 <td>
                   <MdModeEditOutline
-                    onClick={area.status !== "DELETED" ? () => handleOpen(area.id) : null}
+                    onClick={
+                      area.status !== "DELETED"
+                        ? () => handleOpen(area.id)
+                        : null
+                    }
                     style={{
-                      cursor: area.status === "DELETED" ? "not-allowed" : "pointer",
+                      cursor:
+                        area.status === "DELETED" ? "not-allowed" : "pointer",
                       fontSize: "30px",
                       marginRight: "10px",
                       color: area.status === "DELETED" ? "#ccc" : "black",
@@ -171,6 +195,17 @@ const AreaPage = () => {
                       }}
                     />
                   )}
+                  <Link to={`/manager/position/${area.id}`}>
+                    <TbScanPosition
+                      style={{
+                        fontSize: "30px",
+                        marginLeft: "10px",
+                        color: "blue",
+                        cursor:
+                          area.status === "DELETED" ? "not-allowed" : "pointer",
+                      }}
+                    />
+                  </Link>
                 </td>
               </tr>
             ))
@@ -295,14 +330,19 @@ const AreaPage = () => {
         </Modal.Header>
         <ModalBody>
           <p>
-            Are you sure you want to {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"}{" "}
+            Are you sure you want to{" "}
+            {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"}{" "}
             area "{selectedDeleteArea?.name}"?
           </p>
           <div className="d-flex justify-content-end">
             <Button variant="secondary" onClick={() => setShowDelete(false)}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleDeleteConfirm} className="ms-2">
+            <Button
+              variant="danger"
+              onClick={handleDeleteConfirm}
+              className="ms-2"
+            >
               Confirm
             </Button>
           </div>

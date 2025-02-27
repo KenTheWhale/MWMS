@@ -42,4 +42,6 @@ public class ItemGroup {
 
     @Column(name = "`carrier_phone`")
     String carrierPhone;
+
+    String status;
 }

@@ -106,5 +106,22 @@
 .detail h5 select,
 .detail h5 textarea{
     width: 100% !important;
-    margin-top: 1vh;
+    margin-top: 0.5vh;
+}
+
+.detail h5 ul li{
+    width: 100% !important;
+}
+
+.detail h5 label{
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: black;
+}
+
+.detail h5{
+    margin-top: 3vh;
+}
+
+.detail h5 fieldset{
 }

@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface SupplierService {
 
-    ResponseEntity<ResponseObject> getRequestList(GetWarehouseRequest request);
-
-    ResponseEntity<ResponseObject> changeRequestStatus(ChangeWarehouseRequestStatusRequest request);
+//    ResponseEntity<ResponseObject> getRequestList(GetWarehouseRequest request);
+//
+//    ResponseEntity<ResponseObject> changeRequestStatus(ChangeWarehouseRequestStatusRequest request);
 
 }
