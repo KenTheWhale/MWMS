@@ -15,6 +15,8 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
         description: ''
     });
 
+    const [errors, setErrors] = useState({});
+
     // const categories = [
     //     'Diagnostic Equipment',
     //     'Surgical Equipment',
@@ -30,6 +32,19 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
     // ];
 
     const [categories, setCategories] = useState([]);
+
+    const validateForm = () => {
+        let newErrors = {};
+        if (!editedEquipment.name.trim()) newErrors.name = "Name is required";
+        if (!editedEquipment.category) newErrors.category = "Category is required";
+        if (!editedEquipment.unit || editedEquipment.unit <= 0) newErrors.unit = "Unit is required";
+        if (!editedEquipment.price || editedEquipment.price <= 0) newErrors.price = "Price is required";
+        if (!editedEquipment.code.trim()) newErrors.code = "Code is required";
+        if (!editedEquipment.description) newErrors.description = "Description date is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     useEffect(() => {
         if (actionType === 'edit' && equipment) {
@@ -74,6 +89,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
 
     const handleSave = async () => {
         try {
+            if (!validateForm()) return;
             let updatedEquipment = editedEquipment;
             if (actionType === 'add') {
                 await addEquipment(
@@ -125,7 +141,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="name"
                                 value={editedEquipment.name}
                                 onChange={handleChange}
+                                isInvalid={!!errors.name}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -135,7 +153,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="code"
                                 value={editedEquipment.code}
                                 onChange={handleChange}
+                                isInvalid={!!errors.code}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.code}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -144,6 +164,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="category"
                                 value={editedEquipment.category}
                                 onChange={handleChange}
+                                isInvalid={!!errors.category}
                             >
                                 <option value="">Select a category</option>
                                 {categories.map((category, index) => (
@@ -152,6 +173,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                     </option>
                                 ))}
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">{errors.category}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -161,7 +183,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="unit"
                                 value={editedEquipment.unit}
                                 onChange={handleChange}
+                                isInvalid={!!errors.unit}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.unit}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -171,7 +195,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="price"
                                 value={editedEquipment.price}
                                 onChange={handleChange}
+                                isInvalid={!!errors.price}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.price}</Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -181,7 +207,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                                 name="description"
                                 value={editedEquipment.description}
                                 onChange={handleChange}
+                                isInvalid={!!errors.description}
                             />
+                            <Form.Control.Feedback type="invalid">{errors.description}</Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 );
