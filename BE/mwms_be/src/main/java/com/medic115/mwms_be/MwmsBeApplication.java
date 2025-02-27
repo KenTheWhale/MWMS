@@ -1,9 +1,6 @@
 package com.medic115.mwms_be;
 
-import com.medic115.mwms_be.enums.RequestType;
-import com.medic115.mwms_be.enums.Role;
-import com.medic115.mwms_be.enums.Status;
-import com.medic115.mwms_be.enums.TokenType;
+import com.medic115.mwms_be.enums.*;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.JWTService;
@@ -315,12 +312,11 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .findFirst()
                             .orElse(null);
 
-                    String baseCode = "TASK-" + group.getRequestApplication().getCode();
-                    String uniqueCode = baseCode + "-" + count;
+                    String uniqueCode = CodeFormat.TASK.getValue() + count;
 
                     while (taskRepo.existsByCode(uniqueCode)) {
                         count++;
-                        uniqueCode = baseCode + "-" + count;
+                        uniqueCode = CodeFormat.TASK.getValue() + count;
                     }
 
                     Task task = Task.builder()
