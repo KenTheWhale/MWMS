@@ -883,7 +883,6 @@ public class ManagerServiceImpl implements ManagerService {
                     //request application detail
                     Map<String, Object> requestDetail = new HashMap<>();
                     requestDetail.put("code", itemGroup.getRequestApplication().getCode());
-
                     requestDetail.put("requestDate", itemGroup.getRequestApplication().getRequestDate());
                     requestDetail.put("lastModified", itemGroup.getRequestApplication().getLastModifiedDate());
                     requestDetail.put("type", itemGroup.getRequestApplication().getType());
@@ -897,7 +896,7 @@ public class ManagerServiceImpl implements ManagerService {
                     dataItem.put("cName", itemGroup.getCarrierName());
                     dataItem.put("cPhone", itemGroup.getCarrierPhone());
                     dataItem.put("delivery", itemGroup.getDeliveryDate());
-                    requestDetail.put("status", itemGroup.getStatus());
+                    dataItem.put("status", itemGroup.getStatus());
                     dataItem.put("partner", getPartnerFromGroup(itemGroup).getUser().getName());
                     dataItem.put("request", requestDetail);
                     dataItem.put("items", itemList);

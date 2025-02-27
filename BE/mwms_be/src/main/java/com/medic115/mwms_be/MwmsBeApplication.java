@@ -140,6 +140,7 @@ public class MwmsBeApplication implements CommandLineRunner {
 
                     tokenRepo.save(access);
                     tokenRepo.save(refresh);
+                    System.out.println("\u001B[31m" + access.getAccount().getUsername().toUpperCase() + ": \u001B[0m" + access.getValue());
                 });
 
                 // ----------------------------- Area ----------------------------- //
