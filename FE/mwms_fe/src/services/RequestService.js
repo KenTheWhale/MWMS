@@ -39,6 +39,11 @@ export const createRequestApplication = async (requestItems) => {
 }
 
 export const getSupplierRequestList = async (username) => {
-    const response = await axiosClient.post("/supplier/request/list", { username });
-    return response && response.status === 200 ? response.data : null;
+    const response = await axiosClient.post("/supplier/request/list", { username: username });
+    return response && response.status === 200 ? response.data.data : null;
+}
+
+export const approveRequest = async (code, status) => {
+    const response = await axiosClient.put("/supplier/request/status", { code: code, status: status });
+    return response && response.status === 200 ? response.data.data : null;
 }

@@ -8,13 +8,50 @@ import {getSupplierRequestList} from "../../services/RequestService.js";
 
 function Request() {
 
+    // const [requests, setRequest] = useState([
+    //     {
+    //         id: 1,
+    //         code: "REQ001",
+    //         requestDate: "2021-08-01",
+    //         lastModifiedDate: "2021-08-01",
+    //         status: "Pending"
+    //     },
+    //     {
+    //         id: 2,
+    //         code: "REQ002",
+    //         requestDate: "2021-08-01",
+    //         lastModifiedDate: "2021-08-01",
+    //         status: "Pending"
+    //     },
+    //     {
+    //         id: 3,
+    //         code: "REQ003",
+    //         requestDate: "2021-08-01",
+    //         lastModifiedDate: "2021-08-01",
+    //         status: "Pending"
+    //     },
+    //     {
+    //         id: 4,
+    //         code: "REQ004",
+    //         requestDate: "2021-08-01",
+    //         lastModifiedDate: "2021-08-01",
+    //         status: "Pending"
+    //     },
+    //     {
+    //         id: 5,
+    //         code: "REQ005",
+    //         requestDate: "2021-08-01",
+    //         lastModifiedDate: "2021-08-01",
+    //         status: "Pending"
+    //     }
+    // ]);
     const [requests, setRequest] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
-            let username = localStorage.getItem('username');
+            let username = localStorage.getItem('name');
             return await getSupplierRequestList(username);
         }
         fetchData().then((data) => {
@@ -47,7 +84,7 @@ function Request() {
     return (
         <div className={style.main}>
             <div className={style.title_area}>
-                <h1 className={`text-light`}>Request</h1>
+                <h1 className={`text-light`}>Warehouse Request</h1>
             </div>
             <div className={style.search_area}>
                 <div className={style.search_input}>
@@ -75,35 +112,18 @@ function Request() {
                         <th>Request Date</th>
                         <th>Last Modified Date</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {/*{requests.map((request, index) => (*/}
-                    {/*    <tr key={index}>*/}
-                    {/*        <td>{index + 1}</td>*/}
-                    {/*        <td>{request.code}</td>*/}
-                    {/*        <td>{request.requestDate}</td>*/}
-                    {/*        <td>{request.lastModifiedDate}</td>*/}
-                    {/*        <td>{request.status}</td>*/}
-                    {/*        <td>*/}
-                    {/*            <Button variant="warning"*/}
-                    {/*                    onClick={(e) => {*/}
-                    {/*                        e.stopPropagation();*/}
-                    {/*                        handleAcceptClick(request);*/}
-                    {/*                    }}>*/}
-                    {/*                <FaCheck/>*/}
-                    {/*            </Button>*/}
-                    {/*            <Button variant="danger"*/}
-                    {/*                    onClick={(e) => {*/}
-                    {/*                        e.stopPropagation();*/}
-                    {/*                        handleRejectClick(request);*/}
-                    {/*                    }}>*/}
-                    {/*                <FaX/>*/}
-                    {/*            </Button>*/}
-                    {/*        </td>*/}
-                    {/*    </tr>*/}
-                    {/*))}*/}
+                    {requests.map((request, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{request.code}</td>
+                            <td>{request.requestDate}</td>
+                            <td>{request.lastModifiedDate}</td>
+                            <td>{request.status}</td>
+                        </tr>
+                    ))}
                     </tbody>
                 </Table>
             </div>

@@ -11,7 +11,7 @@ import {
 import {FaSearch} from "react-icons/fa";
 import {GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
-import {axiosClient} from "../../config/api.jsx";
+import CustomAlert from "../CustomAlert.jsx";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -23,15 +23,9 @@ function ImportRequest() {
     const [partners, setPartners] = useState([]);
     const [equipments, setEquipments] = useState([]);
     const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertType, setAlertType] = useState("");
 
-
-    const [newRequest, setNewRequest] = useState({
-        partnerId: "",
-        equipmentId: "",
-        description: "",
-        quantity: 1,
-        unit: "",
-    });
 
     useEffect(() => {
         async function fetchData() {
@@ -117,22 +111,41 @@ function ImportRequest() {
 
     const handleSubmit = () => {
         async function createRequest() {
+
+            for (const row of rows) {
+                if (!row.partner || !row.name || !row.quantity) {
+                    setAlertMessage("Please fill in all required fields.");
+                    setAlertType("danger");
+                    return;
+                }
+            }
+
             const requestItems = rows.map(row => ({
                 equipmentId: equipments.find(e => e.name === row.name)?.id,
                 partnerId: row.partner,
                 quantity: parseInt(row.quantity, 10),
             }))
-            const response = createRequestApplication(requestItems);
-            return response.message;
+            const response = await createRequestApplication(requestItems);
+
+            if (response) {
+                setAlertMessage(response.message);
+                setAlertType("success");
+                const updatedRequests = await getImportRequest();
+                setRequestList(updatedRequests.data || []);
+            } else {
+                setAlertMessage(response.message);
+                setAlertType("danger");
+            }
         }
 
         createRequest();
         setShowAddCard(false);
-        window.location.reload();
+
     }
 
     return (
         <div className="container-fluid">
+            <CustomAlert message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
             <div className="row">
                 <h1 className="d-flex justify-content-center text-light">Import Request</h1>
             </div>
@@ -185,8 +198,10 @@ function ImportRequest() {
 
             {showAddCard && (
                 <Card className={`${style.addCard} mt-3 p-3`}>
-                    <Card.Body>
-                        <h3>Add New Request Items</h3>
+                    <Form onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
+                    }}>
                         <Table striped bordered hover>
                             <thead>
                             <tr>
@@ -203,7 +218,8 @@ function ImportRequest() {
                                 <tr key={index}>
                                     <td>
                                         <Form.Select className="m-2" value={row.partner}
-                                                     onChange={(e) => handleInputRow(index, "partner", e.target.value)}>
+                                                     onChange={(e) => handleInputRow(index, "partner", e.target.value)}
+                                                     required>
                                             <option value="">Select Partner</option>
                                             {partners.map((partner) => (
                                                 <option key={partner.partnerId} value={partner.partnerId}>
@@ -214,11 +230,9 @@ function ImportRequest() {
                                     </td>
 
                                     <td>
-                                        <Form.Select
-                                            className="m-2"
-                                            value={row.name}
-                                            onChange={(e) => handleInputRow(index, "name", e.target.value)}
-                                        >
+                                        <Form.Select className="m-2" value={row.name}
+                                                     onChange={(e) => handleInputRow(index, "name", e.target.value)}
+                                                     required>
                                             <option value="">Select Equipment</option>
                                             {equipments.map((equipment) => (
                                                 <option key={equipment.id} value={equipment.name}>
@@ -229,31 +243,17 @@ function ImportRequest() {
                                     </td>
 
                                     <td>
-                                        <Form.Control
-                                            className="m-2"
-                                            type="text"
-                                            value={row.description}
-                                            readOnly
-                                        >{equipments.description}</Form.Control>
+                                        <Form.Control className="m-2" type="text" value={row.description} readOnly/>
                                     </td>
 
                                     <td>
-                                        <Form.Control
-                                            className="m-2"
-                                            type="number"
-                                            min="1"
-                                            value={row.quantity}
-                                            onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
-                                        />
+                                        <Form.Control className="m-2" type="number" min="1" value={row.quantity}
+                                                      onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
+                                                      required/>
                                     </td>
 
                                     <td>
-                                        <Form.Control
-                                            className="m-2"
-                                            type="text"
-                                            value={row.unit}
-                                            readOnly
-                                        >{equipments.unit}</Form.Control>
+                                        <Form.Control className="m-2" type="text" value={row.unit} readOnly/>
                                     </td>
 
                                     <td>
@@ -265,11 +265,13 @@ function ImportRequest() {
                             ))}
                             </tbody>
                         </Table>
+
                         <Button variant="primary" onClick={handleAddRow}>+</Button>
-                    </Card.Body>
-                    <Card.Footer>
-                        <Button onClick={handleSubmit}>Submit</Button>
-                    </Card.Footer>
+
+                        <Card.Footer>
+                            <Button type="submit">Submit</Button>
+                        </Card.Footer>
+                    </Form>
                 </Card>
             )}
 
@@ -300,7 +302,7 @@ function ImportRequest() {
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <Card.Title>
-                                                    {group.partner} - {group.carrierName}
+                                                    Partner : {group.partner}
                                                 </Card.Title>
                                                 <Button
                                                     variant="outline-primary"
@@ -311,6 +313,10 @@ function ImportRequest() {
                                                 </Button>
                                             </div>
 
+                                            <Card.Subtitle className="mb-2 text-muted">
+                                                Carrier Name : {group.carrierName}
+
+                                            </Card.Subtitle>
                                             <Card.Subtitle className="mb-2 text-muted">
                                                 Carrier Phone: {group.carrierPhone}
                                             </Card.Subtitle>
@@ -355,6 +361,7 @@ function ImportRequest() {
                 </Modal.Footer>
             </Modal>
         </div>
+
     );
 }
 

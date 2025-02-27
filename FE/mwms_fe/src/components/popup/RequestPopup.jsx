@@ -1,66 +1,93 @@
-import { Modal, Button, Form } from 'react-bootstrap';
+import {Table, Modal, Button, Form} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import {approveRequest} from "../../services/RequestService.js";
+import {FaCheck} from "react-icons/fa";
+import {FaX} from "react-icons/fa6";
+import style from '../../styles/partner/Request.module.css';
+
 
 const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
-    // const [editedRequest, setEditedRequest] = useState({
-    //     id: '',
-    //     name: '',
-    //     code: '',
-    //     category: '',
-    //     unit: '',
-    //     price: '',
-    //     description: ''
-    // });
-    //
-    // const handleChange = (e) => {
-    //     setEditedRequest({
-    //         ...editedRequest,
-    //         [e.target.name]: e.target.value,
-    //     });
-    // };
-    //
-    // const handleSave = async () => {
-    //
-    // };
-    //
-    // const handleDelete = () => {
-    //     if (request && request.id) {
-    //         onReject(request.id);
-    //         handleClose();
-    //     }
-    // };
-    //
-    // const renderContent = () => {
-    //     if (actionType === 'view' && !request) return null;
-    //             return (
-    //                 <>
-    //                     <p><strong>Name:</strong> {request.code}</p>
-    //                     <p><strong>Category:</strong> {request.requestDate}</p>
-    //                     <p><strong>Unit:</strong> {request.lastModifiedDate}</p>
-    //                     <p><strong>Price:</strong> {request.status}</p>
-    //                 </>
-    //             );
-    // };
-    //
-    // return (
-    //     <Modal show={show} onHide={handleClose}>
-    //         <Modal.Header closeButton>
-    //             <Modal.Title>Approve Request</Modal.Title>
-    //         </Modal.Header>
-    //         <Modal.Body>
-    //             {renderContent()}
-    //         </Modal.Body>
-    //         <Modal.Footer>
-    //                 <Button variant="primary">
-    //                     Accept
-    //                 </Button>
-    //             <Button variant="primary">
-    //                     Reject
-    //                 </Button>
-    //         </Modal.Footer>
-    //     </Modal>
-    // );
+
+    const handleAccept = async () => {
+        if (!request) return;
+        const result = await approveRequest(request.code, "accepted");
+        if (result) {
+            onAccept(request.code);
+            handleClose();
+        }
+    };
+
+    const handleReject = async () => {
+        if (!request) return;
+        const result = await approveRequest(request.code, "rejected");
+        if (result) {
+            onReject(request.code);
+            handleClose();
+        }
+    };
+
+    return (
+        <Modal show={show} onHide={handleClose} size="lg">
+            <Modal.Header closeButton>
+                <Modal.Title>Approve Request</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {request ? (
+                    <>
+                        <p><strong>Request Code:</strong> {request.code}</p>
+                        <p><strong>Request Date:</strong> {request.requestDate}</p>
+                        <p><strong>Last Modified:</strong> {request.lastModifiedDate}</p>
+
+                        <h5>Request Items:</h5>
+                        <div className={style.popup_table_area}>
+                            <Table striped bordered hover >
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Equipment Name</th>
+                                    <th>Supplier</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Length(cm)</th>
+                                    <th>Width(cm)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {request.requestItems && request.requestItems.length > 0 ? (
+                                    request.requestItems.map((item, index) => (
+                                        <tr key={item.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{item.equipmentName}</td>
+                                            <td>{item.partnerName}</td>
+                                            <td>{item.quantity}</td>
+                                            <td>${item.unitPrice}</td>
+                                            <td>{item.length}</td>
+                                            <td>{item.width}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" className="text-center">No items found</td>
+                                    </tr>
+                                )}
+                                </tbody>
+                            </Table>
+                        </div>
+                    </>
+                ) : (
+                    <p>Loading...</p>
+                )}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="success" onClick={handleAccept}>
+                    <FaCheck />
+                </Button>
+                <Button variant="danger" onClick={handleReject}>
+                    <FaX />
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 RequestPopup.propTypes = {
