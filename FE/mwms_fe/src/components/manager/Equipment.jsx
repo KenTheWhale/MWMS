@@ -133,7 +133,7 @@ function Equipment() {
         fetchData().then((data) => {
             setEquipments(data);
         });
-    }, [equipments]);
+}, [equipments]);
 
     const handleRowClick = (equipment) => {
         setSelectedEquipment(equipment);
