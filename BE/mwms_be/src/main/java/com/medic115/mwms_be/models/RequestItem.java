@@ -26,7 +26,8 @@ public class RequestItem {
     @JoinColumn(name = "`equipment_id`")
     Equipment equipment;
 
-    @OneToOne(mappedBy = "requestItem")
+    @OneToOne(mappedBy = "requestItem"
+    , cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Batch batch;

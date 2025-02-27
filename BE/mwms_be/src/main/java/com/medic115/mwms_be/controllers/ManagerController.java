@@ -2,14 +2,17 @@ package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.AreaResponse;
+import com.medic115.mwms_be.dto.response.BatchItemResponse;
 import com.medic115.mwms_be.dto.response.PositionResponse;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
+import com.medic115.mwms_be.services.BatchService;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.services.PositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +27,8 @@ public class ManagerController {
     private final AreaService areaService;
 
     private final PositionService positionService;
+
+    private final BatchService batchService;
 
     //-------------------------------------------------Category-------------------------------------------------//
 
@@ -236,9 +241,32 @@ public class ManagerController {
         return ResponseEntity.ok("Update position successful");
     }
 
+    @DeleteMapping("/position/{positionId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> deletePosition(@PathVariable("positionId") Integer positionId) {
+        positionService.deletePosition(positionId);
+        return ResponseEntity.ok("Delete position successful");
+    }
+
+
+    //------------------------------------------BatchItem----------------------------------------------//
+
+    @GetMapping("/batch-item/{batchId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<List<BatchItemResponse>> getAlBatchItems(@PathVariable("batchId") Integer batchId) {
+        return ResponseEntity.ok(batchService.getAllBatchItems(batchId));
+    }
+    //-----------------------------------------------------
     @GetMapping("/supplier")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> getListSupplier() {
         return managerService.getListSupplier();
+    }
+
+    @DeleteMapping("/batch/{batchId}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<String> deleteBatch(@PathVariable("batchId") Integer batchId) {
+        batchService.deleteBatch(batchId);
+        return ResponseEntity.ok("Delete batch successful");
     }
 }
