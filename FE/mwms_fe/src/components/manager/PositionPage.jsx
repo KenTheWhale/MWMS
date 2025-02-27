@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Accordion,
   Button,
@@ -17,19 +17,20 @@ import { toast } from "react-toastify";
 const PositionPage = () => {
   const { id } = useParams();
   const [positions, setPositions] = useState([]);
+  const [chosePositionId, setChosePositionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPosition, setShowPosition] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [activeBatch, setActiveBatch] = useState(null);
-
-
+  const [showDelete, setShowDelete] = useState(false);
   const [batch, setBatch] = useState([]);
-
   const [form, setForm] = useState({
     name: null,
     areaId: null,
   });
+
+  const [activeBatchDetails, setActiveBatchDetails] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -110,10 +111,41 @@ const PositionPage = () => {
     }
   };
 
+  const handSelectBatch = async (selectedKey) => {
+    if (!selectedKey) return;
 
-  const handleToggleBatch = (id) => {
-    setActiveBatch(activeBatch === id ? null : id);
+    const batchId = parseInt(selectedKey);
+
+    if (activeBatchDetails && activeBatchDetails.batchId === batchId) {
+      return;
+    }
+
+    try {
+      setLoadingDetails(true);
+      const response = await axiosClient.get(`/manager/batch-item/${batchId}`);
+      setActiveBatchDetails(response.data);
+    } catch (error) {
+      toast.error("Something Wrong....", error);
+    } finally {
+      setLoadingDetails(false);
+    }
   };
+
+  const handleDeletePosition = async () => {
+    try {
+      const response = await axiosClient.delete(`/manager/position/${chosePositionId}`);
+      toast.success(response.data);
+      setShowDelete(false);
+      // setShowPosition(false)
+    } catch (error) {
+      toast.error("Something Wrong....", error);
+    }
+  }
+
+  const handleOpenDeleteModal = (positionId) => {
+    setShowDelete(true)
+    setChosePositionId(positionId);
+  }
 
   return (
     <>
@@ -150,7 +182,7 @@ const PositionPage = () => {
                     key={position.id}
                     className={`border rounded d-flex flex-column align-items-center justify-content-center p-2 bg-${getPositionColor(
                       position
-                    )}`}
+                    )} position-relative`}
                     style={{
                       width: "180px",
                       height: "80px",
@@ -158,6 +190,25 @@ const PositionPage = () => {
                     }}
                     onClick={() => handleShowPosition(position.id)}
                   >
+                    <span
+                      className="position-absolute bg-danger text-white rounded-circle d-flex justify-content-center align-items-center"
+                      style={{
+                        top: "5px",
+                        right: "5px",
+                        width: "20px",
+                        height: "20px",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        zIndex: 10,
+                      }}
+                      onClick={(e) => {
+                        handleOpenDeleteModal(position.id);
+                      }}
+                    >
+                      x
+                    </span>
+
+                    
                     <span className="fs-6">{position.name}</span>
                   </div>
                 ))}
@@ -169,60 +220,68 @@ const PositionPage = () => {
 
       <Modal show={showPosition} onHide={handlePositionClose}>
         <Modal.Title className="text-center">Detail Batch</Modal.Title>
-        <Modal.Header>
-          <MdDeleteOutline style={{ fontSize: "30px", color: "red" }} />
-        </Modal.Header>
         <Modal.Body>
-          <Table className="text-center">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Code</th>
-                <th>Create Date</th>
-                <th>Equipment Quantity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {batch.map((item) => (
-                <React.Fragment key={item.id}>
-                  <tr
-                    onClick={() => handleToggleBatch(item.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td>{item.id}</td>
-                    <td>{item.code}</td>
-                    <td>{item.createdDate}</td>
-                    <td>{item.equipmentQty}</td>
-                  </tr>
-                  {/* {activeBatch === item.id && (
-                    <tr>
-                      <td colSpan="4">
-                        <Accordion defaultActiveKey="0">
-                          <Accordion.Item eventKey="1">
-                            <Accordion.Header>
-                              Chi tiết Batch #{item.id}
-                            </Accordion.Header>
-                            <Accordion.Body>
-                              <p>
-                                <strong>Code:</strong> {item.code}
-                              </p>
-                              <p>
-                                <strong>Equipment Quantity:</strong>{" "}
-                                {item.equipmentQty}
-                              </p>
-                              <p>
-                                <strong>Create Date:</strong> {item.createdDate}
-                              </p>
-                            </Accordion.Body>
-                          </Accordion.Item>
-                        </Accordion>
-                      </td>
-                    </tr>
-                  )} */}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </Table>
+          <Accordion
+            defaultActiveKey="0"
+            onSelect={(selectedKey) => {
+              // Gọi hàm xử lý khi có accordion được chọn
+              if (selectedKey) {
+                handSelectBatch(selectedKey);
+              }
+            }}
+          >
+            {batch.map((item) => (
+              <Accordion.Item eventKey={item.id.toString()} key={item.id}>
+                <Accordion.Header>
+                  <div className="d-flex justify-content-between w-100">
+                    <span>{item.id}</span>
+                    <span>{item.code}</span>
+                    <span>{item.createdDate}</span>
+                    <span>{item.equipmentQty}</span>
+                  </div>
+                </Accordion.Header>
+                <Accordion.Body>
+                  <div className="batch-details p-3">
+                    <h5 className="mb-3">Chi tiết của Batch {item.code}</h5>
+                    {/* Sử dụng state để hiển thị dữ liệu chi tiết */}
+                    {activeBatchDetails != null ? (
+                      <>
+                        {loadingDetails ? (
+                          <div className="text-center">
+                            <Spinner animation="border" size="sm" />
+                            <span className="ms-2">Đang tải chi tiết...</span>
+                          </div>
+                        ) : (
+                          <Table striped bordered hover>
+                            <thead>
+                              <tr>
+                                <th>ID</th>
+                                <th>Serial number</th>
+                                <th>Import Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {activeBatchDetails.map((item) => (
+                                <tr key={item.id}>
+                                  <td>{item.id}</td>
+                                  <td>{item.serialNumber}</td>
+                                  <td>{item.importedDate}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center">
+                        <span>Đang tải dữ liệu...</span>
+                      </div>
+                    )}
+                  </div>
+                </Accordion.Body>
+              </Accordion.Item>
+            ))}
+          </Accordion>
         </Modal.Body>
       </Modal>
 
@@ -254,6 +313,15 @@ const PositionPage = () => {
               Create
             </Button>
           </Modal.Footer>
+        </Modal.Body>
+      </Modal>
+
+
+      <Modal show={showDelete} onHide={() => setShowDelete(false)}>
+        <Modal.Header>Do you really want to delete ?</Modal.Header>
+        <Modal.Body>
+          <Button variant="primary" onClick={() => setShowDelete(false)}>Close</Button>
+          <Button variant="primary" onClick={() => handleDeletePosition()}>Delete</Button>
         </Modal.Body>
       </Modal>
     </>
