@@ -74,10 +74,10 @@ function RenderTable({tasks}) {
     )
 }
 
-function RenderGroupModal({modalVisible, CloseModal, OpenDetailModal, groups, setGroupFunc}) {
+function RenderGroupModal({modalVisible, CloseGroupModal, OpenDetailModal, groups, setGroupFunc}) {
 
     return (
-        <Modal show={modalVisible} onHide={CloseModal} size={"xl"} centered>
+        <Modal show={modalVisible} onHide={CloseGroupModal} size={"xl"} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Group List</Modal.Title>
             </Modal.Header>
@@ -106,8 +106,7 @@ function RenderGroupModal({modalVisible, CloseModal, OpenDetailModal, groups, se
                                 <td>{group.cPhone}</td>
                                 <td><Button variant={"success"} onClick={() => {
                                     setGroupFunc(group, index)
-                                    CloseModal()
-                                    OpenDetailModal()
+                                    OpenDetailModal("detail", true)
                                 }}>
                                     <MdOutlineAssignmentInd/>
                                 </Button>
@@ -118,14 +117,14 @@ function RenderGroupModal({modalVisible, CloseModal, OpenDetailModal, groups, se
                     </tbody>
                 </Table>
                 <div className={style.save_btn}>
-                    <Button variant={"success"} onClick={CloseModal}>Finish</Button>
+                    <Button variant={"success"} onClick={() => CloseGroupModal("group", false)}>Finish</Button>
                 </div>
             </Modal.Body>
         </Modal>
     )
 }
 
-function RenderDetailModal({modalVisible, group, staffs}) {
+function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
     const [selectedStaff, setSelectedStaff] = useState("")
     const [assignedStaffArea, setAssignedStaffArea] = useState(false)
     // const [selectedDate, setSelectedDate] = useState(new Date())
@@ -215,7 +214,7 @@ function RenderDetailModal({modalVisible, group, staffs}) {
                     </InputLabel>
                     <OutlinedInput
                         id="component-outlined"
-                        defaultValue={group.data.request.status}
+                        defaultValue={group.data.status}
                         readOnly
                         style={{width: '100%'}}
                         size={"small"}
@@ -304,7 +303,7 @@ function RenderDetailModal({modalVisible, group, staffs}) {
                 </Accordion>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="danger">Back</Button>
+                <Button variant="danger" onClick={() => CloseDetailModal("detail", false)}>Back</Button>
                 <Button variant="success">Save</Button>
             </Modal.Footer>
         </Modal>
@@ -354,23 +353,24 @@ export default function Task() {
         fetchTasks().then(res => setTasks(res.data));
     }, [])
 
-    function SetGroup(data, index){
+    function SetCurrentGroup(data, index){
         setCurrentGrp({...currentGrp, data: data, index: index});
     }
 
-    function CloseGroupModal(){
-        setModalVisible({...modalVisible, group: false});
+    function HandleModal(modalType, isOpen){
+        switch (modalType){
+            case "group":
+                isOpen ?
+                    setModalVisible({...modalVisible, group: true, detail: false}) :
+                    setModalVisible({...modalVisible, group: false, detail: false})
+                break
+            case "detail":
+                isOpen ?
+                    setModalVisible({...modalVisible, group: false, detail: true}) :
+                    setModalVisible({...modalVisible, group: true, detail: false})
+                break
+        }
     }
-
-    function OpenGroupModal(){
-        setModalVisible({...modalVisible, group: true})
-    }
-
-    function OpenDetailModal(){
-        setModalVisible({...modalVisible, detail: true, group: false})
-    }
-
-    console.log(modalVisible.group)
 
     return (
         <div className={style.main}>
@@ -378,24 +378,29 @@ export default function Task() {
             {groups.length > 0 &&
                 <div className={style.alert}>
                     <p>There are requests not yet be assigned.&nbsp;<span
-                        onClick={OpenGroupModal}>Assign now</span></p>
+                        onClick={() => HandleModal("group", true)}>Assign now</span></p>
                 </div>
             }
             <div className={style.table_container}>
                 <RenderTable tasks={tasks}/>
             </div>
-            <RenderGroupModal
-                modalVisible={modalVisible.group}
-                CloseModal={CloseGroupModal}
-                groups={groups}
-                setGroupFunc={SetGroup}
-                OpenDetailModal={OpenDetailModal}
-            />
-            {modalVisible.detail &&
+            {
+                modalVisible.group &&
+                <RenderGroupModal
+                    modalVisible={modalVisible.group}
+                    CloseGroupModal={HandleModal}
+                    groups={groups}
+                    setGroupFunc={SetCurrentGroup}
+                    OpenDetailModal={HandleModal}
+                />
+            }
+            {
+                modalVisible.detail &&
                 <RenderDetailModal
                 group={currentGrp}
                 modalVisible={modalVisible.detail}
                 staffs={staffs}
+                CloseDetailModal={HandleModal}
             />
             }
         </div>
