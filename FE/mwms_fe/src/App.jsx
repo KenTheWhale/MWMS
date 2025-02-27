@@ -56,7 +56,7 @@ const router = createBrowserRouter([
       },
       {
         path: "task",
-        element: <Task />,
+        element: <Task/>,
       },
       {
         path: "area",

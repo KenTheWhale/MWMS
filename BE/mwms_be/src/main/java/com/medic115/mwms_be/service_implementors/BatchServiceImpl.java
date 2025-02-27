@@ -3,7 +3,6 @@ package com.medic115.mwms_be.service_implementors;
 import com.medic115.mwms_be.dto.response.BatchItemResponse;
 import com.medic115.mwms_be.models.Batch;
 import com.medic115.mwms_be.models.BatchItem;
-import com.medic115.mwms_be.repositories.BatchItemRepo;
 import com.medic115.mwms_be.repositories.BatchRepo;
 import com.medic115.mwms_be.services.BatchService;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,20 +17,15 @@ import java.util.List;
 public class BatchServiceImpl implements BatchService {
 
     private final BatchRepo batchRepo;
-
-    private final BatchItemRepo batchItemRepo;
     @Override
     public List<BatchItemResponse> getAllBatchItems(Integer batchId) {
 
-        Batch batch = batchRepo.findById(batchId).get();
+        Batch batch = batchRepo.findById(batchId).orElse(null);
         if (batch == null) {
             throw new EntityNotFoundException("Batch not found");
         }
 
-        List<BatchItemResponse> responses
-                = batch.getBatchItems().stream().map(this::mapToDto).toList();
-
-        return responses;
+        return batch.getBatchItems().stream().map(this::mapToDto).toList();
     }
 
 

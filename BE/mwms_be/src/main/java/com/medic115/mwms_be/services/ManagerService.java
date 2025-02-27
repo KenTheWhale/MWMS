@@ -14,26 +14,27 @@ public interface ManagerService {
 
 
     //----------------------------Request----------------------------//
-//
-    ResponseEntity<ResponseObject> getAllRequestImport();
 
-    ResponseEntity<ResponseObject> getAllRequestExport();
-//
-    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
-//
-    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
-//
-    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
+//  ResponseEntity<ResponseObject> getAllRequestImport();
 
-    ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
+//    ResponseEntity<ResponseObject> getAllRequestExport();
 
-    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
+//    ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request);
 
-//    ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
+//    ResponseEntity<ResponseObject> createImportRequest(CreateImportRequest request);
+
+//    ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
+
+//    ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
+
+//    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
+
+//  ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
     //----------------------------Supplier----------------------------//
 
     ResponseEntity<ResponseObject> getListSupplier();
+
     //----------------------------Category----------------------------//
     ResponseEntity<ResponseObject> viewCategory();
 
