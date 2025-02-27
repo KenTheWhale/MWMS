@@ -5,10 +5,9 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record BatchResponse(
+public record BatchItemResponse(
         Integer id,
-        String code,
-        int equipmentQty,
-        LocalDate createdDate
+        String serialNumber,
+        LocalDate importedDate
 ) {
 }
