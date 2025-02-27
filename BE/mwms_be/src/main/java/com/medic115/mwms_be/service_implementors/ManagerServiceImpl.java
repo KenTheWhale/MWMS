@@ -2,6 +2,7 @@ package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.*;
+import com.medic115.mwms_be.enums.CodeFormat;
 import com.medic115.mwms_be.enums.RequestType;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
@@ -960,7 +961,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     private String generateTaskCode() {
         List<Task> tasks = taskRepo.findAll();
-        String latestCode = tasks.get(tasks.size() - 1).getCode();
-        return latestCode.substring(0, 7) + (Integer.parseInt(latestCode.substring(7, 8)) + 1);
+        int latestCode = Integer.parseInt(tasks.get(tasks.size() - 1).getCode().split(CodeFormat.TASK.getValue())[1]);
+        return CodeFormat.TASK.getValue() + (latestCode + 1);
     }
 }
