@@ -11,7 +11,7 @@ import {
 import {FaSearch} from "react-icons/fa";
 import {GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
-import CustomAlert from "../CustomAlert.jsx";
+import {CustomAlertHUY} from "../CustomAlert.jsx";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -145,7 +145,7 @@ function ImportRequest() {
 
     return (
         <div className="container-fluid">
-            <CustomAlert message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
+            <CustomAlertHUY message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
             <div className="row">
                 <h1 className="d-flex justify-content-center text-light">Import Request</h1>
             </div>
