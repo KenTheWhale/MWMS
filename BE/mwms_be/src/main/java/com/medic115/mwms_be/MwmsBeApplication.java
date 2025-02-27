@@ -207,7 +207,6 @@ public class MwmsBeApplication implements CommandLineRunner {
                 for (int i = 1; i <= 3; i++) {
                     RequestApplication requestApplication = RequestApplication.builder()
                             .code("REQ-" + i)
-                            .status(Status.REQUEST_PENDING.getValue())
                             .type(RequestType.IMPORT.getValue())
                             .requestDate(LocalDate.now().minusDays(i))
                             .lastModifiedDate(LocalDate.now())
@@ -226,6 +225,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     for (int i = 1; i <= numGroups; i++) {
                         ItemGroup itemGroup = ItemGroup.builder()
                                 .requestApplication(request)
+                                .status(Status.REQUEST_PENDING.getValue())
                                 .deliveryDate(LocalDate.now().plusDays(random.nextInt(5) + 3))
                                 .carrierName("Carrier " + i + " for " + request.getCode())
                                 .carrierPhone("0912-345-" + (600 + random.nextInt(400)))

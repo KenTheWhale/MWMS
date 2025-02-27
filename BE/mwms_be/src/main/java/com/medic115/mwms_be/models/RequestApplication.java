@@ -22,8 +22,6 @@ public class RequestApplication {
 
     String code;
 
-    String status;
-
     String type;
 
     @Column(name = "`request_date`")

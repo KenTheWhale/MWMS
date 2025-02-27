@@ -5,7 +5,6 @@ import com.medic115.mwms_be.dto.response.BatchResponse;
 import com.medic115.mwms_be.dto.response.PositionResponse;
 import com.medic115.mwms_be.models.Area;
 import com.medic115.mwms_be.models.Batch;
-import com.medic115.mwms_be.models.BatchItem;
 import com.medic115.mwms_be.models.Position;
 import com.medic115.mwms_be.repositories.AreaRepo;
 import com.medic115.mwms_be.repositories.BatchItemRepo;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,9 +51,8 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public List<PositionResponse> getAllPosition(Integer areaId) {
         Area area = areaRepo.findById(areaId).orElseThrow(() -> new EntityNotFoundException("Area not found"));
-        List<PositionResponse> response = area.getPositions().stream().map(this::mapPositionToDto1).toList();
 
-        return response != null ? response : Collections.emptyList();
+        return area.getPositions().stream().map(this::mapPositionToDto1).toList();
     }
 
     @Override
@@ -103,9 +100,7 @@ public class PositionServiceImpl implements PositionService {
 
             // Xóa batchItems trước (đảm bảo không bị lỗi khóa ngoại)
             if (batch.getBatchItems() != null && !batch.getBatchItems().isEmpty()) {
-                for (BatchItem item : new ArrayList<>(batch.getBatchItems())) {
-                    batchItemRepo.delete(item);
-                }
+                batchItemRepo.deleteAll(new ArrayList<>(batch.getBatchItems()));
                 batch.getBatchItems().clear();
                 batchRepo.save(batch);
             }
