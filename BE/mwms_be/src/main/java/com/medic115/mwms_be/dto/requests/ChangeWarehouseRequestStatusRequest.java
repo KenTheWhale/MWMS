@@ -11,4 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class ChangeWarehouseRequestStatusRequest {
     String code;
     String status;
+    String username;
+
 }
