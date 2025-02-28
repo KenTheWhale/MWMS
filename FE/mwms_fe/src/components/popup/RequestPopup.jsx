@@ -4,26 +4,42 @@ import {approveRequest} from "../../services/RequestService.js";
 import {FaCheck} from "react-icons/fa";
 import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
+import {useState} from "react";
 
 
-const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
+const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
+    const [deliveryDate, setDeliveryDate] = useState("");
+    const [carrierName, setCarrierName] = useState("");
+    const [carrierPhone, setCarrierPhone] = useState("");
+    const [errors, setErrors] = useState("");
+
+    const validateForm = () => {
+        let errors = {};
+        if (!deliveryDate) errors.deliveryDate = "Delivery date is required";
+        if (!carrierName) errors.carrierName = "Carrier name is required";
+        if (!carrierPhone) errors.carrierPhone = "Carrier phone is required";
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
 
     const handleAccept = async () => {
+        if (!validateForm()) return;
         if (!request) return;
-        const result = await approveRequest(request.code, "accepted");
-        if (result) {
-            onAccept(request.code);
-            handleClose();
-        }
+        await approveRequest(request.code, "accepted", {
+            deliveryDate,
+            carrierName,
+            carrierPhone
+        });
+        onAccept(request.code);
+        handleClose();
     };
 
     const handleReject = async () => {
         if (!request) return;
-        const result = await approveRequest(request.code, "rejected");
-        if (result) {
-            onReject(request.code);
-            handleClose();
-        }
+        await approveRequest(request.code, "rejected");
+        onReject(request.code);
+        handleClose();
     };
 
     return (
@@ -40,12 +56,11 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
 
                         <h5>Request Items:</h5>
                         <div className={style.popup_table_area}>
-                            <Table striped bordered hover >
+                            <Table striped bordered hover>
                                 <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Equipment Name</th>
-                                    <th>Supplier</th>
                                     <th>Quantity</th>
                                     <th>Unit Price</th>
                                     <th>Length(cm)</th>
@@ -58,7 +73,6 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
                                         <tr key={item.id}>
                                             <td>{index + 1}</td>
                                             <td>{item.equipmentName}</td>
-                                            <td>{item.partnerName}</td>
                                             <td>{item.quantity}</td>
                                             <td>${item.unitPrice}</td>
                                             <td>{item.length}</td>
@@ -73,29 +87,74 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
                                 </tbody>
                             </Table>
                         </div>
+                        <h5>Delivery Details</h5>
+                        <Form>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Delivery Date</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    value={deliveryDate}
+                                    onChange={(e) => setDeliveryDate(e.target.value)}
+                                    isInvalid={errors.deliveryDate}
+                                />
+                                <Form.Control.Feedback type="invalid">{errors.deliveryDate}</Form.Control.Feedback>
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Carrier Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter carrier name"
+                                    value={carrierName}
+                                    onChange={(e) => setCarrierName(e.target.value)}
+                                    isInvalid={errors.carrierName}
+                                />
+                                <Form.Control.Feedback type="invalid">{errors.carrierName}</Form.Control.Feedback>
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Carrier Phone</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter carrier phone"
+                                    value={carrierPhone}
+                                    onChange={(e) => setCarrierPhone(e.target.value)}
+                                    isInvalid={errors.carrierPhone}
+                                />
+                                <Form.Control.Feedback type="invalid">{errors.carrierPhone}</Form.Control.Feedback>
+                            </Form.Group>
+                        </Form>
                     </>
-                ) : (
+                    ) : (
                     <p>Loading...</p>
-                )}
+                    )}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="success" onClick={handleAccept}>
-                    <FaCheck />
+                    <FaCheck/>
                 </Button>
                 <Button variant="danger" onClick={handleReject}>
-                    <FaX />
+                    <FaX/>
                 </Button>
             </Modal.Footer>
         </Modal>
-    );
+);
 };
 
 RequestPopup.propTypes = {
     request: PropTypes.object,
-    show: PropTypes.bool.isRequired,
-    handleClose: PropTypes.func.isRequired,
-    onAccept: PropTypes.func.isRequired,
-    onReject: PropTypes.func.isRequired,
+        show
+:
+    PropTypes.bool.isRequired,
+        handleClose
+:
+    PropTypes.func.isRequired,
+        onAccept
+:
+    PropTypes.func.isRequired,
+        onReject
+:
+    PropTypes.func.isRequired,
 };
 
 export default RequestPopup;

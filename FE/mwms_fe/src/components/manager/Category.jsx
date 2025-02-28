@@ -152,18 +152,6 @@ function Category() {
                     className={`btn btn-primary`}>Add Category
                 </button>
             </div>
-            <div className={style.search_area}>
-                <div className={style.search_input}>
-                    <Form.Group controlId="formGridSearch">
-                        <Form.Control type="email" placeholder="Enter name, code,..."/>
-                    </Form.Group>
-                </div>
-                <div className={style.search_button}>
-                    <Button variant="primary" type="submit" style={{width: "100%"}}>
-                        Search
-                    </Button>
-                </div>
-            </div>
             <div className={style.table_area}>
                 <Table striped bordered hover onClick={(e) => {
                     const row = e.nativeEvent.target.closest('tr');

@@ -7,44 +7,6 @@ import {FaX} from "react-icons/fa6";
 import {getSupplierRequestList} from "../../services/RequestService.js";
 
 function Request() {
-
-    // const [requests, setRequest] = useState([
-    //     {
-    //         id: 1,
-    //         code: "REQ001",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 2,
-    //         code: "REQ002",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 3,
-    //         code: "REQ003",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 4,
-    //         code: "REQ004",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 5,
-    //         code: "REQ005",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     }
-    // ]);
     const [requests, setRequest] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showModal, setShowModal] = useState(false);
