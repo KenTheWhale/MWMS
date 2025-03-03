@@ -15,14 +15,14 @@ public class SupplierController {
 
     private final SupplierService supplierService;
 
-    @PostMapping("/request/list")
-    public ResponseEntity<ResponseObject> getRequestList(@RequestBody GetWarehouseRequest request) {
-        return supplierService.getRequestList(request);
-    }
-
-    @PutMapping("/request/status")
-    public ResponseEntity<ResponseObject> changeRequestStatus(@RequestBody ChangeWarehouseRequestStatusRequest request) {
-        return supplierService.changeRequestStatus(request);
-    }
+//    @PostMapping("/request/list")
+//    public ResponseEntity<ResponseObject> getRequestList(@RequestBody GetWarehouseRequest request) {
+//        return supplierService.getRequestList(request);
+//    }
+//
+//    @PutMapping("/request/status")
+//    public ResponseEntity<ResponseObject> changeRequestStatus(@RequestBody ChangeWarehouseRequestStatusRequest request) {
+//        return supplierService.changeRequestStatus(request);
+//    }
 
 }

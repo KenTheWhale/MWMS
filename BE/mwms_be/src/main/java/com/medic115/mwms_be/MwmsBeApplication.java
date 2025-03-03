@@ -1,9 +1,6 @@
 package com.medic115.mwms_be;
 
-import com.medic115.mwms_be.enums.RequestType;
-import com.medic115.mwms_be.enums.Role;
-import com.medic115.mwms_be.enums.Status;
-import com.medic115.mwms_be.enums.TokenType;
+import com.medic115.mwms_be.enums.*;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.JWTService;
@@ -140,6 +137,7 @@ public class MwmsBeApplication implements CommandLineRunner {
 
                     tokenRepo.save(access);
                     tokenRepo.save(refresh);
+                    System.out.println("\u001B[31m" + access.getAccount().getUsername().toUpperCase() + ": \u001B[0m" + access.getValue());
                 });
 
                 // ----------------------------- Area ----------------------------- //
@@ -207,7 +205,6 @@ public class MwmsBeApplication implements CommandLineRunner {
                 for (int i = 1; i <= 3; i++) {
                     RequestApplication requestApplication = RequestApplication.builder()
                             .code("REQ-" + i)
-                            .status(Status.REQUEST_PENDING.getValue())
                             .type(RequestType.IMPORT.getValue())
                             .requestDate(LocalDate.now().minusDays(i))
                             .lastModifiedDate(LocalDate.now())
@@ -226,6 +223,7 @@ public class MwmsBeApplication implements CommandLineRunner {
                     for (int i = 1; i <= numGroups; i++) {
                         ItemGroup itemGroup = ItemGroup.builder()
                                 .requestApplication(request)
+                                .status(Status.REQUEST_PENDING.getValue())
                                 .deliveryDate(LocalDate.now().plusDays(random.nextInt(5) + 3))
                                 .carrierName("Carrier " + i + " for " + request.getCode())
                                 .carrierPhone("0912-345-" + (600 + random.nextInt(400)))
@@ -314,12 +312,11 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .findFirst()
                             .orElse(null);
 
-                    String baseCode = "TASK-" + group.getRequestApplication().getCode();
-                    String uniqueCode = baseCode + "-" + count;
+                    String uniqueCode = CodeFormat.TASK.getValue() + count;
 
                     while (taskRepo.existsByCode(uniqueCode)) {
                         count++;
-                        uniqueCode = baseCode + "-" + count;
+                        uniqueCode = CodeFormat.TASK.getValue() + count;
                     }
 
                     Task task = Task.builder()

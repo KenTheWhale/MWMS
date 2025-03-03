@@ -1,6 +1,9 @@
 import {Table, Modal, Button, Form} from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import {approveRequest} from "../../services/RequestService.js";
+import {FaCheck} from "react-icons/fa";
+import {FaX} from "react-icons/fa6";
+import style from '../../styles/partner/Request.module.css';
 
 
 const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
@@ -36,38 +39,40 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
                         <p><strong>Last Modified:</strong> {request.lastModifiedDate}</p>
 
                         <h5>Request Items:</h5>
-                        <Table striped bordered hover>
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Equipment Name</th>
-                                <th>Supplier</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Length(cm)</th>
-                                <th>Width(cm)</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {request.requestItems && request.requestItems.length > 0 ? (
-                                request.requestItems.map((item, index) => (
-                                    <tr key={item.id}>
-                                        <td>{index + 1}</td>
-                                        <td>{item.equipmentName}</td>
-                                        <td>{item.partnerName}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>${item.unitPrice}</td>
-                                        <td>{item.length}</td>
-                                        <td>{item.width}</td>
-                                    </tr>
-                                ))
-                            ) : (
+                        <div className={style.popup_table_area}>
+                            <Table striped bordered hover >
+                                <thead>
                                 <tr>
-                                    <td colSpan="7" className="text-center">No items found</td>
+                                    <th>#</th>
+                                    <th>Equipment Name</th>
+                                    <th>Supplier</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Length(cm)</th>
+                                    <th>Width(cm)</th>
                                 </tr>
-                            )}
-                            </tbody>
-                        </Table>
+                                </thead>
+                                <tbody>
+                                {request.requestItems && request.requestItems.length > 0 ? (
+                                    request.requestItems.map((item, index) => (
+                                        <tr key={item.id}>
+                                            <td>{index + 1}</td>
+                                            <td>{item.equipmentName}</td>
+                                            <td>{item.partnerName}</td>
+                                            <td>{item.quantity}</td>
+                                            <td>${item.unitPrice}</td>
+                                            <td>{item.length}</td>
+                                            <td>{item.width}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" className="text-center">No items found</td>
+                                    </tr>
+                                )}
+                                </tbody>
+                            </Table>
+                        </div>
                     </>
                 ) : (
                     <p>Loading...</p>
@@ -75,10 +80,10 @@ const RequestPopup = ({ request, show, handleClose, onAccept, onReject }) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="success" onClick={handleAccept}>
-                    Accept
+                    <FaCheck />
                 </Button>
                 <Button variant="danger" onClick={handleReject}>
-                    Reject
+                    <FaX />
                 </Button>
             </Modal.Footer>
         </Modal>

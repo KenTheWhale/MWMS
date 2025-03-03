@@ -98,3 +98,18 @@
     text-align: left;
 }
 
+.popup_table_area{
+    width: 770px !important;
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
+.popup_table_area table thead tr th{
+    position: sticky;
+    top: 0;
+}
+
+.popup_table_area::-webkit-scrollbar {
+    display: none;
+}
+
