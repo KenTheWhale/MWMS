@@ -2,6 +2,7 @@ package com.medic115.mwms_be.controllers;
 
 
 import com.medic115.mwms_be.dto.requests.SignInRequest;
+import com.medic115.mwms_be.dto.requests.SignUpRequest;
 import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
 import com.medic115.mwms_be.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthenticationResponse> signIn(@RequestBody SignInRequest request) {
         return authenticationService.signIn(request);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) {
+        return authenticationService.signUp(request);
     }
 }
