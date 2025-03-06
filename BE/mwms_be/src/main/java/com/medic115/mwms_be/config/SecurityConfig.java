@@ -33,9 +33,10 @@ public class SecurityConfig {
                         cors.configurationSource(
                                 request -> {
                                     CorsConfiguration config = new CorsConfiguration();
-                                    config.setAllowedOrigins(Collections.singletonList("*"));
+                                    config.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
                                     config.setAllowedMethods(Collections.singletonList("*"));
                                     config.setAllowedHeaders(Collections.singletonList("*"));
+                                    config.setAllowCredentials(true);
                                     return config;
                                 }
                         )

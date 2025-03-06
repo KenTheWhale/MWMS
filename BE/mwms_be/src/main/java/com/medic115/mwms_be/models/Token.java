@@ -26,12 +26,6 @@ public class Token{
 
     String status;
 
-    @Column(name = "`expired_date`")
-    LocalDate expiredDate;
-
-    @Column(name = "`created_date`")
-    LocalDate createdDate;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "`account_id`")
     Account account;

@@ -1,26 +1,17 @@
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import {enqueueSnackbar} from "notistack";
+import {Navigate} from "react-router-dom";
 
-/* eslint-disable react/prop-types */
+// eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const { isAuthenticated } = useSelector(state => state.authReducer);
-    const role = localStorage.getItem("role");
-    const navigate = useNavigate();
+    const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate("/login");
-        } else if (!allowedRoles.includes(role)) {
-            navigate("/unauthorized");
-        }
-    }, [isAuthenticated, role, navigate, allowedRoles]);
-
-    if (!isAuthenticated || !allowedRoles.includes(role)) {
-        return null; // Tránh render component nếu điều kiện không đúng
+    if(user && allowedRoles === user.role) {
+        return children;
+    }else{
+        enqueueSnackbar("You do not have permission to use this function", {variant:"warning"});
+        return <Navigate to={"/login"} />;
     }
 
-    return children;
 };
 
 export default ProtectedRoute;

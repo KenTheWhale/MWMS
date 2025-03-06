@@ -14,7 +14,7 @@ import avatar1 from "../../assets/images/user/avatar-1.jpg";
 import { FaUserPlus } from "react-icons/fa6";
 import style from "../../styles/Admin.module.css";
 import { useEffect, useState } from "react";
-import { axiosClient } from "../../config/api";
+import axiosClient from "../../config/api";
 import { toast } from "react-toastify";
 
 const DashDefault = () => {

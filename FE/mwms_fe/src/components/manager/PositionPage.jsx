@@ -1,18 +1,9 @@
-import { useEffect, useState } from "react";
-import {
-  Accordion,
-  Button,
-  Card,
-  Container,
-  Form,
-  Modal,
-  Spinner,
-  Table,
-} from "react-bootstrap";
-import { axiosClient } from "../../config/api";
-import { useParams } from "react-router-dom";
-import { MdAddCircleOutline, MdDeleteOutline } from "react-icons/md";
-import { toast } from "react-toastify";
+import {useEffect, useState} from "react";
+import {Accordion, Button, Card, Container, Form, Modal, Spinner, Table,} from "react-bootstrap";
+import axiosClient from "../../config/api";
+import {useParams} from "react-router-dom";
+import {MdAddCircleOutline} from "react-icons/md";
+import {toast} from "react-toastify";
 
 const PositionPage = () => {
   const { id } = useParams();
