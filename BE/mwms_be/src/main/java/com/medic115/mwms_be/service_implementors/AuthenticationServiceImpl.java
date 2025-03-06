@@ -2,13 +2,17 @@ package com.medic115.mwms_be.service_implementors;
 
 import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
 import com.medic115.mwms_be.dto.requests.SignInRequest;
+import com.medic115.mwms_be.dto.requests.SignUpRequest;
 import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
+import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.TokenType;
 import com.medic115.mwms_be.models.Account;
 import com.medic115.mwms_be.models.Token;
+import com.medic115.mwms_be.models.User;
 import com.medic115.mwms_be.repositories.AccountRepo;
 import com.medic115.mwms_be.repositories.TokenRepo;
+import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.services.AuthenticationService;
 import com.medic115.mwms_be.services.JWTService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AccountRepo accountRepo;
 
     private final TokenRepo tokenRepo;
+
+    private final UserRepo userRepo;
 
     @Value("${jwt.expiration.access-token}")
     private long accessExpiration;
@@ -154,5 +160,40 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtAuthenticationResponse.builder().token("").message("Account not found").build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtAuthenticationResponse.builder().token("").message("Token invalid").build());
+    }
+
+    @Override
+    public ResponseEntity<String> signUp(SignUpRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Sign up request cannot be null");
+        }
+
+        Account acc = Account.builder()
+                .username(request.username())
+                .password(request.password())
+                .status(Status.TOKEN_ACTIVE.getValue())
+                .role(Role.valueOf(request.roleName().toUpperCase()))
+                .build();
+        accountRepo.save(acc);
+
+        User user = User.builder()
+                .phone(request.phone())
+                .email(request.email())
+                .name(request.name())
+                .account(acc)
+                .build();
+
+        userRepo.save(user);
+
+        String accessToken = jwtService.generateAccessToken(acc);
+        String refreshToken = jwtService.generateRefreshToken(acc);
+
+        this.saveAccountToken(acc, accessToken, refreshToken);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        "Sign up successful !"
+                );
     }
 }

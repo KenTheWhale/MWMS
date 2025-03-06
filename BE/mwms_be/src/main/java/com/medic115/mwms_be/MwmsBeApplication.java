@@ -1,9 +1,6 @@
 package com.medic115.mwms_be;
 
-import com.medic115.mwms_be.enums.RequestType;
-import com.medic115.mwms_be.enums.Role;
-import com.medic115.mwms_be.enums.Status;
-import com.medic115.mwms_be.enums.TokenType;
+import com.medic115.mwms_be.enums.*;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.JWTService;
@@ -20,7 +17,7 @@ import java.util.Random;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-public class MwmsBeApplication implements CommandLineRunner {
+public class MwmsBeApplication{
 
     private final AccountRepo accountRepo;
 
@@ -56,10 +53,6 @@ public class MwmsBeApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(MwmsBeApplication.class, args);
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
     }
 
     @Bean
@@ -140,6 +133,7 @@ public class MwmsBeApplication implements CommandLineRunner {
 
                     tokenRepo.save(access);
                     tokenRepo.save(refresh);
+                    System.out.println("\u001B[31m" + access.getAccount().getUsername().toUpperCase() + ": \u001B[0m" + access.getValue());
                 });
 
                 // ----------------------------- Area ----------------------------- //
@@ -314,12 +308,11 @@ public class MwmsBeApplication implements CommandLineRunner {
                             .findFirst()
                             .orElse(null);
 
-                    String baseCode = "TASK-" + group.getRequestApplication().getCode();
-                    String uniqueCode = baseCode + "-" + count;
+                    String uniqueCode = CodeFormat.TASK.getValue() + count;
 
                     while (taskRepo.existsByCode(uniqueCode)) {
                         count++;
-                        uniqueCode = baseCode + "-" + count;
+                        uniqueCode = CodeFormat.TASK.getValue() + count;
                     }
 
                     Task task = Task.builder()
