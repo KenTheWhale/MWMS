@@ -11,18 +11,15 @@ import BatchManage from "./components/manager/BatchManage.jsx";
 import ExportRequest from "./components/manager/ExportRequest.jsx";
 import Equipment from "./components/manager/Equipment.jsx";
 import Category from "./components/manager/Category.jsx";
-import {configureStore} from "@reduxjs/toolkit";
-import {Provider} from "react-redux";
 import Task from "./components/manager/Task.jsx";
-import {authReducer} from "./reducers/AuthReducer.jsx";
 import Unauthorized from "./view/Unauthorized.jsx";
 import ProtectedRoute from "./config/ProtectedRoute.jsx";
 import Request from "./components/partner/Request.jsx";
 import AreaPage from "./components/manager/AreaPage.jsx";
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';
 import PositionPage from "./components/manager/PositionPage.jsx";
 import "react-datepicker/dist/react-datepicker.css";
+import {SnackbarProvider} from "notistack";
 
 
 const router = createBrowserRouter([
@@ -33,13 +30,17 @@ const router = createBrowserRouter([
   {
     path: "/manager",
     element: (
-      <ProtectedRoute allowedRoles={["MANAGER"]}>
+      <ProtectedRoute allowedRoles={"manager"}>
         <ManagerLayout />
       </ProtectedRoute>
     ),
     children: [
       {
         index: true,
+        element: <Navigate to={"/manager/task"} />,
+      },
+      {
+        path: "request",
         element: <Navigate to={"/manager/request/import"} />,
       },
       {
@@ -83,7 +84,7 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: (
-      <ProtectedRoute allowedRoles={["ADMIN"]}>
+      <ProtectedRoute allowedRoles={"admin"}>
         <AdminLayout />
       </ProtectedRoute>
     ),
@@ -101,7 +102,7 @@ const router = createBrowserRouter([
   {
     path: "/staff",
     element: (
-      <ProtectedRoute allowedRoles={["STAFF"]}>
+      <ProtectedRoute allowedRoles={"staff"}>
         <StaffLayout />
       </ProtectedRoute>
     ),
@@ -133,7 +134,7 @@ const router = createBrowserRouter([
   {
     path: "/sp",
     element: (
-        <ProtectedRoute allowedRoles={["PARTNER"]}>
+        <ProtectedRoute allowedRoles={"partner"}>
           <SupplierLayout/>
         </ProtectedRoute>
     ),
@@ -151,7 +152,7 @@ const router = createBrowserRouter([
   {
     path: "/rq",
     element: (
-        <ProtectedRoute allowedRoles={["PARTNER"]}>
+        <ProtectedRoute allowedRoles={"partner"}>
           <RequesterLayout/>
         </ProtectedRoute>
     ),
@@ -180,18 +181,14 @@ const router = createBrowserRouter([
   },
 ]);
 
-const store = configureStore({
-  reducer: {
-    authReducer: authReducer,
-  },
-});
-
 function App() {
+
+
+
     return (
-        <Provider store={store}>
+        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={3000}>
             <RouterProvider router={router}/>
-            <ToastContainer/>
-        </Provider>
+        </SnackbarProvider>
     )
 }
 

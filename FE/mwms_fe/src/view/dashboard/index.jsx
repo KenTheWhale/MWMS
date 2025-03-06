@@ -15,7 +15,7 @@ import { FaUserPlus } from "react-icons/fa6";
 import { FaPowerOff } from "react-icons/fa";
 import style from "../../styles/Admin.module.css";
 import { useEffect, useState } from "react";
-import { axiosClient } from "../../config/api";
+import axiosClient from "../../config/api";
 import { toast } from "react-toastify";
 import { MdModeEdit } from "react-icons/md";
 import { BiSolidUserDetail } from "react-icons/bi";

@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-public class MwmsBeApplication implements CommandLineRunner {
+public class MwmsBeApplication{
 
 //    private final AccountRepo accountRepo;
 //
@@ -55,9 +55,9 @@ public class MwmsBeApplication implements CommandLineRunner {
         SpringApplication.run(MwmsBeApplication.class, args);
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-    }
+//    @Override
+//    public void run(String... args) throws Exception {
+//    }
 
 //    @Bean
 //    public CommandLineRunner initData() {

@@ -1,4 +1,5 @@
 import axios from "axios"
+import {refreshToken} from "../services/JWTService.jsx";
 axios.defaults.baseURL = "http://localhost:8080/api/v1"
 
 const axiosClient = axios.create({
@@ -6,24 +7,35 @@ const axiosClient = axios.create({
     headers: {
         "Content-Type" : "application/json"
     },
+    withCredentials: true
 })
 
-const authClient = axios.create({
-    baseURL: axios.defaults.baseURL + "/auth",
-    headers:{
-        "Content-Type" : "application/json"
-    }
-})
+axiosClient.interceptors.response.use(
+    response => response,
+    async error => {
+        const originalRequest = error.config;
 
-axiosClient.interceptors.request.use(
-    (config) => {
-        const accessToken = localStorage.getItem("accessToken");
-        if(accessToken){
-            config.headers.Authorization = `Bearer ${accessToken}`;
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            if (originalRequest.url === "/auth/refresh") {
+                console.error("Refresh token request failed, redirecting to login.");
+                window.location.href = "/login";
+                return Promise.reject(error); // Important to reject the promise
+            }
+
+            try {
+                const refreshRes = await refreshToken();
+                if(refreshRes.success){
+                    return axiosClient(originalRequest);
+                }else{
+                    window.location.href = "/login";
+                }
+            } catch (refreshError) {
+                console.log("Token refresh failed:", refreshError);
+                window.location.href = "/login";
+            }
         }
-        return config;
-    },
-    (error) => Promise.reject(error)
+        return Promise.reject(error);
+    }
 )
 
-export {axiosClient, authClient};
+export default axiosClient;

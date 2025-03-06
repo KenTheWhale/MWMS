@@ -7,7 +7,7 @@ import {
     getSupplierEquipment,
     getSupplierList,
     viewDetail
-} from "../../services/RequestService.js";
+} from "../../services/ManagerService.jsx";
 import {FaSearch} from "react-icons/fa";
 import {GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";

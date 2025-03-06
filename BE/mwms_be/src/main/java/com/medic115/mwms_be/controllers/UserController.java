@@ -18,16 +18,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final AuthenticationService authenticationService;
-
     private final UserService userService;
 
-
-    @PostMapping("/refresh")
-    @PreAuthorize("hasRole('admin') || hasRole('manager') || hasRole('staff') || hasRole('partner')")
-    ResponseEntity<JwtAuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
-        return authenticationService.refreshToken(request);
-    }
+    private final AuthenticationService authenticationService;
 
     @GetMapping
     @PreAuthorize("hasRole('admin')")
