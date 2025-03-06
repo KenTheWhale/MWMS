@@ -10,7 +10,7 @@
 }
 
 .importTable {
-    max-height: 300px;
+    max-height: 40vh;
     width: 100%;
     overflow-x: auto;
     display: block;
@@ -81,8 +81,6 @@
 }
 
 
-
-
 .importTable .action-btn {
     background-color: var(--button-bg);
     color: var(--button-text);
@@ -113,7 +111,7 @@
     background: transparent;
 }
 .addCard{
-    max-height: 350px;
+    max-height: 40vh;
     overflow-x: auto;
     display: block;
 }
@@ -125,6 +123,13 @@
 .addCard h3 {
     display: flex;
     justify-content: center;
+}
+
+.footCard{
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
 }
 
 

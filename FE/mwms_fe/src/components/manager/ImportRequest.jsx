@@ -9,9 +9,10 @@ import {
     viewDetail
 } from "../../services/ManagerService.jsx";
 import {FaSearch} from "react-icons/fa";
-import {GrView} from "react-icons/gr";
+import {GrUpdate, GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
 import {CustomAlertHUY} from "../CustomAlert.jsx";
+import {LuSave} from "react-icons/lu";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -25,6 +26,8 @@ function ImportRequest() {
     const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
     const [alertMessage, setAlertMessage] = useState("");
     const [alertType, setAlertType] = useState("");
+    const [currentUpdateEq, setCurrentUpdateEq] = useState(null);
+
 
 
     useEffect(() => {
@@ -43,10 +46,13 @@ function ImportRequest() {
     };
 
     const toggleGroup = (groupId) => {
-        setExpandedGroups((prev) => ({
-            ...prev,
-            [groupId]: !prev[groupId],
-        }));
+        setExpandedGroups((previousState) => {
+            const updatedState = { ...previousState };
+
+            updatedState[groupId] = !previousState[groupId];
+
+            return updatedState;
+        });
     };
 
     const handleDateChange = (event) => {
@@ -112,12 +118,10 @@ function ImportRequest() {
     const handleSubmit = () => {
         async function createRequest() {
 
-            for (const row of rows) {
-                if (!row.partner || !row.name || !row.quantity) {
-                    setAlertMessage("Please fill in all required fields.");
-                    setAlertType("danger");
-                    return;
-                }
+            if (rows.length === 0 || rows.every(row => !row.partner || !row.name || !row.quantity)) {
+                setAlertMessage("Please fill in at least one item.");
+                setAlertType("danger");
+                return;
             }
 
             const requestItems = rows.map(row => ({
@@ -171,7 +175,6 @@ function ImportRequest() {
                             <th>Code</th>
                             <th>Request Date</th>
                             <th>Last Modified</th>
-                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                         </thead>
@@ -184,7 +187,6 @@ function ImportRequest() {
                                     <td>{item.code}</td>
                                     <td>{item.requestDate}</td>
                                     <td>{item.lastModifiedDate}</td>
-                                    <td>{item.status}</td>
                                     <td>
                                         <Button onClick={() => handleViewDetail(item.code)}><GrView/></Button>
 
@@ -230,16 +232,22 @@ function ImportRequest() {
                                     </td>
 
                                     <td>
-                                        <Form.Select className="m-2" value={row.name}
+                                        <Form.Select className="m-2" value={row.name || ""}
                                                      onChange={(e) => handleInputRow(index, "name", e.target.value)}
-                                                     required>
+                                                     required
+                                                    disabled={!row.partner}>
                                             <option value="">Select Equipment</option>
-                                            {equipments.map((equipment) => (
-                                                <option key={equipment.id} value={equipment.name}>
-                                                    {equipment.name}
-                                                </option>
-                                            ))}
+                                            {equipments.filter(eq =>
+                                                    eq.name === row.name ||
+                                                    !rows.some(r => r.partner === row.partner && r.name === eq.name)
+                                                )
+                                                .map(equipment => (
+                                                    <option key={equipment.id} value={equipment.name}>
+                                                        {equipment.name}
+                                                    </option>
+                                                ))}
                                         </Form.Select>
+
                                     </td>
 
                                     <td>
@@ -293,12 +301,11 @@ function ImportRequest() {
                             <div className="mb-3">
                                 <p><strong>Request Date:</strong> {selectedRequest.requestDate}</p>
                                 <p><strong>Last Modified:</strong> {selectedRequest.lastModified}</p>
-                                <p><strong>Status:</strong> {selectedRequest.status}</p>
                             </div>
 
                             {selectedRequest.itemGroups && selectedRequest.itemGroups.length > 0 ? (
                                 selectedRequest.itemGroups.map((group) => (
-                                    <Card key={group.groupId} className="mb-3">
+                                    <Card key={group.groupId} className={`mb-3`}>
                                         <Card.Body>
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <Card.Title>
@@ -321,32 +328,48 @@ function ImportRequest() {
                                                 Carrier Phone: {group.carrierPhone}
                                             </Card.Subtitle>
                                             <Card.Text>Delivery Date: {group.deliveryDate}</Card.Text>
+                                            <Card.Text>Status: {group.status}</Card.Text>
 
-                                            {expandedGroups[group.groupId] && (
-                                                <Table striped bordered hover className="mt-3 table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Equipment Name</th>
-                                                        <th>Description</th>
-                                                        <th>Quantity</th>
-                                                        <th>Unit</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {group.requestItems.map((item, index) => (
-                                                        <tr key={index}>
-                                                            <td>{item.equipmentName}</td>
-                                                            <td>{item.equipmentDescription}</td>
-                                                            <td>{item.quantity}</td>
-                                                            <td>{item.unit}</td>
+                                            {expandedGroups[group.groupId] &&
+                                                <>
+                                                    <Table striped bordered hover className="mt-3 table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Equipment Name</th>
+                                                            <th>Description</th>
+                                                            <th>Quantity</th>
+                                                            <th>Unit</th>
+                                                            <th>Action</th>
                                                         </tr>
-                                                    ))}
-                                                    </tbody>
-                                                </Table>
-                                            )}
+                                                        </thead>
+                                                        <tbody>
+                                                        {group.requestItems.map((item, index) => (
+                                                            <tr key={index}>
+                                                                <td>{item.equipmentName}</td>
+                                                                <td>{item.equipmentDescription}</td>
+                                                                <td>{item.quantity}</td>
+                                                                <td>{item.unit}</td>
+                                                                <td>
+                                                                    <Button onClick={() => setCurrentUpdateEq({...item})}>
+                                                                        <GrUpdate />
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        </tbody>
+
+                                                    </Table>
+                                                    <div className={style.footCard}>
+                                                        <Button className={`btn btn-danger`}>Cancel</Button>
+                                                    </div>
+
+                                                </>
+                                            }
                                         </Card.Body>
                                     </Card>
+
                                 ))
+
                             ) : (
                                 <p className="text-center">No groups available</p>
                             )}
@@ -356,7 +379,6 @@ function ImportRequest() {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button>Update</Button>
                     <Button className={`btn btn-danger`} onClick={handleClose}>Close</Button>
                 </Modal.Footer>
             </Modal>
