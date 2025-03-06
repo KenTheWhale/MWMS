@@ -5,6 +5,7 @@ import com.medic115.mwms_be.dto.response.*;
 import com.medic115.mwms_be.enums.CodeFormat;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
+import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -511,7 +513,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .code(generateRequestCode())
                 .requestDate(LocalDate.now())
                 .lastModifiedDate(LocalDate.now())
-                .type(RequestType.IMPORT.getValue())
+                .type(Type.REQUEST_IMPORT.getValue())
                 .build();
 
         requestApplicationRepo.save(requestApplication);
@@ -616,7 +618,6 @@ public class ManagerServiceImpl implements ManagerService {
                                         itemDetail.put("equipmentDescription", item.getEquipment().getDescription());
                                         itemDetail.put("quantity", item.getQuantity());
                                         itemDetail.put("unit", item.getEquipment().getUnit());
-
 
                                         if (item.getPartner() != null) {
                                             groupDetail.put("partner", item.getPartner().getUser().getName());
