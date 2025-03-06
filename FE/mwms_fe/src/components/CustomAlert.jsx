@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { Alert } from "react-bootstrap";
-import {Snackbar} from "@mui/material";
+import {useEffect} from "react";
+import {Snackbar, Alert} from "@mui/material";
+import css from "../styles/ui/Alert.module.css"
 
 /*eslint-disable react/prop-types*/
-export function CustomAlertHUY({ message, type, onClose}){
+export function CustomAlertHUY({message, type, onClose}) {
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => {
@@ -21,23 +21,23 @@ export function CustomAlertHUY({ message, type, onClose}){
             {message}
         </Alert>
     );
-};
+}
 
 
-export function CustomAlertQUOC({openCondition, closeFunc, severity, variant, message}){
-    return(
+export function CustomAlertQUOC({message, CloseFunc, open, severity}) {
+    return (
         <Snackbar
-            open={openCondition}
+            open={open}
             autoHideDuration={3000}
-            onClose={closeFunc}
+            onClose={CloseFunc}
             anchorOrigin={{vertical: "top", horizontal: "right"}}
-            style={{zIndex:5000}}
-            >
+            className={css.snackbar}
+        >
             <Alert
-                onClose={closeFunc}
+                handleClose={CloseFunc}
+                sx={{width: "100%"}}
+                variant="filled"
                 severity={severity}
-                variant={variant}
-                sx={{ width: '100%' }}
             >
                 {message}
             </Alert>

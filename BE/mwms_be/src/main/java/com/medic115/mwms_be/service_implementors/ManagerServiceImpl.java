@@ -9,10 +9,7 @@ import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
-import com.medic115.mwms_be.validations.CategoryValidation;
-import com.medic115.mwms_be.validations.DeleteCategoryValidation;
-import com.medic115.mwms_be.validations.UpdateCategoryValidation;
-import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
+import com.medic115.mwms_be.validations.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -339,6 +336,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
+                        .isSuccess(true)
                         .data(data)
                         .build()
         );
@@ -364,6 +362,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
+                        .isSuccess(true)
                         .data(data)
                         .build()
         );
@@ -371,27 +370,23 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request) {
-        User staff = userRepo.findById(request.getStaffId()).orElse(null);
-        if (staff == null) {
+        String error = ManagerValidation.validateAssignStaff(request, userRepo, itemGroupRepo);
+
+        if (!error.isEmpty()) {
             return ResponseEntity
-                    .status(HttpStatus.NO_CONTENT)
+                    .status(HttpStatus.OK)
                     .body(ResponseObject.builder()
-                            .message("Staff not found")
+                            .message(error)
+                            .isSuccess(false)
                             .data("")
                             .build()
                     );
         }
 
+        User staff = userRepo.findById(request.getStaffId()).orElse(null);
         ItemGroup group = itemGroupRepo.findById(request.getGroupId()).orElse(null);
-        if (group == null) {
-            return ResponseEntity
-                    .status(HttpStatus.NO_CONTENT)
-                    .body(ResponseObject.builder()
-                            .message("Item group not found")
-                            .data("")
-                            .build()
-                    );
-        }
+        assert staff != null;
+        assert group != null;
 
         taskRepo.save(
                 Task.builder()
@@ -407,6 +402,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .status(HttpStatus.OK)
                 .body(ResponseObject.builder()
                         .message("Assign staff successfully")
+                        .isSuccess(true)
                         .data("")
                         .build()
                 );
@@ -882,11 +878,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .filter(itemGroup -> !checkIfGroupAssigned(itemGroup.getId()))
                 .map(itemGroup -> {
                     //request application detail
-                    Map<String, Object> requestDetail = new HashMap<>();
-                    requestDetail.put("code", itemGroup.getRequestApplication().getCode());
-                    requestDetail.put("requestDate", itemGroup.getRequestApplication().getRequestDate());
-                    requestDetail.put("lastModified", itemGroup.getRequestApplication().getLastModifiedDate());
-                    requestDetail.put("type", itemGroup.getRequestApplication().getType());
+                    Map<String, Object> requestDetail = getRequestFromGroup(itemGroup);
 
                     //item
                     List<Map<String, Object>> itemList = getItemsFromGroup(itemGroup.getId());
@@ -908,6 +900,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
+                        .isSuccess(true)
                         .data(data)
                         .build()
         );
@@ -953,6 +946,15 @@ public class ManagerServiceImpl implements ManagerService {
                     return map;
                 })
                 .toList();
+    }
+
+    private Map<String, Object> getRequestFromGroup(ItemGroup group){
+        Map<String, Object> request = new HashMap<>();
+        request.put("code", group.getRequestApplication().getCode());
+        request.put("requestDate", group.getRequestApplication().getRequestDate());
+        request.put("lastModified", group.getRequestApplication().getLastModifiedDate());
+        request.put("type", group.getRequestApplication().getType());
+        return request;
     }
 
     private Partner getPartnerFromGroup(ItemGroup group) {
