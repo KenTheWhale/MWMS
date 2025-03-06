@@ -17,7 +17,6 @@ const JWTLogin = () => {
     });
 
     const handleLogin = async (values, { setSubmitting }) => {
-        alert(values.username);
         const response = await login(values.username, values.password);
         if (response) {
             if (response.success) {
