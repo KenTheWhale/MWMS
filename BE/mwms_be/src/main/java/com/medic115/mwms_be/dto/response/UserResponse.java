@@ -13,7 +13,7 @@ public class UserResponse {
     private int id;
     private String role;
     private String phone;
-    private Boolean status;
+    private String status;
     private String fullName;
     private Boolean gender;
 }
