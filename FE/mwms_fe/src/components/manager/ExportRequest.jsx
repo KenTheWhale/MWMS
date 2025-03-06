@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {Button} from "react-bootstrap";
 import style from "../../styles/manager/ExportRequest.module.css";
 import {BsFilter} from "react-icons/bs";
-import {filterRequest, getExportRequest, getImportRequest} from "../../services/RequestService.js";
+import {filterRequest, getExportRequest} from "../../services/ManagerService.jsx";
 import {IoReload} from "react-icons/io5";
 
 function ExportRequest() {

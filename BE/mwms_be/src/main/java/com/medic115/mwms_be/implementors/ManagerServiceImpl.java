@@ -1,9 +1,8 @@
-package com.medic115.mwms_be.service_implementors;
+package com.medic115.mwms_be.implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
 import com.medic115.mwms_be.dto.response.*;
 import com.medic115.mwms_be.enums.CodeFormat;
-import com.medic115.mwms_be.enums.RequestType;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.*;
@@ -17,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -336,7 +334,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
-                        .isSuccess(true)
+                        .success(true)
                         .data(data)
                         .build()
         );
@@ -362,7 +360,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
-                        .isSuccess(true)
+                        .success(true)
                         .data(data)
                         .build()
         );
@@ -377,7 +375,7 @@ public class ManagerServiceImpl implements ManagerService {
                     .status(HttpStatus.OK)
                     .body(ResponseObject.builder()
                             .message(error)
-                            .isSuccess(false)
+                            .success(false)
                             .data("")
                             .build()
                     );
@@ -402,7 +400,7 @@ public class ManagerServiceImpl implements ManagerService {
                 .status(HttpStatus.OK)
                 .body(ResponseObject.builder()
                         .message("Assign staff successfully")
-                        .isSuccess(true)
+                        .success(true)
                         .data("")
                         .build()
                 );
@@ -897,7 +895,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("")
-                        .isSuccess(true)
+                        .success(true)
                         .data(data)
                         .build()
         );

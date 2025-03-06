@@ -1,8 +1,8 @@
 import { Modal, Button, Form } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import {addEquipment} from "../../services/EquipmentService.js";
-import {getCategoryList} from "../../services/CategoryService.js";
+import {addEquipment} from "../../services/ManagerService.jsx";
+import {getCategoryList} from "../../services/ManagerService.jsx";
 
 const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDelete }) => {
     const [editedEquipment, setEditedEquipment] = useState({

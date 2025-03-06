@@ -1,9 +1,10 @@
-import {AppProvider, DashboardLayout} from "@toolpad/core";
+import {DashboardLayout} from "@toolpad/core";
 import {Outlet} from "react-router-dom";
 import '../../styles/ui/dashboard.css'
 import {Typography} from "@mui/material";
 import {useState} from "react";
 import PropTypes from "prop-types";
+import {ReactRouterAppProvider} from "@toolpad/core/react-router";
 
 DashboardUI.proTypes = {
     navigate: PropTypes.array.isRequired,
@@ -41,7 +42,7 @@ export function DashboardUI({navigate, homeUrl}){
 
 
     return(
-        <AppProvider
+        <ReactRouterAppProvider
             navigation={navigate}
             branding={{
                 logo: <img src = "/medic.png" alt = "Medic icon" />,
@@ -52,10 +53,10 @@ export function DashboardUI({navigate, homeUrl}){
             authentication={authen}
         >
             <DashboardLayout slots={{
-                sidebarFooter: SidebarFooter,
+                sidebarFooter: SidebarFooter
             }}>
                 <Outlet className="outlet"/>
             </DashboardLayout>
-        </AppProvider>
+        </ReactRouterAppProvider>
     )
 }
