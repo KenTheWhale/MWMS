@@ -118,9 +118,14 @@ public class SupplierServiceImpl implements SupplierService {
                     .anyMatch(requestItem -> requestItem.getPartner().getUser().getName() != null
                             && requestItem.getPartner().getUser().getName().equals(supplier.getUser().getName()));
 
-            if (hasMatchingSupplier) {
+            if (hasMatchingSupplier && Status.REQUEST_ACCEPTED.getValue().equals(itemGroup.getStatus())) {
                 itemGroup.setStatus(request.getStatus());
+                itemGroup.setDeliveryDate(request.getDeliveryDate());
+                itemGroup.setCarrierName(request.getCarrierName());
+                itemGroup.setCarrierPhone(request.getCarrierPhone());
                 requestApplication.setLastModifiedDate(LocalDate.now());
+            } else {
+                itemGroup.setStatus(request.getStatus());
             }
         }
         requestApplicationRepo.save(requestApplication);
