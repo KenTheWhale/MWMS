@@ -8,14 +8,19 @@ import {
   Modal,
   Form,
 } from "react-bootstrap";
-
+import { MdDelete } from "react-icons/md";
 import { Link } from "react-router-dom";
 import avatar1 from "../../assets/images/user/avatar-1.jpg";
 import { FaUserPlus } from "react-icons/fa6";
+import { FaPowerOff } from "react-icons/fa";
 import style from "../../styles/Admin.module.css";
 import { useEffect, useState } from "react";
 import { axiosClient } from "../../config/api";
 import { toast } from "react-toastify";
+import { MdModeEdit } from "react-icons/md";
+import { BiSolidUserDetail } from "react-icons/bi";
+import { IoIosEye , IoIosEyeOff } from "react-icons/io";
+
 
 const DashDefault = () => {
   const [dashData, setDashData] = useState([]);
@@ -52,19 +57,31 @@ const DashDefault = () => {
     status: "",
     name: "",
     phone: "",
+    email: ""
   });
+
+  const [formEdit, setFormEdit] = useState({
+
+  })
 
   const [show, setShow] = useState(false);
 
   const fetchData = async () => {
     try {
       const response = await axiosClient.get("/user");
-      console.log(response.data);
       setDashData(response.data);
     } catch (error) {
       toast.error("Something Wrong....", error);
     }
   };
+
+  const [showUserDetail, setShowUserDetail] = useState(false);
+
+  const [userDetail, setUserDetail] = useState({
+    phone: "",
+    fullName: "",
+    email: ""
+  });
 
   useEffect(() => {
     fetchData();
@@ -108,21 +125,86 @@ const DashDefault = () => {
     });
   };
 
+  const handleCloseUserDetail = () => {
+    setShowUserDetail(false);
+    setUserDetail({
+      phone: "",
+      fullName: "",
+      email: ""
+    });
+  };
 
   const handleOpen = () => {
     setShow(true);
   };
 
+  // eslint-disable-next-line react/prop-types
+  const PasswordField = ({ password }) => {
+    const [showPassword, setShowPassword] = useState(false);
+  
+    return (
+      <td>
+        <h5 className="text-muted">
+          {showPassword ? password : "••••••••"}
+          {showPassword ? 
+          <IoIosEye 
+              style={{color: "black", cursor: "pointer", marginLeft: "10px"}}
+              onClick={() => setShowPassword(false)}
+             /> 
+             
+             : 
+             
+             <IoIosEyeOff 
+             style={{color: "black", cursor: "pointer", marginLeft: "10px"}}
+             onClick={() => setShowPassword(true)}
+             />
+
+             }
+        </h5>
+      </td>
+    );
+  };
+
   const handleCreateUser = async () => {
     try {
-      const response = await axiosClient.post("/auth/register", formData)
+      const response = await axiosClient.post("/auth/register", formData);
       toast.success(response.data);
       fetchData();
-      handleClose()
+      handleClose();
     } catch (error) {
       toast.error("Something Wrong....", error);
     }
   };
+
+  const handleToggleUserStatus = async (user) => {
+    try {
+      await axiosClient.patch(`/user/delete/${user.id}`);
+      fetchData();
+      toast.info(`User Deactivated successfully!`);
+    } catch (error) {
+      toast.error("Something Wrong....", error);
+    }
+  };
+
+  const handleToggleActivate = async (user) => {
+    try {
+      await axiosClient.patch(`/user/activate/${user.id}`);
+      fetchData();
+      toast.info(`User activated successfully!`);
+    } catch (error) {
+      toast.error("Something Wrong....", error);
+    }
+  };
+
+  const handleOpenUserDetail = (detailUser) => {
+    setUserDetail({
+      phone: detailUser.phone,
+      fullName: detailUser.fullName,
+      email: detailUser.email
+    });
+    setShowUserDetail(true);
+  };
+
 
   return (
     <>
@@ -187,7 +269,13 @@ const DashDefault = () => {
                 <tbody>
                   {currentItems && currentItems.length > 0 ? (
                     currentItems.map((item) => (
-                      <tr className="unread" key={item.id}>
+                      <tr 
+                        // className="unread" 
+                        key={item.id}
+                        style={{ 
+                          opacity: item.status === "deleted" ? 0.3 : 1 
+                        }}
+                      >
                         <td>
                           <img
                             className="rounded-circle"
@@ -197,12 +285,12 @@ const DashDefault = () => {
                           />
                         </td>
                         <td>
-                          <h6 className="mb-1">{item.fullName || "User"}</h6>
                           <p className="m-0">ID: {item.id}</p>
                         </td>
                         <td>
-                          <h6 className="text-muted">{item.phone}</h6>
+                          <h5 className="text-muted">{item.username}</h5>
                         </td>
+                        <PasswordField password={item.password} />
                         <td>
                           <h6 className="text-muted">{item.role}</h6>
                         </td>
@@ -219,18 +307,42 @@ const DashDefault = () => {
                           </h6>
                         </td>
                         <td>
-                          <Link
-                            to="#"
-                            className="label theme-bg2 text-white f-12"
-                          >
-                            Reject
-                          </Link>
-                          <Link
-                            to="#"
-                            className="label theme-bg text-white f-12"
-                          >
-                            Approve
-                          </Link>
+                          {item.status === "active" ? (
+                            <MdDelete 
+                              onClick={() => handleToggleUserStatus(item)}
+                              style={{
+                                fontSize: "30px", 
+                                color: "red", 
+                                cursor: "pointer",
+                                marginRight: "30px",
+                              }} 
+                            />
+                          ) : (
+                            <FaPowerOff 
+                              onClick={() => handleToggleActivate(item)}
+                              style={{
+                                color: "green", 
+                                fontSize: "25px", 
+                                marginRight: "30px",
+                                cursor: "pointer",
+                              }} 
+                            />
+                          )}
+                          <MdModeEdit
+                            style={{
+                              fontSize: "25px",
+                              cursor: `${item.status === "active" ? "pointer" : "not-allowed"}`,
+                              marginRight: "30px",
+                            }}
+                          />
+                          <BiSolidUserDetail
+                             style={{
+                              fontSize: "25px",
+                              color: "blue",
+                              cursor: `${item.status === "active" ? "pointer" : "not-allowed"}`
+                            }}
+                            onClick={() => item.status === "active" ?  handleOpenUserDetail(item.userResponse) : ""}
+                          />
                         </td>
                       </tr>
                     ))
@@ -270,6 +382,47 @@ const DashDefault = () => {
           </Card>
         </Col>
       </Row>
+
+      <Modal show={showUserDetail} onHide={handleCloseUserDetail}>
+        <Modal.Header closeButton>
+          <Modal.Title>User Detail</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Card>
+            <Card.Body>
+              <div className="d-flex justify-content-center mb-4">
+                <img
+                  className="rounded-circle"
+                  style={{ width: "100px", height: "100px" }}
+                  src={avatar1}
+                  alt="user-avatar"
+                />
+              </div>
+              <Table bordered responsive>
+                <tbody>
+                  <tr>
+                    <td className="fw-bold">Full Name</td>
+                    <td>{userDetail.fullName || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-bold">Email</td>
+                    <td>{userDetail.email || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-bold">Phone</td>
+                    <td>{userDetail.phone || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Card>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseUserDetail}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -317,6 +470,8 @@ const DashDefault = () => {
               </Form.Control>
             </Form.Group>
 
+      
+
             <Form.Group className="mb-3">
               <Form.Label>Status</Form.Label>
               <Form.Control
@@ -328,7 +483,7 @@ const DashDefault = () => {
               >
                 <option value="">Select Status</option>
                 <option value="active">active</option>
-                <option value="inactive">unactive</option>
+                <option value="inactive">inactive</option>
               </Form.Control>
             </Form.Group>
 
@@ -336,6 +491,18 @@ const DashDefault = () => {
               <Form.Label>Full Name</Form.Label>
               <Form.Control
                 type="text"
+                placeholder="Enter full name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
                 placeholder="Enter full name"
                 value={formData.name}
                 onChange={(e) =>

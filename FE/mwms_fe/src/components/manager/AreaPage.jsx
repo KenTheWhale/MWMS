@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { axiosClient } from "../../config/api";
-import { Button, Form, Modal, ModalBody, Table } from "react-bootstrap";
+import { Button, Form, Modal, ModalBody, Table, Pagination } from "react-bootstrap";
 import {
   MdModeEditOutline,
   MdDeleteOutline,
@@ -14,6 +14,10 @@ import { Link } from "react-router-dom";
 const AreaPage = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
@@ -43,6 +47,17 @@ const AreaPage = () => {
     } catch (error) {
       setError(error);
     }
+  };
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  // Pagination handlers
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   const handleOpen = async (areaId) => {
@@ -114,7 +129,6 @@ const AreaPage = () => {
     setShowDelete(true);
   };
 
-  // Hàm xử lý khi xác nhận xóa
   const handleDeleteConfirm = () => {
     if (selectedDeleteArea) {
       handleToggleDelete(selectedDeleteArea);
@@ -151,8 +165,8 @@ const AreaPage = () => {
           </tr>
         </thead>
         <tbody>
-          {data.length > 0 ? (
-            data.map((area) => (
+          {currentItems.length > 0 ? (
+            currentItems.map((area) => (
               <tr
                 key={area.id}
                 style={{ opacity: area.status === "DELETED" ? 0.5 : 1 }}
@@ -160,7 +174,7 @@ const AreaPage = () => {
                 <td>{area.id}</td>
                 <td>{area.name}</td>
                 <td>{area.status}</td>
-                <td>{area.square}&#178;</td>
+                <td>{area.square}²</td>
                 <td>
                   <MdModeEditOutline
                     onClick={
@@ -195,7 +209,7 @@ const AreaPage = () => {
                       }}
                     />
                   )}
-                  <Link to={`/manager/position/${area.id}`}>
+                  <Link to={area.status === "DELETED" ? '' : `/manager/position/${area.id}`}>
                     <TbScanPosition
                       style={{
                         fontSize: "30px",
@@ -217,139 +231,172 @@ const AreaPage = () => {
         </tbody>
       </Table>
 
-      {/* Modal Update */}
-      <Modal show={showUpdate} onHide={() => setShowUpdate(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Update Area</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Name..."
-                name="name"
-                value={form.name}
-                onChange={(e) => handleChange(e, "update")}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Status..."
-                name="status"
-                value={form.status}
-                onChange={(e) => handleChange(e, "update")}
-                disabled
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Square</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Square..."
-                name="square"
-                min={1}
-                max={1000}
-                value={form.square}
-                onChange={(e) => handleChange(e, "update")}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowUpdate(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleUpdate}>
-            Update
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Pagination */}
+      {data.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+          <Pagination>
+            <Pagination.First
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Pagination.Item
+                key={index + 1}
+                active={index + 1 === currentPage}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </div>
+      )}
 
-      {/* Modal Create */}
-      <Modal show={showCreate} onHide={() => setShowCreate(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create New Area</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Name..."
-                name="name"
-                value={createForm.name}
-                onChange={(e) => handleChange(e, "create")}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Check
-                type="switch"
-                id="custom-switch"
-                label={createForm.status}
-                checked={createForm.status === "ACTIVE"}
-                onChange={(e) => {
-                  const newStatus = e.target.checked ? "ACTIVE" : "INACTIVE";
-                  setCreateForm({ ...createForm, status: newStatus });
-                }}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Square</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Square..."
-                name="square"
-                min={1}
-                max={1000}
-                value={createForm.square}
-                onChange={(e) => handleChange(e, "create")}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleCreate}>
-            Create
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Modal Delete */}
-      <Modal show={showDelete} onHide={() => setShowDelete(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <ModalBody>
-          <p>
-            Are you sure you want to{" "}
-            {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"}{" "}
-            area "{selectedDeleteArea?.name}"?
-          </p>
-          <div className="d-flex justify-content-end">
-            <Button variant="secondary" onClick={() => setShowDelete(false)}>
-              Cancel
+        {/* Modal Update */}
+        <Modal show={showUpdate} onHide={() => setShowUpdate(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Update Area</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Name..."
+                  name="name"
+                  value={form.name}
+                  onChange={(e) => handleChange(e, "update")}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Status</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Status..."
+                  name="status"
+                  value={form.status}
+                  onChange={(e) => handleChange(e, "update")}
+                  disabled
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Square</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Square..."
+                  name="square"
+                  min={1}
+                  max={1000}
+                  value={form.square}
+                  onChange={(e) => handleChange(e, "update")}
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowUpdate(false)}>
+              Close
             </Button>
-            <Button
-              variant="danger"
-              onClick={handleDeleteConfirm}
-              className="ms-2"
-            >
-              Confirm
+            <Button variant="primary" onClick={handleUpdate}>
+              Update
             </Button>
-          </div>
-        </ModalBody>
-      </Modal>
-    </>
-  );
-};
+          </Modal.Footer>
+        </Modal>
 
-export default AreaPage;
+        {/* Modal Create */}
+        <Modal show={showCreate} onHide={() => setShowCreate(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Create New Area</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Name..."
+                  name="name"
+                  value={createForm.name}
+                  onChange={(e) => handleChange(e, "create")}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Status</Form.Label>
+                <Form.Check
+                  type="switch"
+                  id="custom-switch"
+                  label={createForm.status}
+                  checked={createForm.status === "ACTIVE"}
+                  onChange={(e) => {
+                    const newStatus = e.target.checked ? "ACTIVE" : "INACTIVE";
+                    setCreateForm({ ...createForm, status: newStatus });
+                  }}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Square</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Square..."
+                  name="square"
+                  min={1}
+                  max={1000}
+                  value={createForm.square}
+                  onChange={(e) => handleChange(e, "create")}
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowCreate(false)}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleCreate}>
+              Create
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Modal Delete */}
+        <Modal show={showDelete} onHide={() => setShowDelete(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <ModalBody>
+            <p>
+              Are you sure you want to{" "}
+              {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"}{" "}
+              area "{selectedDeleteArea?.name}"?
+            </p>
+            <div className="d-flex justify-content-end">
+              <Button variant="secondary" onClick={() => setShowDelete(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeleteConfirm}
+                className="ms-2"
+              >
+                Confirm
+              </Button>
+            </div>
+          </ModalBody>
+        </Modal>
+      </>
+    );
+  };
+
+  export default AreaPage;

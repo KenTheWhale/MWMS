@@ -11,7 +11,6 @@ function GenerateNavbar() {
             <Sidebar collapsed={false} className={style.sidebar} backgroundColor={'#222222'}>
                 <Menu closeOnClick={true} className={style.menu}>
                     <MenuItem onClick={() => {navigate("/admin/dashboard")}}>Dashboard</MenuItem>
-                    <MenuItem onClick={() => {navigate("/admin/account")}}>Accounts</MenuItem>
                 </Menu>
             </Sidebar>
             <div className={style.profile}>
