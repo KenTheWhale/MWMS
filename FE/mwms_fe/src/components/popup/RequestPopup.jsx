@@ -26,18 +26,25 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
     const handleAccept = async () => {
         if (!validateForm()) return;
         if (!request) return;
-        await approveRequest(request.code, "accepted", {
+        await approveRequest(request.code, "accepted", localStorage.getItem("name"), {
             deliveryDate,
             carrierName,
             carrierPhone
         });
         onAccept(request.code);
         handleClose();
+        setDeliveryDate("");
+        setCarrierName("");
+        setCarrierPhone("");
     };
 
     const handleReject = async () => {
         if (!request) return;
-        await approveRequest(request.code, "rejected");
+        await approveRequest(request.code, "rejected", localStorage.getItem("name"), {
+            deliveryDate,
+            carrierName,
+            carrierPhone
+        });
         onReject(request.code);
         handleClose();
     };
@@ -125,9 +132,9 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                             </Form.Group>
                         </Form>
                     </>
-                    ) : (
+                ) : (
                     <p>Loading...</p>
-                    )}
+                )}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="success" onClick={handleAccept}>
@@ -138,23 +145,15 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                 </Button>
             </Modal.Footer>
         </Modal>
-);
+    );
 };
 
 RequestPopup.propTypes = {
     request: PropTypes.object,
-        show
-:
-    PropTypes.bool.isRequired,
-        handleClose
-:
-    PropTypes.func.isRequired,
-        onAccept
-:
-    PropTypes.func.isRequired,
-        onReject
-:
-    PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    handleClose: PropTypes.func.isRequired,
+    onAccept: PropTypes.func.isRequired,
+    onReject: PropTypes.func.isRequired,
 };
 
 export default RequestPopup;
