@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.List;
 public interface TokenRepo extends JpaRepository<Token, Integer> {
-    Optional<Token> findByAccount_IdAndStatusAndType(int accountId, String status, String type);
     Optional<Token> findByValue(String value);
 
-    @Query("SELECT t FROM Token t inner join Account a on t.account.id = a.id " +
-            "where a.id = :accountId and t.status = 'active' " )
-    List<Token> findAllValidTokensByUser(Integer accountId);
+    List<Token> findAllByAccount_Id(int id);
 
-    List<Token> findAllByStatusAndAccount_Id(String status, int id);
+    List<Token> findAllByTypeAndStatusAndAccount_Id(String type, String status, int accountId);
+
+
 }

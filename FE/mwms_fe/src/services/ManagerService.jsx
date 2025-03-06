@@ -1,0 +1,133 @@
+import axiosClient from "../config/api.jsx";
+
+//-----------------------------------------GROUP-----------------------------------------//
+export const getUnAssignedItemGroup = async () => {
+    const response = await axiosClient.get("/manager/item/group/unassigned")
+    return response ? response.data : null;
+}
+
+//-----------------------------------------CATEGORY-----------------------------------------//
+export const getCategoryList = async () => {
+    try{
+        const response = await axiosClient.get("/manager/category")
+        if (response.status === 200) {
+            const body = response.data;
+            return body.data;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+//-----------------------------------------EQUIPMENT-----------------------------------------//
+export const getEquipmentList = async () => {
+    const response = await axiosClient.get("/manager/equipment")
+    if (response.status === 200) {
+        const body = response.data;
+        return body.data;
+    }
+}
+
+
+export const addEquipment = async (code, name, description, categoryId, unit, price) => {
+    const response = await axiosClient.post("/manager/equipment", {
+        code: code,
+        name: name,
+        description: description,
+        categoryId: categoryId,
+        unit: unit,
+        price: price
+    })
+    if (response.status === 200) {
+        const body = response.data;
+        return body.data;
+    }
+}
+
+export const updateEquipment = async () => {
+    const response = await axiosClient.put("/manager/equipment")
+    if (response.status === 200) {
+        const body = response.data;
+        return body.data;
+    }
+}
+
+export const deleteEquipment = async () => {
+    const response = await axiosClient.delete("/manager/equipment")
+    if (response.status === 200) {
+        const body = response.data;
+        return body.data;
+    }
+}
+
+//-----------------------------------------STAFF-----------------------------------------//
+export const getStaffList = async () => {
+    const response = await axiosClient.get("/manager/staff/list")
+    return response ? response.data : null
+}
+
+export const assignStaff = async (staffId, groupId, description, assignDate) => {
+    const response = await axiosClient.post("/manager/staff/assign", {
+        staffId: staffId,
+        groupId: groupId,
+        description: description,
+        assignDate: assignDate
+    })
+    return response ? response.data : null;
+}
+
+//-----------------------------------------TASK-----------------------------------------//
+
+export const getTaskList = async () => {
+    const response = await axiosClient.get("/manager/task/list")
+    return response ? response.data : null;
+}
+
+//-----------------------------------------REQUEST-----------------------------------------//
+export const getImportRequest = async () => {
+    const response = await axiosClient.get("/manager/request/import");
+    return response && response.status === 200 ? response.data : null;
+};
+
+export const getExportRequest = async () => {
+    const response = await axiosClient.get("/manager/request/export");
+    return response && response.status === 200 ? response.data : null;
+};
+
+export const filterRequest = async () => {
+    const response = await axiosClient.post("/manager/request/filter");
+    return response && response.status === 200 ? response.data : null;
+};
+
+
+export const viewDetail = async (code) => {
+    const response = await axiosClient.post("/manager/request/detail", {code});
+    return response && response.status === 200 ? response.data : null;
+}
+
+export const getSupplierList = async () => {
+    const response = await axiosClient.get("/manager/supplier");
+    return response && response.status === 200 ? response.data : null;
+};
+
+export const getSupplierEquipment = async (id) => {
+    const response = await axiosClient.post("/manager/equipment/supplier", {partnerId: id});
+    return response && response.status === 200 ? response.data : null;
+};
+
+
+export const createRequestApplication = async (requestItems) => {
+    const body = {requestItemList: requestItems};
+    const response = await axiosClient.post("/manager/request/import", body);
+    return response && response.status === 200 ? response.data : null;
+}
+
+export const getSupplierRequestList = async (username) => {
+    const response = await axiosClient.post("/supplier/request/list", { username: username });
+    return response && response.status === 200 ? response.data.data : null;
+}
+
+export const approveRequest = async (code, status) => {
+    const response = await axiosClient.put("/supplier/request/status", { code: code, status: status });
+    return response && response.status === 200 ? response.data.data : null;
+}
