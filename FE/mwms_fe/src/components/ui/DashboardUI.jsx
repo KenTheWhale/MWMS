@@ -26,8 +26,8 @@ function SidebarFooter({ mini }) {
 export function DashboardUI({navigate, homeUrl}){
     const [session, setSession] = useState({
         user: {
-            name: "Test",
-            email: "Test"
+            name: JSON.parse(localStorage.getItem("user")).name,
+            email: JSON.parse(localStorage.getItem("user")).name
         }
     })
 
@@ -37,6 +37,7 @@ export function DashboardUI({navigate, homeUrl}){
         },
             signOut: () => {
             setSession(null);
+            window.location.href = "/login";
         },
     }
 
