@@ -7,10 +7,8 @@ import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
 import com.medic115.mwms_be.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,8 +22,5 @@ public class AuthController {
         return authenticationService.signIn(request);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) {
-        return authenticationService.signUp(request);
-    }
+
 }

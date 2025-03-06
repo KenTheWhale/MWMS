@@ -1,7 +1,10 @@
 package com.medic115.mwms_be.service_implementors;
 
+import com.medic115.mwms_be.dto.response.AccountResponse;
 import com.medic115.mwms_be.dto.response.UserResponse;
+import com.medic115.mwms_be.models.Account;
 import com.medic115.mwms_be.models.User;
+import com.medic115.mwms_be.repositories.AccountRepo;
 import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepo userRepo;
+
+    private final AccountRepo accountRepo;
 
     @Override
     public UserDetailsService userDetailsService() {
@@ -22,20 +26,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllAccountExceptAdmin() {
-        List<User> user = userRepo.findAllUsersExceptAdmin();
-        List<UserResponse> responses = user.stream().map(this::mapToDto).toList();
+    public List<AccountResponse> getAllAccountExceptAdmin() {
+        List<Account> accounts = accountRepo.findAllUsersExceptAdmin();
+        List<AccountResponse> responses = accounts.stream().map(this::mapToDtoAccount).toList();
 
         return responses;
     }
 
-    private UserResponse mapToDto(User user) {
+    private AccountResponse mapToDtoAccount(Account account) {
+        return AccountResponse.builder()
+                .id(account.getId())
+                .username(account.getUsername())
+                .password(account.getPassword())
+                .status(account.getStatus())
+                .role(account.getRole().name())
+                .userResponse(mapToDtoUser(account.getUser()))
+                .build();
+    }
+
+    private UserResponse mapToDtoUser(User user) {
         return UserResponse.builder()
-                .id(user.getId())
                 .phone(user.getPhone())
-                .role(user.getAccount().getRole().name())
                 .fullName(user.getName())
-                .status(user.getAccount().getStatus())
+                .email(user.getEmail())
                 .build();
     }
 }
