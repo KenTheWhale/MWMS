@@ -17,7 +17,7 @@ import java.util.Random;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-public class MwmsBeApplication implements CommandLineRunner {
+public class MwmsBeApplication{
 
     private final AccountRepo accountRepo;
 
@@ -53,10 +53,6 @@ public class MwmsBeApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(MwmsBeApplication.class, args);
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
     }
 
     @Bean

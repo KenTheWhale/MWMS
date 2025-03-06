@@ -10,6 +10,7 @@ import {InputLabel, MenuItem, OutlinedInput, Select, TextField} from "@mui/mater
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import {CustomAlertQUOC} from "../CustomAlert.jsx";
 
 /* eslint-disable react/prop-types */
 function RenderTable({tasks}) {
@@ -77,54 +78,54 @@ function RenderTable({tasks}) {
 function RenderGroupModal({modalVisible, CloseGroupModal, OpenDetailModal, groups, setGroupFunc}) {
 
     return (
-        <Modal show={modalVisible} onHide={() => CloseGroupModal('group', false)} size={"xl"} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Group List</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Table striped bordered hover className={style.group_table}>
-                    <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Item Amount</th>
-                        <th>Partner</th>
-                        <th>Delivery Date</th>
-                        <th>Carrier Name</th>
-                        <th>Carrier Phone</th>
-                        <th>Assign</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {
-                        groups.map((group, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{group.items.length + " " + group.items[0].unit}</td>
-                                <td>{group.partner}</td>
-                                <td>{group.delivery}</td>
-                                <td>{group.cName}</td>
-                                <td>{group.cPhone}</td>
-                                <td><Button variant={"success"} onClick={() => {
-                                    setGroupFunc(group, index)
-                                    OpenDetailModal("detail", true)
-                                }}>
-                                    <MdOutlineAssignmentInd/>
-                                </Button>
-                                </td>
-                            </tr>
-                        ))
-                    }
-                    </tbody>
-                </Table>
-                <div className={style.save_btn}>
-                    <Button variant={"success"} onClick={() => CloseGroupModal("group", false)}>Finish</Button>
-                </div>
-            </Modal.Body>
-        </Modal>
+        <Modal show={modalVisible} backdrop={false} onHide={() => CloseGroupModal('group', false)} size={"xl"} centered>
+        <Modal.Header closeButton>
+            <Modal.Title>Group List</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <Table striped bordered hover className={style.group_table}>
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Item Amount</th>
+                    <th>Partner</th>
+                    <th>Delivery Date</th>
+                    <th>Carrier Name</th>
+                    <th>Carrier Phone</th>
+                    <th>Assign</th>
+                </tr>
+                </thead>
+                <tbody>
+                {
+                    groups.map((group, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{group.items.length + " " + group.items[0].unit}</td>
+                            <td>{group.partner}</td>
+                            <td>{group.delivery}</td>
+                            <td>{group.cName}</td>
+                            <td>{group.cPhone}</td>
+                            <td><Button variant={"success"} onClick={() => {
+                                setGroupFunc(group, index)
+                                OpenDetailModal("detail", true)
+                            }}>
+                                <MdOutlineAssignmentInd/>
+                            </Button>
+                            </td>
+                        </tr>
+                    ))
+                }
+                </tbody>
+            </Table>
+            <div className={style.save_btn}>
+                <Button variant={"success"} onClick={() => CloseGroupModal("group", false)}>Finish</Button>
+            </div>
+        </Modal.Body>
+    </Modal>
     )
 }
 
-function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
+function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal, AlertFunc}) {
     const [selectedAssignData, setSelectedAssignData] = useState({
         staffId: 0,
         description: '',
@@ -136,18 +137,18 @@ function RenderDetailModal({modalVisible, group, staffs, CloseDetailModal}) {
         try {
             const date = assignDate.format('YYYY-MM-DD');
             const res = await assignStaff(staffId, groupId, description, date);
-            if (res) {
-                alert(res.message);
+            AlertFunc(true, res.success, res.message)
+            if (res.success) {
                 CloseDetailModal("detail", false)
             }
 
         } catch (err) {
-            alert(err.response.data.message)
+            console.log(err)
         }
     }
 
     return (
-        <Modal show={modalVisible} backdrop={"static"} keyboard={false} size={"lg"} centered>
+        <Modal show={modalVisible} backdrop={false} keyboard={false} size={"lg"} centered scrollable>
             <Modal.Header>
                 <Modal.Title>{"Group Detail"}</Modal.Title>
             </Modal.Header>
@@ -347,12 +348,15 @@ export default function Task() {
     const [groups, setGroups] = useState([])
     const [staffs, setStaffs] = useState([])
     const [tasks, setTasks] = useState([]);
-
+    const [alert, setAlert] = useState({
+        open: false,
+        success: false,
+        message: ""
+    })
     const [modalVisible, setModalVisible] = useState({
         group: false,
         detail: false
     });
-
     const [currentGrp, setCurrentGrp] = useState({
         data: null,
         index: 0
@@ -405,6 +409,12 @@ export default function Task() {
         }
     }
 
+    function HandleAlert(status, isSuccess, message){
+        setAlert({...alert, open: status, success: isSuccess, message: message});
+    }
+
+    console.log(alert)
+
     return (
         <div className={style.main}>
             <h1 className={style.title}>Task</h1>
@@ -434,6 +444,16 @@ export default function Task() {
                     modalVisible={modalVisible.detail}
                     staffs={staffs}
                     CloseDetailModal={HandleModal}
+                    AlertFunc={HandleAlert}
+                />
+            }
+            {
+                alert.open &&
+                <CustomAlertQUOC
+                    message={alert.message}
+                    CloseFunc={() => HandleAlert(false, false, "")}
+                    open={alert.open}
+                    severity={alert.success ? "success" : "error"}
                 />
             }
         </div>
