@@ -6,8 +6,6 @@ import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
 import {useState} from "react";
 
-
-// eslint-disable-next-line react/prop-types
 const RequestPopup = ({request, show, handleClose, onAccept, onReject, setRequest}) => {
     const [deliveryDate, setDeliveryDate] = useState("");
     const [carrierName, setCarrierName] = useState("");
@@ -36,11 +34,13 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
     const handleConfirmAccept  = async () => {
         if (!validateForm()) return;
         if (!request) return;
+
         await approveRequest(request.code, "accepted", JSON.parse(localStorage.getItem('user')).name, {
             deliveryDate,
             carrierName,
             carrierPhone
         }, null);
+        console.log(deliveryDate, carrierName, carrierPhone);
         onAccept(request.code);
         setRequest(prevRequests =>
             prevRequests.map(req =>
@@ -52,6 +52,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
         setDeliveryDate("");
         setCarrierName("");
         setCarrierPhone("");
+        window.location.reload();
     };
 
     const handleRejectClick = () => {
@@ -134,10 +135,11 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Label>Delivery Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={request.deliveryDate === "" ? deliveryDate : request.deliveryDate}
+                                    value={request.deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
                                     disabled={isDeliveryDisabled}
+                                    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.deliveryDate}</Form.Control.Feedback>
                             </Form.Group>
@@ -147,7 +149,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier name"
-                                    value={request.carrierName === "" ? carrierName : request.carrierName}
+                                    value={request.carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
                                     disabled={isDeliveryDisabled}
@@ -160,13 +162,31 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier phone"
-                                    value={request.carrierPhone === "" ? carrierPhone : request.carrierPhone}
-                                    onChange={(e) => setCarrierPhone(e.target.value)}
+                                    value={request.carrierPhone}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value.replace(/\D/g, "");
+                                        if (newValue.length <= 10) {
+                                            setCarrierPhone(newValue);
+                                        }
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            !/\d/.test(e.key) &&
+                                            e.key !== "Backspace" &&
+                                            e.key !== "Delete" &&
+                                            e.key !== "ArrowLeft" &&
+                                            e.key !== "ArrowRight"
+                                        ) {
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    maxLength={10}
                                     isInvalid={errors.carrierPhone}
                                     disabled={isDeliveryDisabled}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.carrierPhone}</Form.Control.Feedback>
                             </Form.Group>
+
                         </Form>
                     </>
                 ) : (
