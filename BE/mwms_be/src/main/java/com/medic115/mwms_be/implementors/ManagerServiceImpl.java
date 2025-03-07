@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -24,8 +25,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerServiceImpl implements ManagerService {
-
-    AccountRepo accountRepo;
 
     RequestApplicationRepo requestApplicationRepo;
 
@@ -320,17 +319,18 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> getTaskList() {
         List<Map<String, Object>> data = taskRepo.findAll().stream()
-                .map(
-                        task -> {
-                            Map<String, Object> dataItem = new HashMap<>();
-                            dataItem.put("code", task.getCode());
-                            dataItem.put("desc", task.getDescription());
-                            dataItem.put("status", task.getStatus());
-                            dataItem.put("assigned", task.getAssignedDate());
-                            dataItem.put("staff", task.getUser().getName());
-                            return dataItem;
-                        }
-                )
+                .filter(task -> !task.getStatus().equalsIgnoreCase(Status.TASK_DELETE.getValue()))
+                .map(task -> {
+                    Map<String, Object> dataItem = new HashMap<>();
+                    dataItem.put("id", task.getId());
+                    dataItem.put("code", task.getCode());
+                    dataItem.put("assignDate", task.getAssignedDate());
+                    dataItem.put("staff", task.getUser().getName());
+                    dataItem.put("partner", task.getItemGroup().getRequestItems().get(0).getPartner().getUser().getName());
+                    dataItem.put("description", task.getDescription());
+                    dataItem.put("status", task.getStatus());
+                    return dataItem;
+                })
                 .toList();
 
         return ResponseEntity.ok().body(
@@ -338,6 +338,101 @@ public class ManagerServiceImpl implements ManagerService {
                         .message("")
                         .success(true)
                         .data(data)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> deleteTask(int id) {
+        Task task = taskRepo.findById(id).orElse(null);
+        if (task == null) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Task not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        if (!task.getAssignedDate().isAfter(LocalDate.now())) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Can not delete today task or before")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        task.setStatus(Status.TASK_DELETE.getValue());
+        task.getItemGroup().setStatus(Status.GROUP_ACCEPTED.getValue());
+        taskRepo.save(task);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Delete task successfully")
+                        .success(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> createTask(CreateTaskRequest request) {
+        User staff = userRepo.findById(request.getStaffId()).orElse(null);
+        if (staff == null) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Staff not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        ItemGroup group = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+        if (group == null) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Group not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        boolean flag = false;
+        List<Task> tasks = taskRepo.findAll();
+        for(Task t: tasks){
+            if(t.getItemGroup().getId().equals(request.getGroupId())){
+                t.setStatus(Status.TASK_ASSIGNED.getValue());
+                t.setDescription(request.getDescription());
+                t.setAssignedDate(group.getDeliveryDate());
+                t.setUser(staff);
+                taskRepo.save(t);
+                flag = true;
+            }
+        }
+        Task task = tasks.get(tasks.size() - 1);
+        if(!flag){
+            taskRepo.save(
+                    Task.builder()
+                            .assignedDate(group.getDeliveryDate())
+                            .code(CodeFormat.TASK.getValue() + (task.getId() + 1))
+                            .itemGroup(group)
+                            .user(staff)
+                            .description(request.getDescription())
+                            .status(Status.TASK_ASSIGNED.getValue())
+                            .build()
+            );
+        }
+        group.setStatus(Status.GROUP_PROCESSING.getValue());
+        itemGroupRepo.save(group);
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Assigned staff successfully")
+                        .success(true)
+                        .data(null)
                         .build()
         );
     }
@@ -345,19 +440,45 @@ public class ManagerServiceImpl implements ManagerService {
 
     //-----------------------------------------------STAFF-----------------------------------------------//
     @Override
-    public ResponseEntity<ResponseObject> getStaffList() {
-        List<Map<String, Object>> data = accountRepo.findAll().stream()
-                .filter(account -> account.getRole().equals(Role.STAFF))
+    public ResponseEntity<ResponseObject> getStaffs() {
+        List<Map<String, Object>> data = userRepo.findAll().stream()
+                .filter(user -> user.getAccount().getRole().equals(Role.STAFF))
                 .map(
-                        account -> {
-                            Map<String, Object> item = new HashMap<>();
-                            item.put("id", account.getUser().getId());
-                            item.put("username", account.getUser().getName());
-                            item.put("phone", account.getUser().getPhone());
-                            item.put("status", account.getStatus());
-                            return item;
+                        staff -> {
+                            Map<String, Object> dataItem = new HashMap<>();
+                            dataItem.put("id", staff.getId());
+                            dataItem.put("name", staff.getName());
+                            dataItem.put("email", staff.getEmail());
+                            dataItem.put("phone", staff.getPhone());
+                            return dataItem;
                         }
-                )
+                ).toList();
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("")
+                        .success(true)
+                        .data(data)
+                        .build()
+        );
+    }
+
+    //-----------------------------ITEM GROUP-----------------------------//
+
+    @Override
+    public ResponseEntity<ResponseObject> getUnassignedGroups() {
+        List<Map<String, Object>> data = itemGroupRepo.findAll().stream()
+                .filter(itemGroup -> itemGroup.getStatus().equalsIgnoreCase(Status.GROUP_ACCEPTED.getValue()))
+                .map(itemGroup -> {
+                    Map<String, Object> dataItem = new HashMap<>();
+                    dataItem.put("id", itemGroup.getId());
+                    dataItem.put("cName", itemGroup.getCarrierName());
+                    dataItem.put("cPhone", itemGroup.getCarrierPhone());
+                    dataItem.put("delivery", itemGroup.getDeliveryDate());
+                    dataItem.put("status", itemGroup.getStatus());
+                    dataItem.put("request", getRequestDataFromGroup(itemGroup));
+                    dataItem.put("items", getItemDataFromGroup(itemGroup));
+                    return dataItem;
+                })
                 .toList();
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
@@ -368,45 +489,34 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-    @Override
-    public ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request) {
-        String error = ManagerValidation.validateAssignStaff(request, userRepo, itemGroupRepo);
-
-        if (!error.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(ResponseObject.builder()
-                            .message(error)
-                            .success(false)
-                            .data("")
-                            .build()
-                    );
-        }
-
-        User staff = userRepo.findById(request.getStaffId()).orElse(null);
-        ItemGroup group = itemGroupRepo.findById(request.getGroupId()).orElse(null);
-        assert staff != null;
-        assert group != null;
-
-        taskRepo.save(
-                Task.builder()
-                        .user(staff)
-                        .itemGroup(group)
-                        .code(generateTaskCode())
-                        .description(request.getDescription())
-                        .status(Status.TASK_ASSIGNED.getValue())
-                        .assignedDate(request.getAssignDate())
-                        .build()
-        );
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseObject.builder()
-                        .message("Assign staff successfully")
-                        .success(true)
-                        .data("")
-                        .build()
-                );
+    private Map<String, Object> getRequestDataFromGroup(ItemGroup itemGroup) {
+        Map<String, Object> requestApplication = new HashMap<>();
+        requestApplication.put("id", itemGroup.getRequestApplication().getId());
+        requestApplication.put("code", itemGroup.getRequestApplication().getCode());
+        requestApplication.put("type", itemGroup.getRequestApplication().getType());
+        requestApplication.put("requestDate", itemGroup.getRequestApplication().getRequestDate());
+        return requestApplication;
     }
+
+    private List<Map<String, Object>> getItemDataFromGroup(ItemGroup itemGroup) {
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        return requestItemRepo.findAll().stream()
+                .filter(item -> item.getItemGroup().getId().equals(itemGroup.getId()))
+                .map(
+                        item -> {
+                            Map<String, Object> dataItem = new HashMap<>();
+                            dataItem.put("id", item.getId());
+                            dataItem.put("equipment", item.getEquipment().getName());
+                            dataItem.put("category", item.getEquipment().getCategory().getName());
+                            dataItem.put("partner", item.getPartner().getUser().getName());
+                            dataItem.put("quantity", item.getQuantity());
+                            dataItem.put("unitPrice", df.format(item.getUnitPrice()));
+                            return dataItem;
+                        }
+                ).toList();
+    }
+
 
     //-----------------------------------------------REQUEST-----------------------------------------------//
 
@@ -771,6 +881,88 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    //    @Override
+//    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
+//
+//        RequestApplication requestApplication = requestApplicationRepo.findById(request.getRequestAppId()).orElse(null);
+//
+//
+//        if (requestApplication == null) {
+//            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+//                    .body(ResponseObject.builder()
+//                            .message("204 No Content - Request application not found")
+//                            .build());
+//        }
+//
+//        List<RequestItem> currentItems = requestApplication.getItems();
+//        List<UpdateImportRequest.Items> updatedItems = request.getItems();
+//        List<Integer> itemIdsInList = currentItems.stream().map(RequestItem::getId).toList();
+//        int count = 0;
+//
+//        for (RequestItem item : currentItems) {
+//             UpdateImportRequest.Items i = getItemById(item.getId(), updatedItems);
+//             Equipment equipment;
+//             Partner partner;
+//             if(
+//                     i != null
+//                             && (equipment = equipmentRepo.findById(i.getEquipmentId()).orElse(null)) != null
+//                             && (partner = partnerRepo.findById(i.getPartnerId()).orElse(null)) != null) {
+//
+//                 item.setEquipment(equipment);
+//                 item.setPartner(partner);
+//                 item.setQuantity(i.getQuantity());
+//
+//                 requestItemRepo.save(item);
+//                 count++;
+//             }
+//        }
+//        if(count == 0){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(ResponseObject.builder()
+//                            .message("400 bad request - No items updated")
+//                            .build());
+//        }
+//
+//
+//        for(UpdateImportRequest.Items item : updatedItems) {
+//
+//            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
+//            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
+//
+//            if (newEquipment == null || newPartner == null) {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                        .body(ResponseObject.builder()
+//                                .message("400 Bad Request - Equipment or Partner not found")
+//                                .build());
+//            }
+//
+//            for(RequestItem itemPresent : currentItems) {
+//                if(itemIdsInList.contains(item.getRequestItemId())){
+//                    if(item.getRequestItemId() == itemPresent.getId()){
+//                        itemPresent.setEquipment(newEquipment);
+//                        itemPresent.setPartner(newPartner);
+//                        itemPresent.setQuantity(item.getQuantity());
+//                    }
+//                }
+//                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+//                        ResponseObject.builder()
+//                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
+//                                .build()
+//                );
+//            }
+//        }
+
+//        requestApplication.setItems(currentItems);
+//        requestApplicationRepo.save(requestApplication);
+//
+//        return ResponseEntity.ok().body(
+//                ResponseObject
+//                        .builder()
+//                        .message("200 OK update application successfully")
+//                        .build()
+//        );
+//    }
+
 
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//
     private String generateRequestCode() {
@@ -782,6 +974,10 @@ public class ManagerServiceImpl implements ManagerService {
         String lastCode = lastRequest.getCode();
         int lastNumber = Integer.parseInt(lastCode.replace("REQ-", ""));
         return "REQ-" + (lastNumber + 1);
+    }
+
+    private UpdateImportRequest.Items getItemById(int id, List<UpdateImportRequest.Items> items) {
+        return items.stream().filter(item -> item.getRequestItemId() == id).findFirst().orElse(null);
     }
 
     private boolean checkIfGroupAssigned(int groupId) {

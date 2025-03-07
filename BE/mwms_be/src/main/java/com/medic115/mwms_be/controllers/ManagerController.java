@@ -103,22 +103,36 @@ public class ManagerController {
 
     @GetMapping("/staff/list")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getStaffList() {
-        return managerService.getStaffList();
-    }
-    
-    @PostMapping("/staff/assign")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> assignStaff(@RequestBody AssignStaffRequest request) {
-        return managerService.assignStaff(request);
+    public ResponseEntity<ResponseObject> getStaffs(){
+        return managerService.getStaffs();
     }
 
     //-------------------------------------------------Task-------------------------------------------------//
 
     @GetMapping("/task/list")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getTaskList() {
+    public ResponseEntity<ResponseObject> getTaskList(){
         return managerService.getTaskList();
+    }
+
+    @DeleteMapping("/task/{id}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> deleteTask(@PathVariable int id){
+        return managerService.deleteTask(id);
+    }
+
+    @PostMapping("/task")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> createTask(@RequestBody CreateTaskRequest request){
+        return managerService.createTask(request);
+    }
+
+    //-------------------------------------------------Item Group-------------------------------------------------//
+
+    @GetMapping("/group/unassign")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getUnassignedGroups(){
+        return managerService.getUnassignedGroups();
     }
 
     //-------------------------------------------------Request-------------------------------------------------//
@@ -175,14 +189,6 @@ public class ManagerController {
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> addImportRequest(@RequestBody AddForUpdateRequest request) {
         return managerService.addForUpdateRequest(request);
-    }
-
-    //-------------------------------------------------Request-------------------------------------------------//
-
-    @GetMapping("/item/group/unassigned")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> getAllUnassignedGroup() {
-        return managerService.getAllUnassignedGroup();
     }
 
 
