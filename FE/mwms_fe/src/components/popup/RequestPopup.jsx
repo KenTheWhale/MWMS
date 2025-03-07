@@ -163,12 +163,30 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                     type="text"
                                     placeholder="Enter carrier phone"
                                     value={request.carrierPhone}
-                                    onChange={(e) => setCarrierPhone(e.target.value)}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value.replace(/\D/g, "");
+                                        if (newValue.length <= 10) {
+                                            setCarrierPhone(newValue);
+                                        }
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            !/\d/.test(e.key) &&
+                                            e.key !== "Backspace" &&
+                                            e.key !== "Delete" &&
+                                            e.key !== "ArrowLeft" &&
+                                            e.key !== "ArrowRight"
+                                        ) {
+                                            e.preventDefault();
+                                        }
+                                    }}
+                                    maxLength={10}
                                     isInvalid={errors.carrierPhone}
                                     disabled={isDeliveryDisabled}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.carrierPhone}</Form.Control.Feedback>
                             </Form.Group>
+
                         </Form>
                     </>
                 ) : (
