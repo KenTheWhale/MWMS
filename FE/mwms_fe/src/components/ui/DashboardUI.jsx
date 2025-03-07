@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import {ReactRouterAppProvider} from "@toolpad/core/react-router";
 import {enqueueSnackbar} from "notistack";
 import Cookies from 'js-cookie'
+import {logout} from "../../services/AuthService.jsx";
 
 DashboardUI.proTypes = {
     navigate: PropTypes.array.isRequired,
@@ -25,11 +26,10 @@ function SidebarFooter({mini}) {
     );
 }
 
-
 export function DashboardUI({navigate, homeUrl}) {
     const [session, setSession] = useState({
         user: {
-            name: JSON.parse(localStorage.getItem("user")).name,
+            name: JSON.parse(localStorage.getItem("user")).name ,
             email: JSON.parse(localStorage.getItem("user")).email
         }
     })

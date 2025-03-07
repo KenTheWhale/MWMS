@@ -1,21 +1,22 @@
 .main{
-    width: 83vw !important;
+    width: 100% !important;
     display: flex;
     flex-direction: column;
 }
 
 .add_button_area,
 .title_area{
-    width: var(--outlet-width) !important;
+    width: 100% !important;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
 .search_area{
-    width: var(--outlet-width) !important;
+    width: 100% !important;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     margin-bottom: 1vh;
 }
@@ -46,7 +47,7 @@
 }
 
 .table_area table {
-    width: var(--outlet-width) !important;
+    width: 100% !important;
     border: 0;
 }
 
@@ -83,7 +84,7 @@
 
 
 .table_area table tbody tr td:nth-child(1) {
-    text-align: left;
+    text-align: center;
 }
 .table_area table tbody tr td:nth-child(2) {
     text-align: left;
@@ -113,3 +114,22 @@
     display: none;
 }
 
+.text_color {
+    color: black;
+}
+
+.modal_index {
+    z-index: 2000 !important;
+    color: black;
+}
+
+.confirm_index {
+    z-index: 2001 !important;
+    color: black;
+}
+
+.rejected_status {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}

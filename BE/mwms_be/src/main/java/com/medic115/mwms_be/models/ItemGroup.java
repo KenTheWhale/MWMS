@@ -44,4 +44,6 @@ public class ItemGroup {
     String carrierPhone;
 
     String status;
+
+    String rejectionReason;
 }
