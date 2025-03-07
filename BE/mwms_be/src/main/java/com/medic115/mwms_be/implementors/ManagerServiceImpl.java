@@ -403,8 +403,8 @@ public class ManagerServiceImpl implements ManagerService {
 
         boolean flag = false;
         List<Task> tasks = taskRepo.findAll();
-        for(Task t: tasks){
-            if(t.getItemGroup().getId().equals(request.getGroupId())){
+        for (Task t : tasks) {
+            if (t.getItemGroup().getId().equals(request.getGroupId())) {
                 t.setStatus(Status.TASK_ASSIGNED.getValue());
                 t.setDescription(request.getDescription());
                 t.setAssignedDate(group.getDeliveryDate());
@@ -414,7 +414,7 @@ public class ManagerServiceImpl implements ManagerService {
             }
         }
         Task task = tasks.get(tasks.size() - 1);
-        if(!flag){
+        if (!flag) {
             taskRepo.save(
                     Task.builder()
                             .assignedDate(group.getDeliveryDate())
@@ -724,12 +724,15 @@ public class ManagerServiceImpl implements ManagerService {
                             .map(
                                     item -> {
                                         Map<String, Object> itemDetail = new HashMap<>();
+                                        itemDetail.put("itemId", item.getId());
+                                        itemDetail.put("eqId", item.getEquipment().getId());
                                         itemDetail.put("equipmentName", item.getEquipment().getName());
                                         itemDetail.put("equipmentDescription", item.getEquipment().getDescription());
                                         itemDetail.put("quantity", item.getQuantity());
                                         itemDetail.put("unit", item.getEquipment().getUnit());
 
                                         if (item.getPartner() != null) {
+                                            groupDetail.put("partnerId", item.getPartner().getId());
                                             groupDetail.put("partner", item.getPartner().getUser().getName());
                                         }
                                         return itemDetail;
@@ -746,123 +749,71 @@ public class ManagerServiceImpl implements ManagerService {
                         .build());
     }
 
-//    @Override
-//    public ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request) {
-//
-//        RequestApplication requestApplication = requestApplicationRepo.findAll().stream()
-//                .filter(r -> r.getCode().equals(request.getCode())).findFirst().orElse(null);
-//
-//        if (requestApplication == null) {
-//            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("204 No Content")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        if (requestApplication.getStatus().equalsIgnoreCase(Status.REQUEST_ACCEPTED.getValue())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("Request already accepted")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        if (requestApplication.getStatus().equalsIgnoreCase(Status.REQUEST_CANCELLED.getValue())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("You can not approve the cancelled request")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        requestApplication.setStatus(Status.REQUEST_ACCEPTED.getValue());
-//        requestApplicationRepo.save(requestApplication);
-//
-//        Map<String, Object> requestApprove = new HashMap<>();
-//        requestApprove.put("code", requestApplication.getCode());
-//        requestApprove.put("status", requestApplication.getStatus());
-//        requestApprove.put("message", "Request has been approved");
-//
-//        return ResponseEntity.ok().body(
-//                ResponseObject
-//                        .builder()
-//                        .message("200 OK")
-//                        .data(requestApprove)
-//                        .build()
-//        );
-//    }
+    @Override
+    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
 
-//    @Override
-//    public ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request) {
-//
-//        RequestApplication requestApplication = requestApplicationRepo.findAll().stream()
-//                .filter(r -> r.getCode().equals(request.getCode())).findFirst().orElse(null);
-//
-//
-//        if (requestApplication == null) {
-//            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("204 No Content")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//
-//        if (requestApplication.getStatus().equalsIgnoreCase(Status.REQUEST_ACCEPTED.getValue())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("Can not cancel approved request ")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        if (requestApplication.getStatus().equalsIgnoreCase(Status.REQUEST_CANCELLED.getValue())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("Request already cancelled")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        if (requestApplication.getRequestDate().isBefore(LocalDate.now())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                    ResponseObject
-//                            .builder()
-//                            .message("You can only cancel requests on the same day")
-//                            .data("")
-//                            .build()
-//            );
-//        }
-//
-//        requestApplication.setStatus(Status.REQUEST_CANCELLED.getValue());
-//        requestApplicationRepo.save(requestApplication);
-//
-//        Map<String, Object> requestApprove = new HashMap<>();
-//        requestApprove.put("code", requestApplication.getCode());
-//        requestApprove.put("status", requestApplication.getStatus());
-//        requestApprove.put("message", "Request has been cancel");
-//
-//        return ResponseEntity.ok().body(
-//                ResponseObject
-//                        .builder()
-//                        .message("200 OK")
-//                        .data(requestApprove)
-//                        .build()
-//        );
-//    }
+        RequestItem requestItem = requestItemRepo.findById(request.getRequestItemId()).orElse(null);
+        if (requestItem == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    ResponseObject
+                            .builder()
+                            .message("204 No Content")
+                            .data(null)
+                            .build()
+            );
+        }
+        if (requestItem.getEquipment().getId() != request.getEquipmentId()) {
+            Equipment equipment = equipmentRepo.findById(request.getEquipmentId()).orElse(null);
+            requestItem.setEquipment(equipment);
+        }
+        requestItem.setQuantity(request.getQuantity());
+        requestItemRepo.save(requestItem);
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK Updated item successfully")
+                        .success(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request) {
+        ItemGroup itemGroup = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+        Partner partner = partnerRepo.findById(request.getPartnerId()).orElse(null);
+        Equipment equipment = equipmentRepo.findById(request.getEquipmentId()).orElse(null);
+
+        if (request.getQuantity() < 0) {
+            return ResponseEntity.ok().body(
+                    ResponseObject
+                            .builder()
+                            .success(false)
+                            .message("quantity must be greater than 0")
+                            .data(null)
+                            .build()
+            );
+        }
+
+        RequestItem requestItem = RequestItem
+                .builder()
+                .equipment(equipment)
+                .partner(partner)
+                .itemGroup(itemGroup)
+                .quantity(request.getQuantity())
+                .build();
+
+        requestItemRepo.save(requestItem);
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK Add item for update successfully")
+                        .success(true)
+                        .data(null)
+                        .build()
+        );
+    }
+
 
     @Override
     public ResponseEntity<ResponseObject> getListSupplier() {
@@ -894,88 +845,6 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-    //    @Override
-//    public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
-//
-//        RequestApplication requestApplication = requestApplicationRepo.findById(request.getRequestAppId()).orElse(null);
-//
-//
-//        if (requestApplication == null) {
-//            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-//                    .body(ResponseObject.builder()
-//                            .message("204 No Content - Request application not found")
-//                            .build());
-//        }
-//
-//        List<RequestItem> currentItems = requestApplication.getItems();
-//        List<UpdateImportRequest.Items> updatedItems = request.getItems();
-//        List<Integer> itemIdsInList = currentItems.stream().map(RequestItem::getId).toList();
-//        int count = 0;
-//
-//        for (RequestItem item : currentItems) {
-//             UpdateImportRequest.Items i = getItemById(item.getId(), updatedItems);
-//             Equipment equipment;
-//             Partner partner;
-//             if(
-//                     i != null
-//                             && (equipment = equipmentRepo.findById(i.getEquipmentId()).orElse(null)) != null
-//                             && (partner = partnerRepo.findById(i.getPartnerId()).orElse(null)) != null) {
-//
-//                 item.setEquipment(equipment);
-//                 item.setPartner(partner);
-//                 item.setQuantity(i.getQuantity());
-//
-//                 requestItemRepo.save(item);
-//                 count++;
-//             }
-//        }
-//        if(count == 0){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body(ResponseObject.builder()
-//                            .message("400 bad request - No items updated")
-//                            .build());
-//        }
-//
-//
-//        for(UpdateImportRequest.Items item : updatedItems) {
-//
-//            Equipment newEquipment = equipmentRepo.findById(item.getEquipmentId()).orElse(null);
-//            Partner newPartner = partnerRepo.findById(item.getPartnerId()).orElse(null);
-//
-//            if (newEquipment == null || newPartner == null) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                        .body(ResponseObject.builder()
-//                                .message("400 Bad Request - Equipment or Partner not found")
-//                                .build());
-//            }
-//
-//            for(RequestItem itemPresent : currentItems) {
-//                if(itemIdsInList.contains(item.getRequestItemId())){
-//                    if(item.getRequestItemId() == itemPresent.getId()){
-//                        itemPresent.setEquipment(newEquipment);
-//                        itemPresent.setPartner(newPartner);
-//                        itemPresent.setQuantity(item.getQuantity());
-//                    }
-//                }
-//                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-//                        ResponseObject.builder()
-//                                .message("204 No Content - Dont have request item with id: " + item.getRequestItemId())
-//                                .build()
-//                );
-//            }
-//        }
-
-//        requestApplication.setItems(currentItems);
-//        requestApplicationRepo.save(requestApplication);
-//
-//        return ResponseEntity.ok().body(
-//                ResponseObject
-//                        .builder()
-//                        .message("200 OK update application successfully")
-//                        .build()
-//        );
-//    }
-
 
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//
     private String generateRequestCode() {
@@ -988,9 +857,4 @@ public class ManagerServiceImpl implements ManagerService {
         int lastNumber = Integer.parseInt(lastCode.replace("REQ-", ""));
         return "REQ-" + (lastNumber + 1);
     }
-
-    private UpdateImportRequest.Items getItemById(int id, List<UpdateImportRequest.Items> items) {
-        return items.stream().filter(item -> item.getRequestItemId() == id).findFirst().orElse(null);
-    }
-
 }
