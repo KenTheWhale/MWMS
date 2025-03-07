@@ -13,6 +13,7 @@ import {GrUpdate, GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
 import {CustomAlertHUY} from "../CustomAlert.jsx";
 import {LuSave} from "react-icons/lu";
+import {MdOutlineCancel} from "react-icons/md";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -26,9 +27,8 @@ function ImportRequest() {
     const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
     const [alertMessage, setAlertMessage] = useState("");
     const [alertType, setAlertType] = useState("");
-    const [currentUpdateEq, setCurrentUpdateEq] = useState(null);
-
-
+    const [editRows, setEditRows] = useState({});
+    const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -84,7 +84,6 @@ function ImportRequest() {
         ]);
     };
 
-
     const handleInputRow = (index, field, value) => {
         const updatedRows = [...rows];
         updatedRows[index][field] = value;
@@ -108,7 +107,6 @@ function ImportRequest() {
 
         setRows(updatedRows);
     };
-
 
     const handleRemoveRow = (index) => {
         const updatedRows = rows.filter((_, i) => i !== index);
@@ -147,6 +145,33 @@ function ImportRequest() {
 
     }
 
+    const handleEditRow = async (groupId, index, item) => {
+        const selectedGroup = selectedRequest?.itemGroups.find(group => group.groupId === groupId);
+        if (!selectedGroup) return;
+
+        const existingEquipmentIds = selectedGroup?.requestItems?.map(item => item.eqId) || [];
+
+        getSupplierEquipment(selectedGroup.partnerId).then(response => {
+            const filteredEquipments = response.data.filter(eq =>
+                !(existingEquipmentIds.includes(eq.id) && eq.id === item.eqId)
+            );
+
+            setEquipmentForUpdate(filteredEquipments);
+            setEditRows(prev => ({
+                ...prev,
+                [`${groupId}-${index}`]: true,
+            }));
+        });
+    };
+
+
+    const cancelEditRow = (groupId, index) => {
+        setEditRows(prev => {
+            const updatedEditRows = { ...prev };
+            delete updatedEditRows[`${groupId}-${index}`];
+            return updatedEditRows;
+        });
+    };
     return (
         <div className="container-fluid">
             <CustomAlertHUY message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
@@ -290,10 +315,13 @@ function ImportRequest() {
                 onHide={handleClose}
                 backdrop="static"
                 keyboard={false}
-
+                className={`${style.modalDetail}`}
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
+                    <div className={`${style.titleModal}`}>
+                        <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
+                    </div>
+
                 </Modal.Header>
                 <Modal.Body className={style.modalBody}>
                     {selectedRequest ? (
@@ -343,22 +371,82 @@ function ImportRequest() {
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        {group.requestItems.map((item, index) => (
-                                                            <tr key={index}>
-                                                                <td>{item.equipmentName}</td>
-                                                                <td>{item.equipmentDescription}</td>
-                                                                <td>{item.quantity}</td>
-                                                                <td>{item.unit}</td>
-                                                                <td>
-                                                                    <Button onClick={() => setCurrentUpdateEq({...item})}>
-                                                                        <GrUpdate />
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                        {group.requestItems.map((item, index) => {
+                                                            const rowKey = `${group.groupId}-${index}`;
+                                                            const isEditing = editRows[rowKey];
+
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <Form.Select
+                                                                                value={isEditing.selectedEquipmentId}
+                                                                                onChange={(e) =>
+                                                                                    setEditRows(prev => ({
+                                                                                        ...prev,
+                                                                                        [rowKey]: {
+                                                                                            ...prev[rowKey],
+                                                                                            selectedEquipmentId: parseInt(e.target.value, 10)
+                                                                                        }
+                                                                                    }))
+                                                                                }
+                                                                            >
+                                                                                {equipmentForUpdate.map(eq => (
+                                                                                    <option key={eq.id}
+                                                                                            value={eq.id}>{eq.name}</option>
+                                                                                ))}
+                                                                            </Form.Select>
+                                                                        ) : (
+                                                                            item.equipmentName
+                                                                        )}
+                                                                    </td>
+                                                                    <td>{item.equipmentDescription}</td>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <Form.Control
+                                                                                type="number"
+                                                                                value={isEditing.quantity}
+                                                                                onChange={(e) =>
+                                                                                    setEditRows(prev => ({
+                                                                                        ...prev,
+                                                                                        [rowKey]: {
+                                                                                            ...prev[rowKey],
+                                                                                            quantity: parseInt(e.target.value, 10) || 1
+                                                                                        }
+                                                                                    }))
+                                                                                }
+                                                                            />
+                                                                        ) : (
+                                                                            item.quantity
+                                                                        )}
+                                                                    </td>
+                                                                    <td>{item.unit}</td>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <div>
+                                                                                <Button onClick={() => saveEditRow(group.groupId, index)}>
+                                                                                    <LuSave/>
+                                                                                </Button>
+                                                                                <Button variant="danger" onClick={() => cancelEditRow(group.groupId, index)}>
+                                                                                    <MdOutlineCancel />
+                                                                                </Button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <Button variant="outline-primary">
+                                                                                <GrUpdate
+                                                                                    onClick={() => handleEditRow(group.groupId, index, item)}/>
+                                                                            </Button>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                         </tbody>
 
                                                     </Table>
+                                                    <div>
+                                                        <Button>+</Button>
+                                                    </div>
                                                     <div className={style.footCard}>
                                                         <Button className={`btn btn-danger`}>Cancel</Button>
                                                     </div>
