@@ -29,7 +29,9 @@ public interface ManagerService {
 
 //    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
 
-//  ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
+  ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
+
+  ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request);
 
     //----------------------------Supplier----------------------------//
 

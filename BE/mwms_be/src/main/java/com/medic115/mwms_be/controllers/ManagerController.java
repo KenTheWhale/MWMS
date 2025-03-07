@@ -164,12 +164,18 @@ public class ManagerController {
     public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
         return managerService.createImportRequest(request);
     }
-//
-//    @PutMapping("/request/import")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> updateImportRequest(@RequestBody UpdateImportRequest request) {
-//        return managerService.updateImportRequest(request);
-//    }
+
+    @PutMapping("/request/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> updateImportRequest(@RequestBody UpdateImportRequest request) {
+        return managerService.updateImportRequest(request);
+    }
+
+    @PostMapping("/request/detail/import")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> addImportRequest(@RequestBody AddForUpdateRequest request) {
+        return managerService.addForUpdateRequest(request);
+    }
 
     //-------------------------------------------------Request-------------------------------------------------//
 
