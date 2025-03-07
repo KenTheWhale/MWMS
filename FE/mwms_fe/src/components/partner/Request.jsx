@@ -46,7 +46,7 @@ function Request() {
     return (
         <div className={style.main}>
             <div className={style.title_area}>
-                <h1 className={`text-light`}>Warehouse Request</h1>
+                <label className={`fs-1`}>Warehouse Request</label>
             </div>
             <div className={style.search_area}>
                 <div className={style.search_input}>

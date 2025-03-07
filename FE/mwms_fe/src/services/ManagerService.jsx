@@ -131,8 +131,8 @@ export const getSupplierRequestList = async (username) => {
     return response && response.status === 200 ? response.data : null;
 }
 
-export const approveRequest = async (code, status, username, deliveryDetail) => {
+export const approveRequest = async (code, status, username, deliveryDetail, rejectionReason) => {
     const response = await axiosClient.put("/supplier/request/status", { code: code, status: status, username: username,
-        deliveryDate: deliveryDetail.deliveryDate, carrierName: deliveryDetail.carrierName, carrierPhone: deliveryDetail.carrierPhone });
+        deliveryDate: deliveryDetail.deliveryDate, carrierName: deliveryDetail.carrierName, carrierPhone: deliveryDetail.carrierPhone , rejectionReason: rejectionReason});
     return response && response.status === 200 ? response.data.data : null;
 }

@@ -1,5 +1,5 @@
 .main{
-    width: 83vw !important;
+    width: 100% !important;
     display: flex;
     flex-direction: column;
 }
@@ -8,12 +8,13 @@
 .title_area{
     width: 100% !important;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
 .search_area{
-    width: var(--outlet-width) !important;
+    width: 100% !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,7 +47,7 @@
 }
 
 .table_area table {
-    width: 83vw !important;
+    width: 100% !important;
     border: 0;
 }
 
@@ -127,3 +128,8 @@
     color: black;
 }
 
+.rejected_status {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}

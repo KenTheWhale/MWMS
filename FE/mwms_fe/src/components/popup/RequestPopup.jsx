@@ -12,8 +12,10 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
     const [deliveryDate, setDeliveryDate] = useState("");
     const [carrierName, setCarrierName] = useState("");
     const [carrierPhone, setCarrierPhone] = useState("");
+    const [rejectionReason, setRejectionReason] = useState("");
     const [errors, setErrors] = useState("");
     const [showConfirm, setShowConfirm] = useState(false);
+    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
     const isDeliveryDisabled = request?.status === "accepted" || request?.status === "rejected" || request?.status === "canceled";
 
@@ -38,7 +40,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
             deliveryDate,
             carrierName,
             carrierPhone
-        });
+        }, null);
         onAccept(request.code);
         setRequest(prevRequests =>
             prevRequests.map(req =>
@@ -52,13 +54,18 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
         setCarrierPhone("");
     };
 
-    const handleReject = async () => {
-        if (!request) return;
+    const handleRejectClick = () => {
+        setShowRejectConfirm(true);
+        console.log(request);
+    };
+
+    const handleConfirmReject = async () => {
+        if (!request || !rejectionReason.trim()) return;
         await approveRequest(request.code, "rejected", JSON.parse(localStorage.getItem('user')).name, {
             deliveryDate,
             carrierName,
             carrierPhone
-        });
+        }, rejectionReason);
         onReject(request.code);
         setRequest(prevRequests =>
             prevRequests.map(req =>
@@ -66,13 +73,19 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
             )
         );
         handleClose();
+        setShowRejectConfirm(false);
+        setRejectionReason("");
+        window.location.reload();
     };
 
     return (
         <Modal show={show} onHide={handleClose} size="lg" className={`${style.modal_index}`}>
             <Modal.Header closeButton>
                 <div className={`${style.title_area}`}>
-                    <Modal.Title className={`${style.text_color}`}>Approve Request</Modal.Title>
+                        <Modal.Title className={`${style.text_color}`}>Approve Request</Modal.Title>
+                        {request?.status === "rejected" && (
+                            <p className={`${style.rejected_status}`}>Rejected because {request.rejectionReason}</p>
+                        )}
                 </div>
             </Modal.Header>
             <Modal.Body>
@@ -115,13 +128,13 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 </tbody>
                             </Table>
                         </div>
-                        <h5>Delivery Information</h5>
+                        <h5 className={`${style.title_area}`}>Delivery Information</h5>
                         <Form>
                             <Form.Group className="mb-3">
                                 <Form.Label>Delivery Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={deliveryDate}
+                                    value={request.deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
                                     disabled={isDeliveryDisabled}
@@ -134,7 +147,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier name"
-                                    value={carrierName}
+                                    value={request.carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
                                     disabled={isDeliveryDisabled}
@@ -147,7 +160,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier phone"
-                                    value={carrierPhone}
+                                    value={request.carrierPhone}
                                     onChange={(e) => setCarrierPhone(e.target.value)}
                                     isInvalid={errors.carrierPhone}
                                     disabled={isDeliveryDisabled}
@@ -164,7 +177,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                 <Button variant="success" onClick={handleAcceptClick} disabled={isDeliveryDisabled}>
                     <FaCheck/>
                 </Button>
-                <Button variant="danger" onClick={handleReject} disabled={isDeliveryDisabled}>
+                <Button variant="danger" onClick={handleRejectClick} disabled={isDeliveryDisabled}>
                     <FaX/>
                 </Button>
             </Modal.Footer>
@@ -178,6 +191,27 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowConfirm(false)}>Cancel</Button>
                     <Button variant="primary" onClick={handleConfirmAccept}>Confirm</Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showRejectConfirm} onHide={() => setShowRejectConfirm(false)} className={`${style.confirm_index}`}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Reject Request</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group>
+                        <Form.Label>Rejection Reason</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            placeholder="Enter rejection reason"
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowRejectConfirm(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={handleConfirmReject} disabled={!rejectionReason.trim()}>Reject</Button>
                 </Modal.Footer>
             </Modal>
         </Modal>

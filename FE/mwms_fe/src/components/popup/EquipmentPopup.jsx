@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import {addEquipment} from "../../services/ManagerService.jsx";
 import {getCategoryList} from "../../services/ManagerService.jsx";
+import style from "../../styles/manager/Equipment.module.css"
 
 const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDelete }) => {
     const [editedEquipment, setEditedEquipment] = useState({
@@ -38,7 +39,8 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
         if (!editedEquipment.name.trim()) newErrors.name = "Name is required";
         if (!editedEquipment.category) newErrors.category = "Category is required";
         if (!editedEquipment.unit || editedEquipment.unit <= 0) newErrors.unit = "Unit is required";
-        if (!editedEquipment.price || editedEquipment.price <= 0) newErrors.price = "Price is required";
+        if (!editedEquipment.price) newErrors.price = "Price is required";
+        if (editedEquipment.price && editedEquipment.price <= 0) newErrors.price = "Price must be greater than 0";
         if (!editedEquipment.code.trim()) newErrors.code = "Code is required";
         if (!editedEquipment.description) newErrors.description = "Description date is required";
 
@@ -122,12 +124,12 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
             case 'view':
                 return (
                     <>
-                        <p><strong>Name:</strong> {equipment.name}</p>
-                        <p><strong>Code:</strong> {equipment.code}</p>
-                        <p><strong>Category:</strong> {equipment.category}</p>
-                        <p><strong>Unit:</strong> {equipment.unit}</p>
-                        <p><strong>Price:</strong> {equipment.price}</p>
-                        <p><strong>Description:</strong> {equipment.description}</p>
+                        <p className={style.text_color}><strong>Name:</strong> {equipment.name}</p>
+                        <p className={style.text_color}><strong>Code:</strong> {equipment.code}</p>
+                        <p className={style.text_color}><strong>Category:</strong> {equipment.category}</p>
+                        <p className={style.text_color}><strong>Unit:</strong> {equipment.unit}</p>
+                        <p className={style.text_color}><strong>Price:</strong> {equipment.price}</p>
+                        <p className={style.text_color}><strong>Description:</strong> {equipment.description}</p>
                     </>
                 );
             case 'add':
@@ -135,7 +137,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                 return (
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Name</Form.Label>
+                            <Form.Label className={style.text_color}>Name</Form.Label>
                             <Form.Control
                                 type="text"
                                 name="name"
@@ -147,7 +149,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Code</Form.Label>
+                            <Form.Label className={style.text_color}>Code</Form.Label>
                             <Form.Control
                                 type="text"
                                 name="code"
@@ -159,7 +161,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Category</Form.Label>
+                            <Form.Label className={style.text_color}>Category</Form.Label>
                             <Form.Select
                                 name="category"
                                 value={editedEquipment.category}
@@ -177,7 +179,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Unit</Form.Label>
+                            <Form.Label className={style.text_color}>Unit</Form.Label>
                             <Form.Control
                                 type="text"
                                 name="unit"
@@ -189,7 +191,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Price</Form.Label>
+                            <Form.Label className={style.text_color}>Price</Form.Label>
                             <Form.Control
                                 type="number"
                                 name="price"
@@ -201,7 +203,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Description</Form.Label>
+                            <Form.Label className={style.text_color}>Description</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 name="description"
@@ -228,9 +230,9 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
     };
 
     return (
-        <Modal show={show} onHide={handleClose}>
+        <Modal show={show} onHide={handleClose} className={`${style.modal_index}`}>
             <Modal.Header closeButton>
-                <Modal.Title>{actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : equipment?.name}</Modal.Title>
+                <Modal.Title className={style.text_color}>{actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : equipment?.name}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {renderContent()}

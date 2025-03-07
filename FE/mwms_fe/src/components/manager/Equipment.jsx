@@ -20,7 +20,7 @@ function Equipment() {
 
 
     const searchProps = {
-        mainWidth: 80,
+        mainWidth: 75,
         mainMarginBottom: 1,
         mainMarginTop: 1,
         height: 5,
@@ -107,7 +107,7 @@ function Equipment() {
     return (
         <div className={style.main}>
             <div className={style.title_area}>
-                <h1 className={`text-light`}>Equipment</h1>
+                <label className={`fs-1`}>Equipment</label>
             </div>
             <div className={style.add_button_area}>
                 <button
