@@ -31,6 +31,7 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.5",
     "jquery": "^3.7.1",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.475.0",
     "notistack": "^3.0.2",

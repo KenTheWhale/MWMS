@@ -1,3 +1,9 @@
 .outlet{
-    flex: 1;
+    width: 90% !important;
+    margin: 0 auto !important;
+    margin-top: 5vh !important;
+}
+
+p{
+    margin-bottom: 0 !important;
 }
