@@ -5,6 +5,7 @@ import {FaCheck} from "react-icons/fa";
 import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
 import {useState} from "react";
+import {colors} from "@mui/material";
 
 
 const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
@@ -50,9 +51,11 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
     };
 
     return (
-        <Modal show={show} onHide={handleClose} size="lg">
+        <Modal show={show} onHide={handleClose} size="lg" className={`${style.modal_index}`}>
             <Modal.Header closeButton>
-                <Modal.Title>Approve Request</Modal.Title>
+                <div className={`${style.title_area}`}>
+                    <Modal.Title className={`${style.text_color}`}>Approve Request</Modal.Title>
+                </div>
             </Modal.Header>
             <Modal.Body>
                 {request ? (
@@ -61,7 +64,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                         <p><strong>Request Date:</strong> {request.requestDate}</p>
                         <p><strong>Last Modified:</strong> {request.lastModifiedDate}</p>
 
-                        <h5>Request Items:</h5>
+                        <h5>Request Detail:</h5>
                         <div className={style.popup_table_area}>
                             <Table striped bordered hover>
                                 <thead>
@@ -94,7 +97,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                                 </tbody>
                             </Table>
                         </div>
-                        <h5>Delivery Details</h5>
+                        <h5>Delivery Information</h5>
                         <Form>
                             <Form.Group className="mb-3">
                                 <Form.Label>Delivery Date</Form.Label>

@@ -15,7 +15,7 @@
 .search_area{
     width: var(--outlet-width) !important;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     margin-bottom: 1vh;
 }
@@ -46,7 +46,7 @@
 }
 
 .table_area table {
-    width: var(--outlet-width) !important;
+    width: 83vw !important;
     border: 0;
 }
 
@@ -111,5 +111,14 @@
 
 .popup_table_area::-webkit-scrollbar {
     display: none;
+}
+
+.text_color {
+    color: black;
+}
+
+.modal_index {
+    z-index: 2000 !important;
+    color: black;
 }
 
