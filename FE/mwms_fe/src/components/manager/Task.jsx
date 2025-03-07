@@ -29,7 +29,7 @@ import {AddRounded, ArrowDropDown, DeleteForeverRounded} from "@mui/icons-materi
 
 /* eslint-disable react/prop-types */
 function CapitalizeFirstLetter(input) {
-    return input[0].toUpperCase() + input.slice(1);
+    return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
 function RenderInfoTextField({label, data, isCapital}){
@@ -182,7 +182,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
             fullWidth={true}
         >
             <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
-                <Typography component={"p"}>Unassigned Requests</Typography>
+                <label>Unassigned Requests</label>
                 <Button variant={"contained"} color={"success"} onClick={() => {
                     setExpand("0")
                     setChildExpand("0")
@@ -294,6 +294,63 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                             </Accordion>
                         ))
                     }
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button variant={"contained"} color={"error"} onClick={CloseModalFunc}>Close</Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
+function RenderTaskDetailModal({modalVisible, CloseModalFunc, SetActionFunc}){
+    const [expand, setExpand] = useState("0")
+    const [childExpand, setChildExpand] = useState("0")
+    const [secondChildExpand, setSecondChildExpand] = useState("0")
+    const [assignArea, setAssignArea] = useState(false)
+    const [input, setInput] = useState({
+        description: "",
+        staff: ""
+    })
+
+    const handleExpand = (value, type) => {
+        switch (type) {
+            case "1":
+                setExpand(expand === value ? "0" : value)
+                break
+            case "2":
+                setChildExpand(childExpand === value ? "0" : value)
+                break
+            case "3":
+                setSecondChildExpand(secondChildExpand === value ? "0" : value)
+                break
+        }
+    }
+
+    const handleAssignArea = () => {
+        SetActionFunc()
+        setAssignArea(!assignArea)
+    }
+
+    return (
+        <Dialog
+            open={modalVisible}
+            onClose={CloseModalFunc}
+            scroll={"paper"}
+            maxWidth={"md"}
+            fullWidth={true}
+        >
+            <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
+                <label>Task Detail</label>
+                <Button variant={"contained"} color={"success"} onClick={() => {
+                    setExpand("0")
+                    setChildExpand("0")
+                    setSecondChildExpand("0")
+                }}>Collapse all</Button>
+            </DialogTitle>
+            <DialogContent dividers={true}>
+                <Box>
+
                 </Box>
             </DialogContent>
             <DialogActions>

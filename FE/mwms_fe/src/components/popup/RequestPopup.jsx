@@ -5,9 +5,9 @@ import {FaCheck} from "react-icons/fa";
 import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
 import {useState} from "react";
-import {colors} from "@mui/material";
 
 
+// eslint-disable-next-line react/prop-types
 const RequestPopup = ({request, show, handleClose, onAccept, onReject, setRequest}) => {
     const [deliveryDate, setDeliveryDate] = useState("");
     const [carrierName, setCarrierName] = useState("");
@@ -134,7 +134,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Label>Delivery Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={request.deliveryDate}
+                                    value={request.deliveryDate === "" ? deliveryDate : request.deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
                                     disabled={isDeliveryDisabled}
@@ -147,7 +147,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier name"
-                                    value={request.carrierName}
+                                    value={request.carrierName === "" ? carrierName : request.carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
                                     disabled={isDeliveryDisabled}
@@ -160,7 +160,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier phone"
-                                    value={request.carrierPhone}
+                                    value={request.carrierPhone === "" ? carrierPhone : request.carrierPhone}
                                     onChange={(e) => setCarrierPhone(e.target.value)}
                                     isInvalid={errors.carrierPhone}
                                     disabled={isDeliveryDisabled}

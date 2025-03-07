@@ -359,7 +359,7 @@ function ImportRequest() {
                                     </td>
 
                                     <td>
-                                        <Form.Control className="m-2" type="number" min="1" value={row.quantity}
+                                        <Form.Control className="m-2" type="number" min="1" max="100" value={row.quantity}
                                                       onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
                                                       required/>
                                     </td>
@@ -434,8 +434,12 @@ function ImportRequest() {
                                             <Card.Subtitle className="mb-2 text-muted">
                                                 Carrier Phone: {group.carrierPhone}
                                             </Card.Subtitle>
-                                            <Card.Text>Delivery Date: {group.deliveryDate}</Card.Text>
-                                            <Card.Text>Status: {group.status}</Card.Text>
+                                            <Card.Subtitle className="mb-2 text-muted">
+                                                Delivery Date: {group.deliveryDate}
+                                            </Card.Subtitle>
+                                            <Card.Subtitle className="mb-2 text-muted">
+                                                Status: {group.status}
+                                            </Card.Subtitle>
 
                                             {expandedGroups[group.groupId] &&
                                                 <>
@@ -476,6 +480,8 @@ function ImportRequest() {
                                                                             <Form.Control
                                                                                 type="number"
                                                                                 value={isEditing.quantity || item.quantity}
+                                                                                min={"1"}
+                                                                                max={"100"}
                                                                                 onChange={(e) => handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)}
                                                                             />
 
@@ -496,9 +502,8 @@ function ImportRequest() {
                                                                                 </Button>
                                                                             </div>
                                                                         ) : (
-                                                                            <Button variant="outline-primary">
-                                                                                <GrUpdate
-                                                                                    onClick={() => handleEditRow(group.groupId, index, item)}/>
+                                                                            <Button variant="outline-primary" onClick={() => handleEditRow(group.groupId, index, item)}>
+                                                                                <GrUpdate/>
                                                                             </Button>
                                                                         )}
                                                                     </td>

@@ -87,6 +87,13 @@ export const addTask = async (staffId, description, groupId) => {
     return response ? response.data : null;
 }
 
+export const getTaskByCode = async (code) => {
+    const response = await axiosClient.post("/manager/task/detail", {
+        code: code,
+    })
+    return response ? response.data : null;
+}
+
 //-----------------------------------------REQUEST-----------------------------------------//
 export const getImportRequest = async () => {
     const response = await axiosClient.get("/manager/request/import");
