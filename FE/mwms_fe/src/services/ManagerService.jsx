@@ -135,3 +135,13 @@ export const approveRequest = async (code, status) => {
     const response = await axiosClient.put("/supplier/request/status", { code: code, status: status });
     return response && response.status === 200 ? response.data.data : null;
 }
+
+export const updateRequestApplication = async (requestItemId,equipmentId,quantity) => {
+    const body = {
+        requestItemId,
+        equipmentId,
+        quantity
+    }
+    const response = await axiosClient.put("/manager/request/import", body);
+    return response ? response.data : null;
+}
