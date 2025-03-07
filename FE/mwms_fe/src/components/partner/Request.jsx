@@ -2,9 +2,7 @@ import {Button, Form, Table} from "react-bootstrap";
 import style from "../../styles/partner/Request.module.css";
 import {useEffect, useState} from "react";
 import RequestPopup from "../popup/RequestPopup.jsx";
-import {FaCheck} from "react-icons/fa";
-import {FaX} from "react-icons/fa6";
-import {getSupplierRequestList} from "../../services/RequestService.js";
+import {getSupplierRequestList} from "../../services/ManagerService.jsx";
 
 function Request() {
     const [requests, setRequest] = useState([]);

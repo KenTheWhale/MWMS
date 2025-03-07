@@ -3,7 +3,7 @@ import {Button, Form, Table} from "react-bootstrap";
 import {useEffect, useState} from "react";
 import CategoryPopup from "../popup/CategoryPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
-import {getCategoryList} from "../../services/CategoryService.js";
+import {getCategoryList} from "../../services/ManagerService.jsx";
 
 
 function Category() {

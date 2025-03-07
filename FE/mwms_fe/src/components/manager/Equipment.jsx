@@ -1,9 +1,9 @@
-import {Button, Col, Form, Row, Table} from "react-bootstrap";
+import {Button, Form, Table} from "react-bootstrap";
 import style from "../../styles/manager/Equipment.module.css";
 import {useEffect, useState} from "react";
 import EquipmentPopup from "../popup/EquipmentPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
-import {getEquipmentList} from "../../services/EquipmentService.js";
+import {getEquipmentList} from "../../services/ManagerService.jsx";
 import {SearchBarHasSelector} from "../ui/SearchBarHasSelector.jsx";
 
 function Equipment() {

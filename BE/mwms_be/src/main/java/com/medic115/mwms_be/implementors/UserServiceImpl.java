@@ -1,4 +1,4 @@
-package com.medic115.mwms_be.service_implementors;
+package com.medic115.mwms_be.implementors;
 
 import com.medic115.mwms_be.dto.response.UserResponse;
 import com.medic115.mwms_be.models.User;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { axiosClient } from "../../config/api";
+import axiosClient from "../../config/api";
 import { Button, Form, Modal, ModalBody, Table } from "react-bootstrap";
 import {
   MdModeEditOutline,
@@ -330,9 +330,9 @@ const AreaPage = () => {
         </Modal.Header>
         <ModalBody>
           <p>
-            Are you sure you want to{" "}
-            {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"}{" "}
-            area "{selectedDeleteArea?.name}"?
+            Are you sure you want to {" "}
+            {selectedDeleteArea?.status === "DELETED" ? "restore " : "delete "}
+            area {selectedDeleteArea?.name} ?
           </p>
           <div className="d-flex justify-content-end">
             <Button variant="secondary" onClick={() => setShowDelete(false)}>

@@ -1,6 +1,6 @@
-import {Table, Modal, Button, Form} from 'react-bootstrap';
+import {Button, Modal, Table} from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import {approveRequest} from "../../services/RequestService.js";
+import {approveRequest} from "../../services/ManagerService.jsx";
 import {FaCheck} from "react-icons/fa";
 import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';

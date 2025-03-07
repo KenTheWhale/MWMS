@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.util.Date;
 
 public interface JWTService {
-    String extractUsername(String token);
-    LocalDate extractExpiration(String token);
-    LocalDate extractIssuedAt(String token);
-    String generateAccessToken(Account account);
-    String generateRefreshToken(Account account);
-    Token checkTokenIsValid(Account acc, String tokenType);
-    boolean checkToken(String token);
+    String extractUsernameFromJWT(String jwt);
+
+    String generateAccessToken(UserDetails user);
+
+    String generateRefreshToken(UserDetails user);
+
+    boolean checkIfNotExpired(String jwt);
 }

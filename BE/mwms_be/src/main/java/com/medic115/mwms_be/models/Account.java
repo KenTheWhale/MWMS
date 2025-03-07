@@ -27,6 +27,8 @@ public class    Account implements UserDetails {
 
     String password;
 
+    boolean logged;
+
     @Enumerated(EnumType.STRING)
     Role role;
 

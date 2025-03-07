@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum TokenType {
-    ACCESS("access"),
-    REFRESH("refresh");
-
+public enum Type {
+    TOKEN_ACCESS("access"),
+    TOKEN_REFRESH("refresh"),
+    REQUEST_IMPORT("import"),
+    REQUEST_EXPORT("export");
     private final String value;
 }
