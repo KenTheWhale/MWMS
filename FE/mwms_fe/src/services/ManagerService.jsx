@@ -146,3 +146,8 @@ export const updateRequestApplication = async (requestItemId,equipmentId,quantit
     const response = await axiosClient.put("/manager/request/import", body);
     return response ? response.data : null;
 }
+
+export const cancelRequest = async (groupId) => {
+    const response = await axiosClient.put("/manager/request/requestItem", groupId)
+    return response && response.status === 200 ? response.data : null;
+}
