@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={"/manager/task"} />,
+        element: <Navigate to={"/manager/request/import"} />,
       },
       {
         path: "request",
@@ -190,9 +190,6 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-
-
-
     return (
         <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={3000}>
             <RouterProvider router={router}/>
