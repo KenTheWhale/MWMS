@@ -13,7 +13,14 @@ import com.medic115.mwms_be.services.SupplierService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +64,27 @@ public class SupplierServiceImpl implements SupplierService {
                             .min(LocalDate::compareTo)
                             .orElse(null);
                     map.put("deliveryDate", earliestDeliveryDate);
+
+                    String carrierName = request.getItemGroups().stream()
+                            .map(ItemGroup::getCarrierName)
+                            .filter(Objects::nonNull)
+                            .findFirst()
+                            .orElse(null);
+                    map.put("carrierName", carrierName);
+
+                    String carrierPhone = request.getItemGroups().stream()
+                            .map(ItemGroup::getCarrierPhone)
+                            .filter(Objects::nonNull)
+                            .findFirst()
+                            .orElse(null);
+                    map.put("carrierPhone", carrierPhone);
+
+                    String rejectionReason = request.getItemGroups().stream()
+                            .map(ItemGroup::getRejectionReason)
+                            .filter(Objects::nonNull)
+                            .findFirst()
+                            .orElse(null);
+                    map.put("rejectionReason", rejectionReason);
 
                     List<Map<String, Object>> requestItems = request.getItemGroups().stream()
                             .flatMap(itemGroup -> itemGroup.getRequestItems().stream())
@@ -122,13 +150,19 @@ public class SupplierServiceImpl implements SupplierService {
                 requestApplication.setLastModifiedDate(LocalDate.now());
             } else {
                 itemGroup.setStatus(request.getStatus());
+                itemGroup.setRejectionReason(request.getRejectionReason());
             }
         }
         requestApplicationRepo.save(requestApplication);
 
-        return ResponseEntity.ok(ResponseObject.builder()
-                .message("Request status updated successfully")
-                .data(null)
-                .build());
+        if (Status.REQUEST_ACCEPTED.getValue().equals(request.getStatus())) {
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("Request is accepted")
+                    .build());
+        } else {
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("Request is rejected")
+                    .build());
+        }
     }
 }

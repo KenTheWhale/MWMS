@@ -17,4 +17,5 @@ public class ChangeWarehouseRequestStatusRequest {
     LocalDate deliveryDate;
     String carrierName;
     String carrierPhone;
+    String rejectionReason;
 }
