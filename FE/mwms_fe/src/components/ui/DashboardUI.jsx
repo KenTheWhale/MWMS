@@ -69,7 +69,7 @@ export function DashboardUI({navigate, homeUrl}) {
                 title: "MEDIC115",
                 homeUrl: homeUrl,
             }}
-            session={session.user ? session : null}
+            session={session ? session : null}
             authentication={auth}
         >
             <DashboardLayout
