@@ -6,7 +6,7 @@
 
 .add_button_area,
 .title_area{
-    width: var(--outlet-width) !important;
+    width: 100% !important;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -119,6 +119,11 @@
 
 .modal_index {
     z-index: 2000 !important;
+    color: black;
+}
+
+.confirm_index {
+    z-index: 2001 !important;
     color: black;
 }
 

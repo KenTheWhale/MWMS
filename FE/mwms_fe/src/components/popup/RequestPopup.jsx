@@ -1,4 +1,4 @@
-import {Button, Modal, Table} from 'react-bootstrap';
+import {Button, Form, Modal, Table} from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import {approveRequest} from "../../services/ManagerService.jsx";
 import {FaCheck} from "react-icons/fa";
@@ -8,11 +8,14 @@ import {useState} from "react";
 import {colors} from "@mui/material";
 
 
-const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
+const RequestPopup = ({request, show, handleClose, onAccept, onReject, setRequest}) => {
     const [deliveryDate, setDeliveryDate] = useState("");
     const [carrierName, setCarrierName] = useState("");
     const [carrierPhone, setCarrierPhone] = useState("");
     const [errors, setErrors] = useState("");
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const isDeliveryDisabled = request?.status === "accepted" || request?.status === "rejected" || request?.status === "canceled";
 
     const validateForm = () => {
         let errors = {};
@@ -24,16 +27,26 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
         return Object.keys(errors).length === 0;
     }
 
-    const handleAccept = async () => {
+    const handleAcceptClick = () => {
+        setShowConfirm(true);
+    };
+
+    const handleConfirmAccept  = async () => {
         if (!validateForm()) return;
         if (!request) return;
-        await approveRequest(request.code, "accepted", localStorage.getItem("name"), {
+        await approveRequest(request.code, "accepted", JSON.parse(localStorage.getItem('user')).name, {
             deliveryDate,
             carrierName,
             carrierPhone
         });
         onAccept(request.code);
+        setRequest(prevRequests =>
+            prevRequests.map(req =>
+                req.code === request.code ? { ...req, status: "accepted" } : req
+            )
+        );
         handleClose();
+        setShowConfirm(false);
         setDeliveryDate("");
         setCarrierName("");
         setCarrierPhone("");
@@ -41,12 +54,17 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
 
     const handleReject = async () => {
         if (!request) return;
-        await approveRequest(request.code, "rejected", localStorage.getItem("name"), {
+        await approveRequest(request.code, "rejected", JSON.parse(localStorage.getItem('user')).name, {
             deliveryDate,
             carrierName,
             carrierPhone
         });
         onReject(request.code);
+        setRequest(prevRequests =>
+            prevRequests.map(req =>
+                req.code === request.code ? { ...req, status: "rejected" } : req
+            )
+        );
         handleClose();
     };
 
@@ -106,6 +124,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                                     value={deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
+                                    disabled={isDeliveryDisabled}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.deliveryDate}</Form.Control.Feedback>
                             </Form.Group>
@@ -118,6 +137,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                                     value={carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
+                                    disabled={isDeliveryDisabled}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.carrierName}</Form.Control.Feedback>
                             </Form.Group>
@@ -130,6 +150,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                                     value={carrierPhone}
                                     onChange={(e) => setCarrierPhone(e.target.value)}
                                     isInvalid={errors.carrierPhone}
+                                    disabled={isDeliveryDisabled}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.carrierPhone}</Form.Control.Feedback>
                             </Form.Group>
@@ -140,13 +161,25 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject}) => {
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="success" onClick={handleAccept}>
+                <Button variant="success" onClick={handleAcceptClick} disabled={isDeliveryDisabled}>
                     <FaCheck/>
                 </Button>
-                <Button variant="danger" onClick={handleReject}>
+                <Button variant="danger" onClick={handleReject} disabled={isDeliveryDisabled}>
                     <FaX/>
                 </Button>
             </Modal.Footer>
+            <Modal show={showConfirm} onHide={() => setShowConfirm(false)} className={`${style.confirm_index}`}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Action</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Double check the information. You cannot modify the request. Confirm?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirm(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={handleConfirmAccept}>Confirm</Button>
+                </Modal.Footer>
+            </Modal>
         </Modal>
     );
 };

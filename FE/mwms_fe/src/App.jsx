@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={"/manager/task"} />,
+        element: <Navigate to={"/manager/request/import"} />,
       },
       {
         path: "request",

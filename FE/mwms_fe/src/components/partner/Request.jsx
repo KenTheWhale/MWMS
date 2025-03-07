@@ -11,13 +11,15 @@ function Request() {
 
     useEffect(() => {
         async function fetchData() {
-            let username = localStorage.getItem('name');
-            return await getSupplierRequestList(username);
+            let username = JSON.parse(localStorage.getItem('user')).name;
+            const response = await getSupplierRequestList(username);
+            return response.data;
         }
+
         fetchData().then((data) => {
             setRequest(data);
         });
-    }, [requests]);
+    }, []);
 
     const handleRowClick = (request) => {
         setSelectedRequest(request);
@@ -92,7 +94,8 @@ function Request() {
                 show={showModal}
                 handleClose={handleCloseModal}
                 onAccept={handleAcceptClick}
-                onReject={handleRejectClick}/>
+                onReject={handleRejectClick}
+                setRequest={setRequest}/>
         </div>
     );
 }
