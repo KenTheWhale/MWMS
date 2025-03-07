@@ -8,10 +8,19 @@ public interface ManagerService {
 
     //----------------------------Staff----------------------------//
 
-    ResponseEntity<ResponseObject> getStaffList();
+    ResponseEntity<ResponseObject> getStaffs();
 
-    ResponseEntity<ResponseObject> assignStaff(AssignStaffRequest request);
+    //----------------------------Task----------------------------//
 
+    ResponseEntity<ResponseObject> getTaskList();
+
+    ResponseEntity<ResponseObject> deleteTask(int id);
+
+    ResponseEntity<ResponseObject> createTask(CreateTaskRequest request);
+
+    //----------------------------Item Group----------------------------//
+
+    ResponseEntity<ResponseObject> getUnassignedGroups();
 
     //----------------------------Request----------------------------//
 
@@ -44,6 +53,8 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
 
+    ResponseEntity<ResponseObject> searchCategory(SearchRequest request);
+
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();
 
@@ -57,13 +68,7 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> searchEquipment(SearchRequest request);
 
-    //----------------------------Task----------------------------//
 
-    ResponseEntity<ResponseObject> getTaskList();
 
-    //----------------------------Item Group----------------------------//
 
-    ResponseEntity<ResponseObject> getAllUnassignedGroup();
-
-    ResponseEntity<ResponseObject> searchCategory(SearchRequest request);
 }

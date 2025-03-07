@@ -25,6 +25,7 @@ function SidebarFooter({mini}) {
     );
 }
 
+
 export function DashboardUI({navigate, homeUrl}) {
     const [session, setSession] = useState({
         user: {
@@ -53,22 +54,38 @@ export function DashboardUI({navigate, homeUrl}) {
     }, [checkCookie]);
 
 
-    return (
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+        if (!args[0].includes("Failed prop type: Invalid prop `router.Link`")) {
+            originalWarn(...args);
+        }
+    };
+
+    const component = (
         <ReactRouterAppProvider
             navigation={navigate}
             branding={{
-                logo: <img src="/medic.png" alt="Medic icon"/>,
+                logo: <img src="/medic.png" alt="Medic icon" />,
                 title: "MEDIC115",
-                homeUrl: homeUrl
+                homeUrl: homeUrl,
             }}
-            session={session}
+            session={session.user ? session : null}
             authentication={auth}
         >
-            <DashboardLayout slots={{
-                sidebarFooter: SidebarFooter
-            }}>
-                <Outlet className="outlet"/>
+            <DashboardLayout
+                slots={{
+                    sidebarFooter: SidebarFooter,
+                }}
+            >
+                <div className="outlet">
+                    <Outlet/>
+                </div>
             </DashboardLayout>
         </ReactRouterAppProvider>
-    )
+    );
+
+    // Restore original console.warn
+    console.warn = originalWarn;
+
+    return component;
 }
