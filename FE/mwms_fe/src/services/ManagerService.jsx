@@ -136,3 +136,13 @@ export const approveRequest = async (code, status, username, deliveryDetail, rej
         deliveryDate: deliveryDetail.deliveryDate, carrierName: deliveryDetail.carrierName, carrierPhone: deliveryDetail.carrierPhone , rejectionReason: rejectionReason});
     return response && response.status === 200 ? response.data.data : null;
 }
+
+export const updateRequestApplication = async (requestItemId,equipmentId,quantity) => {
+    const body = {
+        requestItemId,
+        equipmentId,
+        quantity
+    }
+    const response = await axiosClient.put("/manager/request/import", body);
+    return response ? response.data : null;
+}
