@@ -20,6 +20,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import PositionPage from "./components/manager/PositionPage.jsx";
 import "react-datepicker/dist/react-datepicker.css";
 import {SnackbarProvider} from "notistack";
+import Admin from "./components/admin/Account.jsx";
 
 
 const router = createBrowserRouter([
@@ -100,9 +101,7 @@ const router = createBrowserRouter([
       {
         path: "account",
         element: (
-          <h1 className={`d-flex justify-content-center text-light`}>
-            Request Equipments
-          </h1>
+         <Admin/>
         ),
       },
     ],
