@@ -1,11 +1,14 @@
 package com.medic115.mwms_be;
 
-//import com.medic115.mwms_be.enums.*;
+//import com.medic115.mwms_be.enums.CodeFormat;
+//import com.medic115.mwms_be.enums.Role;
+//import com.medic115.mwms_be.enums.Status;
+//import com.medic115.mwms_be.enums.Type;
 //import com.medic115.mwms_be.models.*;
 //import com.medic115.mwms_be.repositories.*;
 //import com.medic115.mwms_be.services.JWTService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
+//import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 //import org.springframework.context.annotation.Bean;
@@ -55,10 +58,6 @@ public class MwmsBeApplication{
         SpringApplication.run(MwmsBeApplication.class, args);
     }
 
-//    @Override
-//    public void run(String... args) throws Exception {
-//    }
-
 //    @Bean
 //    public CommandLineRunner initData() {
 //        return new CommandLineRunner() {
@@ -78,6 +77,7 @@ public class MwmsBeApplication{
 //                            .password("1")
 //                            .role(Role.valueOf(roles.get(accountName.indexOf(acc)).toUpperCase()))
 //                            .status(Status.ACCOUNT_ACTIVE.getValue())
+//                            .logged(false)
 //                            .build();
 //                    accounts.add(a);
 //                    accountRepo.save(a);
@@ -117,18 +117,14 @@ public class MwmsBeApplication{
 //                    Token access = Token.builder()
 //                            .account(acc)
 //                            .value(accessValue)
-//                            .type(TokenType.ACCESS.getValue())
-//                            .createdDate(jwtService.extractIssuedAt(accessValue))
-//                            .expiredDate(jwtService.extractExpiration(accessValue))
+//                            .type(Type.TOKEN_ACCESS.getValue())
 //                            .status(Status.TOKEN_ACTIVE.getValue())
 //                            .build();
 //
 //                    Token refresh = Token.builder()
 //                            .account(acc)
 //                            .value(refreshValue)
-//                            .type(TokenType.REFRESH.getValue())
-//                            .createdDate(jwtService.extractIssuedAt(refreshValue))
-//                            .expiredDate(jwtService.extractExpiration(refreshValue))
+//                            .type(Type.TOKEN_REFRESH.getValue())
 //                            .status(Status.TOKEN_ACTIVE.getValue())
 //                            .build();
 //
@@ -137,7 +133,6 @@ public class MwmsBeApplication{
 //
 //                    tokenRepo.save(access);
 //                    tokenRepo.save(refresh);
-//                    System.out.println("\u001B[31m" + access.getAccount().getUsername().toUpperCase() + ": \u001B[0m" + access.getValue());
 //                });
 //
 //                // ----------------------------- Area ----------------------------- //
@@ -205,7 +200,7 @@ public class MwmsBeApplication{
 //                for (int i = 1; i <= 3; i++) {
 //                    RequestApplication requestApplication = RequestApplication.builder()
 //                            .code("REQ-" + i)
-//                            .type(RequestType.IMPORT.getValue())
+//                            .type(Type.REQUEST_IMPORT.getValue())
 //                            .requestDate(LocalDate.now().minusDays(i))
 //                            .lastModifiedDate(LocalDate.now())
 //                            .build();

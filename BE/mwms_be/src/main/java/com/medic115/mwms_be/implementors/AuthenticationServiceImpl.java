@@ -259,6 +259,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalArgumentException("Sign up request cannot be null");
         }
 
+        boolean check = accountRepo.findByUsername(request.username()).isPresent();
+
+        if(check){
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            "Username is already existed !"
+                    );
+        }
+
         Account acc = Account.builder()
                 .username(request.username())
                 .password(request.password())
@@ -276,10 +286,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         userRepo.save(user);
 
-        String accessToken = jwtService.generateAccessToken(acc);
-        String refreshToken = jwtService.generateRefreshToken(acc);
-
-        this.saveAccountToken(acc, accessToken, refreshToken);
+//        String accessToken = jwtService.generateAccessToken(acc);
+//        String refreshToken = jwtService.generateRefreshToken(acc);
+//
+//        this.saveAccountToken(acc, accessToken, refreshToken);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -332,6 +342,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (acc == null) {
             throw new IllegalArgumentException("User not found");
         }
+
+        boolean checked = accountRepo.findByUsername(request.getUsername()).isPresent();
+
+        if(checked){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Username is already existed !");
+        }
+
+        checked = userRepo.findByEmail(request.getEmail()).isPresent();
+
+        if(checked){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Email is already existed !");
+        }
+
 
         acc.setUsername(request.getUsername());
         acc.setPassword(request.getPassword());

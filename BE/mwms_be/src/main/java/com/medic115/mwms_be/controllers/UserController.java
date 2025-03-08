@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
+import com.medic115.mwms_be.dto.requests.EditAccountRequest;
 import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
 import com.medic115.mwms_be.dto.requests.SignUpRequest;
 import com.medic115.mwms_be.dto.response.AccountResponse;
@@ -44,5 +45,11 @@ public class UserController {
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<String> activateUser(@PathVariable Integer userId) {
         return authenticationService.activateUser(userId);
+    }
+
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> updateAccount(@PathVariable Integer userId,@RequestBody EditAccountRequest request) {
+        return authenticationService.updateUser(userId, request);
     }
 }
