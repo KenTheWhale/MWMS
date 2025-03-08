@@ -197,6 +197,12 @@ public class ManagerController {
         return managerService.addForUpdateRequest(request);
     }
 
+    @PutMapping("/request/requestItem")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> cancelRequest(@RequestBody CancelImportRequest request) {
+        return managerService.cancelImportRequest(request);
+    }
+
 
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")

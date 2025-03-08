@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {Button, Card, Form, Modal, Table} from "react-bootstrap";
 import style from "../../styles/manager/ImportRequest.module.css";
 import {
+    cancelRequest,
     createRequestApplication,
     getImportRequest,
     getSupplierEquipment,
@@ -14,7 +15,7 @@ import {CgAddR} from "react-icons/cg";
 import {CustomAlertHUY} from "../CustomAlert.jsx";
 import {LuSave} from "react-icons/lu";
 import {MdOutlineCancel} from "react-icons/md";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 
 function ImportRequest() {
@@ -34,6 +35,8 @@ function ImportRequest() {
     const [alertType, setAlertType] = useState("");
     const [editRows, setEditRows] = useState({});
     const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
+    const [showConfirmCancel, setShowConfirmCancel] = useState(false);
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -61,7 +64,7 @@ function ImportRequest() {
 
     const toggleGroup = (groupId) => {
         setExpandedGroups((previousState) => {
-            const updatedState = { ...previousState };
+            const updatedState = {...previousState};
 
             updatedState[groupId] = !previousState[groupId];
 
@@ -78,7 +81,8 @@ function ImportRequest() {
     const clearDatePicker = () => {
         setFilterDate({
             ...filterDate, value: null, format: ""
-        });    }
+        });
+    }
 
     const handleClose = () => setShow(false);
 
@@ -188,7 +192,7 @@ function ImportRequest() {
 
     const cancelEditRow = (groupId, index) => {
         setEditRows(prev => {
-            const updatedEditRows = { ...prev };
+            const updatedEditRows = {...prev};
             delete updatedEditRows[`${groupId}-${index}`];
             return updatedEditRows;
         });
@@ -197,11 +201,14 @@ function ImportRequest() {
 
     const handleUpdateChange = (groupId, index, field, value) => {
         const rowKey = `${groupId}-${index}`;
+
         setEditRows(prev => ({
             ...prev,
             [rowKey]: {
                 ...prev[rowKey],
-                [field]: value
+                [field]: field === "quantity"
+                    ? Math.max(1, Math.min(100, value))
+                    : value
             }
         }));
     };
@@ -214,43 +221,62 @@ function ImportRequest() {
         if (!editData) return;
 
 
-            const response = await updateRequestApplication(
-                item.itemId,
-                editData.selectedEquipmentId || item.eqId,
-                editData.quantity || item.quantity
-            );
+        const response = await updateRequestApplication(
+            item.itemId,
+            editData.selectedEquipmentId || item.eqId,
+            editData.quantity || item.quantity
+        );
 
-            if (response.success) {
-                setSelectedRequest(prev => {
-                    const newItemGroups = prev.itemGroups.map(group => {
-                        if (group.groupId === groupId) {
-                            return {
-                                ...group,
-                                requestItems: group.requestItems.map((reqItem, idx) =>
-                                    idx === index ? { ...reqItem, ...editData } : reqItem
-                                )
-                            };
-                        }
-                        return group;
-                    });
-
-                    return { ...prev, itemGroups: newItemGroups };
+        if (response.success) {
+            setSelectedRequest(prev => {
+                const newItemGroups = prev.itemGroups.map(group => {
+                    if (group.groupId === groupId) {
+                        return {
+                            ...group,
+                            requestItems: group.requestItems.map((reqItem, idx) =>
+                                idx === index ? {...reqItem, ...editData} : reqItem
+                            )
+                        };
+                    }
+                    return group;
                 });
 
-                setEditRows(prev => {
-                    const newRows = { ...prev };
-                    delete newRows[rowKey];
-                    return newRows;
-                });
-                handleViewDetail(selectedRequest.code)
-                setAlertMessage("update successfully");
-                setAlertType("success");
-            } else {
-                setAlertMessage("update false please try again");
-                setAlertType("danger");
-            }
+                return {...prev, itemGroups: newItemGroups};
+            });
+
+            setEditRows(prev => {
+                const newRows = {...prev};
+                delete newRows[rowKey];
+                return newRows;
+            });
+            handleViewDetail(selectedRequest.code)
+            setAlertMessage("update successfully");
+            setAlertType("success");
+        } else {
+            setAlertMessage("update false please try again");
+            setAlertType("danger");
+        }
     };
 
+    const handleCancelClick = (groupId) => {
+        setSelectedGroupId(groupId);
+        setShowConfirmCancel(true);
+    };
+
+    const handleCancel = async () => {
+        const response = await cancelRequest(selectedGroupId);
+
+        console.log("Response:", response);
+        if (response) {
+            setAlertMessage("cancel successfully");
+            setAlertType("success");
+            setShowConfirmCancel(false)
+            handleViewDetail(selectedRequest.code)
+        } else {
+            setAlertMessage("cancel false please try again");
+            setAlertType("danger");
+        }
+    }
     return (
         <div className="container-fluid">
             <CustomAlertHUY message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
@@ -261,11 +287,11 @@ function ImportRequest() {
             <div className="row">
                 <div className="col-12 d-flex justify-content-end align-items-center gap-2">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker slotProps={{field:{clearable:true,onClear:clearDatePicker}}}
+                        <DatePicker slotProps={{field: {clearable: true, onClear: clearDatePicker}}}
                                     format={"YYYY-MM-DD"} timezone={"system"}
                                     onChange={handleDateChange}
                                     value={filterDate.value}
-                                    label="Request Date" />
+                                    label="Request Date"/>
                     </LocalizationProvider>
                     <Button onClick={handleAddClick}><CgAddR/></Button>
                 </div>
@@ -339,12 +365,12 @@ function ImportRequest() {
                                         <Form.Select className="m-2" value={row.name || ""}
                                                      onChange={(e) => handleInputRow(index, "name", e.target.value)}
                                                      required
-                                                    disabled={!row.partner}>
+                                                     disabled={!row.partner}>
                                             <option value="">Select Equipment</option>
                                             {equipments.filter(eq =>
-                                                    eq.name === row.name ||
-                                                    !rows.some(r => r.partner === row.partner && r.name === eq.name)
-                                                )
+                                                eq.name === row.name ||
+                                                !rows.some(r => r.partner === row.partner && r.name === eq.name)
+                                            )
                                                 .map(equipment => (
                                                     <option key={equipment.id} value={equipment.name}>
                                                         {equipment.name}
@@ -359,7 +385,7 @@ function ImportRequest() {
                                     </td>
 
                                     <td>
-                                        <Form.Control className="m-2" type="number" min="1" max="100" value={row.quantity}
+                                        <Form.Control className="m-2" type="number" min="1" value={row.quantity}
                                                       onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
                                                       required/>
                                     </td>
@@ -434,12 +460,8 @@ function ImportRequest() {
                                             <Card.Subtitle className="mb-2 text-muted">
                                                 Carrier Phone: {group.carrierPhone}
                                             </Card.Subtitle>
-                                            <Card.Subtitle className="mb-2 text-muted">
-                                                Delivery Date: {group.deliveryDate}
-                                            </Card.Subtitle>
-                                            <Card.Subtitle className="mb-2 text-muted">
-                                                Status: {group.status}
-                                            </Card.Subtitle>
+                                            <Card.Text>Delivery Date: {group.deliveryDate}</Card.Text>
+                                            <Card.Text>Status: {group.status}</Card.Text>
 
                                             {expandedGroups[group.groupId] &&
                                                 <>
@@ -464,61 +486,79 @@ function ImportRequest() {
                                                                         {isEditing ? (
                                                                             <Form.Select
                                                                                 value={isEditing.selectedEquipmentId || item.eqId}
-                                                                                onChange={(e) => handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))}>
-                                                                                {equipmentForUpdate.map(eq => (
-                                                                                    <option key={eq.id} value={eq.id}>{eq.name}</option>
-                                                                                ))}
+                                                                                onChange={(e) =>
+                                                                                    handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))
+                                                                                }
+                                                                            >
+                                                                                <option value={item.eqId}
+                                                                                        hidden>{item.equipmentName}</option>
+                                                                                {equipmentForUpdate
+                                                                                    .filter(eq => eq.id !== item.eqId)
+                                                                                    .map(eq => (
+                                                                                        <option key={eq.id}
+                                                                                                value={eq.id}>{eq.name}</option>
+                                                                                    ))}
                                                                             </Form.Select>
-
                                                                         ) : (
                                                                             item.equipmentName
                                                                         )}
                                                                     </td>
+
                                                                     <td>{item.equipmentDescription}</td>
                                                                     <td>
                                                                         {isEditing ? (
                                                                             <Form.Control
                                                                                 type="number"
                                                                                 value={isEditing.quantity || item.quantity}
-                                                                                min={"1"}
-                                                                                max={"100"}
+                                                                                min={1} max={100}
                                                                                 onChange={(e) => handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)}
                                                                             />
-
                                                                         ) : (
                                                                             item.quantity
                                                                         )}
                                                                     </td>
                                                                     <td>{item.unit}</td>
                                                                     <td>
-                                                                        {isEditing ? (
-                                                                            <div>
-                                                                                <Button onClick={() => handleUpdateSave(group.groupId, index, item)}>
-                                                                                    <LuSave />
-                                                                                </Button>
+                                                                        {
+                                                                            group.status !== "canceled" && (
+                                                                                isEditing ? (
+                                                                                    <div>
+                                                                                        <Button
+                                                                                            onClick={() => handleUpdateSave(group.groupId, index, item)}>
+                                                                                            <LuSave/>
+                                                                                        </Button>
 
-                                                                                <Button variant="danger" onClick={() => cancelEditRow(group.groupId, index)}>
-                                                                                    <MdOutlineCancel />
-                                                                                </Button>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <Button variant="outline-primary" onClick={() => handleEditRow(group.groupId, index, item)}>
-                                                                                <GrUpdate/>
-                                                                            </Button>
-                                                                        )}
+                                                                                        <Button variant="danger"
+                                                                                                onClick={() => cancelEditRow(group.groupId, index)}>
+                                                                                            <MdOutlineCancel/>
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <Button variant="outline-primary"
+                                                                                            onClick={() => handleEditRow(group.groupId, index, item)}>
+                                                                                        <GrUpdate/>
+                                                                                    </Button>
+                                                                                )
+                                                                            )
+                                                                        }
                                                                     </td>
                                                                 </tr>
                                                             );
                                                         })}
                                                         </tbody>
-
                                                     </Table>
-                                                    <div>
-                                                        <Button>+</Button>
-                                                    </div>
-                                                    <div className={style.footCard}>
-                                                        <Button className={`btn btn-danger`}>Cancel</Button>
-                                                    </div>
+                                                    {
+                                                        group.status !== "canceled" ? (
+                                                            <div className={style.footCard}>
+                                                                <Button
+                                                                    onClick={() => handleCancelClick(group.groupId)}
+                                                                    className={`btn btn-danger`}>Cancel</Button>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                            </>
+                                                        )
+                                                    }
 
                                                 </>
                                             }
@@ -538,6 +578,24 @@ function ImportRequest() {
                     <Button className={`btn btn-danger`} onClick={handleClose}>Close</Button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal
+                className={`${style.confirmModal}`}
+                show={showConfirmCancel}
+                onHide={() => setShowConfirmCancel(false)}
+                centered={true}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Cancel Request</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to cancel this request
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmCancel(false)}>No</Button>
+                    <Button variant="danger" onClick={() => handleCancel()}>Yes</Button>
+                </Modal.Footer>
+            </Modal>
+
         </div>
 
     );

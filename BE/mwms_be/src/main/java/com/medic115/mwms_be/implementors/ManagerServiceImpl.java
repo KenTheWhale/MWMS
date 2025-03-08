@@ -792,6 +792,32 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
+    public ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request) {
+        ItemGroup itemGroup = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+
+        if (itemGroup == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    ResponseObject
+                            .builder()
+                            .message("204 No Content Item group not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        itemGroup.setStatus(Status.REQUEST_CANCELLED.getValue());
+        itemGroupRepo.save(itemGroup);
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK Cancel Group successfully")
+                        .success(true)
+                        .build()
+        );
+    }
+
+    @Override
     public ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request) {
 
         RequestItem requestItem = requestItemRepo.findById(request.getRequestItemId()).orElse(null);

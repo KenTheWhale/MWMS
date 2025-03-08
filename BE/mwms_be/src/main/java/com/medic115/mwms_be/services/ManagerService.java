@@ -38,7 +38,7 @@ public interface ManagerService {
 
 //    ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
 
-//    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
+    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
 
   ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
