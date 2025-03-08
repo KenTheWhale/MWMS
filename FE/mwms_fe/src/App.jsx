@@ -97,6 +97,14 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: <DashDefault />,
       },
+      {
+        path: "account",
+        element: (
+          <h1 className={`d-flex justify-content-center text-light`}>
+            Request Equipments
+          </h1>
+        ),
+      },
     ],
   },
   {

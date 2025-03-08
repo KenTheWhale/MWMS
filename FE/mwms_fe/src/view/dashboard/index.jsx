@@ -9,7 +9,6 @@ import {
   Form,
 } from "react-bootstrap";
 import { MdDelete } from "react-icons/md";
-import { Link } from "react-router-dom";
 import avatar1 from "../../assets/images/user/avatar-1.jpg";
 import { FaUserPlus } from "react-icons/fa6";
 import { FaPowerOff } from "react-icons/fa";
@@ -19,13 +18,15 @@ import axiosClient from "../../config/api";
 import { toast } from "react-toastify";
 import { MdModeEdit } from "react-icons/md";
 import { BiSolidUserDetail } from "react-icons/bi";
-import { IoIosEye , IoIosEyeOff } from "react-icons/io";
-
+import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 
 const DashDefault = () => {
   const [dashData, setDashData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
+  const [idEdit, setIdEdit] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+
   const [salesData, setSalesData] = useState([
     {
       title: "Daily Sales",
@@ -54,15 +55,19 @@ const DashDefault = () => {
     username: "",
     password: "",
     roleName: "",
-    status: "",
     name: "",
     phone: "",
-    email: ""
+    email: "",
   });
 
   const [formEdit, setFormEdit] = useState({
-
-  })
+    username: "",
+    password: "",
+    roleName: "",
+    name: "",
+    phone: "",
+    email: "",
+  });
 
   const [show, setShow] = useState(false);
 
@@ -80,7 +85,7 @@ const DashDefault = () => {
   const [userDetail, setUserDetail] = useState({
     phone: "",
     fullName: "",
-    email: ""
+    email: "",
   });
 
   useEffect(() => {
@@ -119,9 +124,9 @@ const DashDefault = () => {
       username: "",
       password: "",
       roleName: "",
-      status: "",
       name: "",
-      phone: ""
+      phone: "",
+      email: "",
     });
   };
 
@@ -130,7 +135,7 @@ const DashDefault = () => {
     setUserDetail({
       phone: "",
       fullName: "",
-      email: ""
+      email: "",
     });
   };
 
@@ -138,28 +143,46 @@ const DashDefault = () => {
     setShow(true);
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormEdit({ ...formEdit, [name]: name === "roleName" ? value.toLowerCase() : value, // Chỉ lowercase với roleName
+    });
+  };
+
+  const handleOpenEditForm = (item) => {
+    setShowEdit(true);
+    setIdEdit(item.id);
+    console.log(item);
+    setFormEdit({
+      ...formEdit,
+      username: item.username,
+      password: item.password,
+      roleName: item.role.toLowerCase(),
+      name: item.userResponse.fullName,
+      phone: item.userResponse.phone,
+      email: item.userResponse.email,
+    });
+  };
+
   // eslint-disable-next-line react/prop-types
   const PasswordField = ({ password }) => {
     const [showPassword, setShowPassword] = useState(false);
-  
+
     return (
       <td>
         <h5 className="text-muted">
           {showPassword ? password : "••••••••"}
-          {showPassword ? 
-          <IoIosEye 
-              style={{color: "black", cursor: "pointer", marginLeft: "10px"}}
+          {showPassword ? (
+            <IoIosEye
+              style={{ color: "black", cursor: "pointer", marginLeft: "10px" }}
               onClick={() => setShowPassword(false)}
-             /> 
-             
-             : 
-             
-             <IoIosEyeOff 
-             style={{color: "black", cursor: "pointer", marginLeft: "10px"}}
-             onClick={() => setShowPassword(true)}
-             />
-
-             }
+            />
+          ) : (
+            <IoIosEyeOff
+              style={{ color: "black", cursor: "pointer", marginLeft: "10px" }}
+              onClick={() => setShowPassword(true)}
+            />
+          )}
         </h5>
       </td>
     );
@@ -167,12 +190,16 @@ const DashDefault = () => {
 
   const handleCreateUser = async () => {
     try {
-      const response = await axiosClient.post("/auth/register", formData);
+      const response = await axiosClient.post("/user/register", formData);
+      console.log(response.status);
       toast.success(response.data);
       fetchData();
       handleClose();
     } catch (error) {
-      toast.error("Something Wrong....", error);
+      if (error.status === 500) {
+        toast.error(error.response.data);
+        console.log(error.response.data);
+      }
     }
   };
 
@@ -200,11 +227,35 @@ const DashDefault = () => {
     setUserDetail({
       phone: detailUser.phone,
       fullName: detailUser.fullName,
-      email: detailUser.email
+      email: detailUser.email,
     });
     setShowUserDetail(true);
   };
 
+  const handleSubmitEdit = async () => {
+    try {
+      const response = await axiosClient.put(`/user/${idEdit}`, formEdit);
+      setFormEdit({
+        ...formEdit,
+        username: "",
+        password: "",
+        roleName: "",
+        name: "",
+        phone: "",
+        email: "",
+      })
+      setShowEdit(false);
+      fetchData()
+      toast.success(response.data);
+      console.log(response.data)
+
+    } catch (error) {
+      if (error.status === 500) {
+        toast.error(error.response.data);
+        console.log(error.response.data);
+      }
+    }
+  }
 
   return (
     <>
@@ -269,11 +320,11 @@ const DashDefault = () => {
                 <tbody>
                   {currentItems && currentItems.length > 0 ? (
                     currentItems.map((item) => (
-                      <tr 
-                        // className="unread" 
+                      <tr
+                        // className="unread"
                         key={item.id}
-                        style={{ 
-                          opacity: item.status === "deleted" ? 0.3 : 1 
+                        style={{
+                          opacity: item.status === "deleted" ? 0.3 : 1,
                         }}
                       >
                         <td>
@@ -308,24 +359,24 @@ const DashDefault = () => {
                         </td>
                         <td>
                           {item.status === "active" ? (
-                            <MdDelete 
+                            <MdDelete
                               onClick={() => handleToggleUserStatus(item)}
                               style={{
-                                fontSize: "30px", 
-                                color: "red", 
+                                fontSize: "30px",
+                                color: "red",
                                 cursor: "pointer",
                                 marginRight: "30px",
-                              }} 
+                              }}
                             />
                           ) : (
-                            <FaPowerOff 
+                            <FaPowerOff
                               onClick={() => handleToggleActivate(item)}
                               style={{
-                                color: "green", 
-                                fontSize: "25px", 
+                                color: "green",
+                                fontSize: "25px",
                                 marginRight: "30px",
                                 cursor: "pointer",
-                              }} 
+                              }}
                             />
                           )}
                           <MdModeEdit
@@ -334,14 +385,19 @@ const DashDefault = () => {
                               cursor: `${item.status === "active" ? "pointer" : "not-allowed"}`,
                               marginRight: "30px",
                             }}
+                            onClick={() => handleOpenEditForm(item)}
                           />
                           <BiSolidUserDetail
-                             style={{
+                            style={{
                               fontSize: "25px",
                               color: "blue",
-                              cursor: `${item.status === "active" ? "pointer" : "not-allowed"}`
+                              cursor: `${item.status === "active" ? "pointer" : "not-allowed"}`,
                             }}
-                            onClick={() => item.status === "active" ?  handleOpenUserDetail(item.userResponse) : ""}
+                            onClick={() =>
+                              item.status === "active"
+                                ? handleOpenUserDetail(item.userResponse)
+                                : ""
+                            }
                           />
                         </td>
                       </tr>
@@ -424,7 +480,7 @@ const DashDefault = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} style={{color: "black",}} centered size="md" onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Create New User</Modal.Title>
         </Modal.Header>
@@ -465,25 +521,9 @@ const DashDefault = () => {
               >
                 <option value="">Select Role</option>
                 <option value="admin">admin</option>
-                <option value="user">user</option>
+                <option value="user">manager</option>
                 <option value="staff">staff</option>
-              </Form.Control>
-            </Form.Group>
-
-      
-
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Control
-                as="select"
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-              >
-                <option value="">Select Status</option>
-                <option value="active">active</option>
-                <option value="inactive">inactive</option>
+                <option value="staff">partner</option>
               </Form.Control>
             </Form.Group>
 
@@ -503,10 +543,10 @@ const DashDefault = () => {
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="Enter full name"
-                value={formData.name}
+                placeholder="Enter email address"
+                value={formData.email}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, email: e.target.value })
                 }
               />
             </Form.Group>
@@ -531,6 +571,81 @@ const DashDefault = () => {
           <Button variant="primary" onClick={handleCreateUser}>
             Create
           </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showEdit} style={{color: "black",}} onHide={() => setShowEdit(false)} centered size="md">
+      <Modal.Header closeButton>
+        <Modal.Title style={{ fontSize: "1.2rem" }}>Chỉnh sửa thông tin</Modal.Title>
+      </Modal.Header>
+        <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
+        <Form>
+            <Form.Group className="mb-3">
+            <Form.Label>Username</Form.Label>
+              <Form.Control
+                type="text"
+                name="username"
+                value={formEdit.username}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={formEdit.password}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Role Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="roleName"
+                value={formEdit.roleName}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formEdit.name}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Phone</Form.Label>
+              <Form.Control
+                type="text"
+                name="phone"
+                value={formEdit.phone}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formEdit.email}
+                onChange={handleChange}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEdit(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSubmitEdit}>Edit</Button>
         </Modal.Footer>
       </Modal>
     </>
