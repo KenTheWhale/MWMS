@@ -132,5 +132,19 @@
     justify-content: flex-end;
 }
 
+.modalDetail{
+    z-index: 2000 !important;
+    color: black;
+}
+
+.titleModal{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
 
 

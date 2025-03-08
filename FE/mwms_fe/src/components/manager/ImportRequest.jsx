@@ -5,7 +5,7 @@ import {
     createRequestApplication,
     getImportRequest,
     getSupplierEquipment,
-    getSupplierList,
+    getSupplierList, updateRequestApplication,
     viewDetail
 } from "../../services/ManagerService.jsx";
 import {FaSearch} from "react-icons/fa";
@@ -13,10 +13,16 @@ import {GrUpdate, GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
 import {CustomAlertHUY} from "../CustomAlert.jsx";
 import {LuSave} from "react-icons/lu";
+import {MdOutlineCancel} from "react-icons/md";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
-    const [filterDate, setFilterDate] = useState("");
+    const [filterDate, setFilterDate] = useState({
+        value: null,
+        format: ""
+    });
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [show, setShow] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
@@ -26,9 +32,8 @@ function ImportRequest() {
     const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
     const [alertMessage, setAlertMessage] = useState("");
     const [alertType, setAlertType] = useState("");
-    const [currentUpdateEq, setCurrentUpdateEq] = useState(null);
-
-
+    const [editRows, setEditRows] = useState({});
+    const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -40,10 +45,19 @@ function ImportRequest() {
     }, []);
 
     const handleViewDetail = async (code) => {
-        const response = await viewDetail(code);
-        setSelectedRequest(response.data);
-        setShow(true);
+        try {
+            const response = await viewDetail(code);
+            if (!response || !response.data) {
+                console.error("viewDetail API returned null or invalid data.");
+                return;
+            }
+            setSelectedRequest(response.data);
+            setShow(true);
+        } catch (error) {
+            console.error("Error in handleViewDetail:", error);
+        }
     };
+
 
     const toggleGroup = (groupId) => {
         setExpandedGroups((previousState) => {
@@ -55,9 +69,16 @@ function ImportRequest() {
         });
     };
 
-    const handleDateChange = (event) => {
-        setFilterDate(event.target.value);
+    const handleDateChange = (value) => {
+        setFilterDate({
+            ...filterDate, value: value, format: value.format("YYYY-MM-DD")
+        });
     };
+
+    const clearDatePicker = () => {
+        setFilterDate({
+            ...filterDate, value: null, format: ""
+        });    }
 
     const handleClose = () => setShow(false);
 
@@ -84,7 +105,6 @@ function ImportRequest() {
         ]);
     };
 
-
     const handleInputRow = (index, field, value) => {
         const updatedRows = [...rows];
         updatedRows[index][field] = value;
@@ -108,7 +128,6 @@ function ImportRequest() {
 
         setRows(updatedRows);
     };
-
 
     const handleRemoveRow = (index) => {
         const updatedRows = rows.filter((_, i) => i !== index);
@@ -147,22 +166,107 @@ function ImportRequest() {
 
     }
 
+    const handleEditRow = async (groupId, index, item) => {
+        const selectedGroup = selectedRequest?.itemGroups.find(group => group.groupId === groupId);
+        if (!selectedGroup) return;
+
+        const existingEquipmentIds = selectedGroup?.requestItems?.map(item => item.eqId) || [];
+
+        getSupplierEquipment(selectedGroup.partnerId).then(response => {
+            const filteredEquipments = response.data.filter(eq =>
+                !(existingEquipmentIds.includes(eq.id) && eq.id === item.eqId)
+            );
+
+            setEquipmentForUpdate(filteredEquipments);
+            setEditRows(prev => ({
+                ...prev,
+                [`${groupId}-${index}`]: true,
+            }));
+        });
+    };
+
+
+    const cancelEditRow = (groupId, index) => {
+        setEditRows(prev => {
+            const updatedEditRows = { ...prev };
+            delete updatedEditRows[`${groupId}-${index}`];
+            return updatedEditRows;
+        });
+    };
+
+
+    const handleUpdateChange = (groupId, index, field, value) => {
+        const rowKey = `${groupId}-${index}`;
+        setEditRows(prev => ({
+            ...prev,
+            [rowKey]: {
+                ...prev[rowKey],
+                [field]: value
+            }
+        }));
+    };
+
+
+    const handleUpdateSave = async (groupId, index, item) => {
+        const rowKey = `${groupId}-${index}`;
+        const editData = editRows[rowKey];
+
+        if (!editData) return;
+
+
+            const response = await updateRequestApplication(
+                item.itemId,
+                editData.selectedEquipmentId || item.eqId,
+                editData.quantity || item.quantity
+            );
+
+            if (response.success) {
+                setSelectedRequest(prev => {
+                    const newItemGroups = prev.itemGroups.map(group => {
+                        if (group.groupId === groupId) {
+                            return {
+                                ...group,
+                                requestItems: group.requestItems.map((reqItem, idx) =>
+                                    idx === index ? { ...reqItem, ...editData } : reqItem
+                                )
+                            };
+                        }
+                        return group;
+                    });
+
+                    return { ...prev, itemGroups: newItemGroups };
+                });
+
+                setEditRows(prev => {
+                    const newRows = { ...prev };
+                    delete newRows[rowKey];
+                    return newRows;
+                });
+                handleViewDetail(selectedRequest.code)
+                setAlertMessage("update successfully");
+                setAlertType("success");
+            } else {
+                setAlertMessage("update false please try again");
+                setAlertType("danger");
+            }
+    };
+
     return (
         <div className="container-fluid">
             <CustomAlertHUY message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
             <div className="row">
-                <h1 className="d-flex justify-content-center text-light">Import Request</h1>
+                <label className="d-flex justify-content-center fs-1">Import Request</label>
             </div>
 
             <div className="row">
                 <div className="col-12 d-flex justify-content-end align-items-center gap-2">
-                    <label className="text-light">Request Date: </label>
-                    <input
-                        type="date"
-                        className="form-control w-auto"
-                        onChange={handleDateChange}
-                        value={filterDate}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker slotProps={{field:{clearable:true,onClear:clearDatePicker}}}
+                                    format={"YYYY-MM-DD"} timezone={"system"}
+                                    onChange={handleDateChange}
+                                    value={filterDate.value}
+                                    label="Request Date" />
+                    </LocalizationProvider>
                     <Button onClick={handleAddClick}><CgAddR/></Button>
                 </div>
             </div>
@@ -180,7 +284,7 @@ function ImportRequest() {
                         </thead>
                         <tbody>
                         {requestList
-                            .filter((item) => item.requestDate.includes(filterDate))
+                            .filter((item) => item.requestDate.includes(filterDate.format))
                             .reverse()
                             .map((item, index) => (
                                 <tr key={index}>
@@ -290,10 +394,13 @@ function ImportRequest() {
                 onHide={handleClose}
                 backdrop="static"
                 keyboard={false}
-
+                className={`${style.modalDetail}`}
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
+                    <div className={`${style.titleModal}`}>
+                        <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
+                    </div>
+
                 </Modal.Header>
                 <Modal.Body className={style.modalBody}>
                     {selectedRequest ? (
@@ -343,22 +450,67 @@ function ImportRequest() {
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        {group.requestItems.map((item, index) => (
-                                                            <tr key={index}>
-                                                                <td>{item.equipmentName}</td>
-                                                                <td>{item.equipmentDescription}</td>
-                                                                <td>{item.quantity}</td>
-                                                                <td>{item.unit}</td>
-                                                                <td>
-                                                                    <Button onClick={() => setCurrentUpdateEq({...item})}>
-                                                                        <GrUpdate />
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                        {group.requestItems.map((item, index) => {
+                                                            const rowKey = `${group.groupId}-${index}`;
+                                                            const isEditing = editRows[rowKey];
+
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <Form.Select
+                                                                                value={isEditing.selectedEquipmentId || item.eqId}
+                                                                                onChange={(e) => handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))}>
+                                                                                {equipmentForUpdate.map(eq => (
+                                                                                    <option key={eq.id} value={eq.id}>{eq.name}</option>
+                                                                                ))}
+                                                                            </Form.Select>
+
+                                                                        ) : (
+                                                                            item.equipmentName
+                                                                        )}
+                                                                    </td>
+                                                                    <td>{item.equipmentDescription}</td>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <Form.Control
+                                                                                type="number"
+                                                                                value={isEditing.quantity || item.quantity}
+                                                                                onChange={(e) => handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)}
+                                                                            />
+
+                                                                        ) : (
+                                                                            item.quantity
+                                                                        )}
+                                                                    </td>
+                                                                    <td>{item.unit}</td>
+                                                                    <td>
+                                                                        {isEditing ? (
+                                                                            <div>
+                                                                                <Button onClick={() => handleUpdateSave(group.groupId, index, item)}>
+                                                                                    <LuSave />
+                                                                                </Button>
+
+                                                                                <Button variant="danger" onClick={() => cancelEditRow(group.groupId, index)}>
+                                                                                    <MdOutlineCancel />
+                                                                                </Button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <Button variant="outline-primary">
+                                                                                <GrUpdate
+                                                                                    onClick={() => handleEditRow(group.groupId, index, item)}/>
+                                                                            </Button>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                         </tbody>
 
                                                     </Table>
+                                                    <div>
+                                                        <Button>+</Button>
+                                                    </div>
                                                     <div className={style.footCard}>
                                                         <Button className={`btn btn-danger`}>Cancel</Button>
                                                     </div>
@@ -367,7 +519,6 @@ function ImportRequest() {
                                             }
                                         </Card.Body>
                                     </Card>
-
                                 ))
 
                             ) : (

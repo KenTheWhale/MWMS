@@ -3,15 +3,13 @@ package com.medic115.mwms_be.dto.requests;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateImportRequest {
-    int requestItemId;
-    int equipmentId;
-    int quantity;
+public class CreateTaskRequest {
+    int staffId;
+    String description;
+    int groupId;
 }

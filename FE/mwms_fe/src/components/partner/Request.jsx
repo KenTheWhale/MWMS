@@ -5,57 +5,21 @@ import RequestPopup from "../popup/RequestPopup.jsx";
 import {getSupplierRequestList} from "../../services/ManagerService.jsx";
 
 function Request() {
-
-    // const [requests, setRequest] = useState([
-    //     {
-    //         id: 1,
-    //         code: "REQ001",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 2,
-    //         code: "REQ002",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 3,
-    //         code: "REQ003",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 4,
-    //         code: "REQ004",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     },
-    //     {
-    //         id: 5,
-    //         code: "REQ005",
-    //         requestDate: "2021-08-01",
-    //         lastModifiedDate: "2021-08-01",
-    //         status: "Pending"
-    //     }
-    // ]);
     const [requests, setRequest] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
-            let username = localStorage.getItem('name');
-            return await getSupplierRequestList(username);
+            let username = JSON.parse(localStorage.getItem('user')).name;
+            const response = await getSupplierRequestList(username);
+            return response.data;
         }
+
         fetchData().then((data) => {
             setRequest(data);
         });
-    }, [requests]);
+    }, []);
 
     const handleRowClick = (request) => {
         setSelectedRequest(request);
@@ -82,7 +46,7 @@ function Request() {
     return (
         <div className={style.main}>
             <div className={style.title_area}>
-                <h1 className={`text-light`}>Warehouse Request</h1>
+                <label className={`fs-1`}>Warehouse Request</label>
             </div>
             <div className={style.search_area}>
                 <div className={style.search_input}>
@@ -130,7 +94,8 @@ function Request() {
                 show={showModal}
                 handleClose={handleCloseModal}
                 onAccept={handleAcceptClick}
-                onReject={handleRejectClick}/>
+                onReject={handleRejectClick}
+                setRequest={setRequest}/>
         </div>
     );
 }
