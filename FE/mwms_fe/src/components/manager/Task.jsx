@@ -29,7 +29,7 @@ import {AddRounded, ArrowDropDown, DeleteForeverRounded} from "@mui/icons-materi
 
 /* eslint-disable react/prop-types */
 function CapitalizeFirstLetter(input) {
-    return input.charAt(0).toUpperCase() + input.slice(1);
+    return input[0].toUpperCase() + input.slice(1);
 }
 
 function RenderInfoTextField({label, data, isCapital}){
@@ -127,32 +127,11 @@ function RenderTable({tasks, SetActionFunc}) {
 }
 
 function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, staffs}) {
-    const [expand, setExpand] = useState("0")
-    const [childExpand, setChildExpand] = useState("0")
-    const [secondChildExpand, setSecondChildExpand] = useState("0")
     const [assignArea, setAssignArea] = useState(false)
     const [input, setInput] = useState({
         description: "",
         staff: ""
     })
-
-    // console.log("Expand: " + expand)
-    // console.log("Child: " + childExpand)
-    // console.log("Second: " + secondChildExpand)
-
-    const handleExpand = (value, type) => {
-        switch (type) {
-            case "1":
-                setExpand(expand === value ? "0" : value)
-                break
-            case "2":
-                setChildExpand(childExpand === value ? "0" : value)
-                break
-            case "3":
-                setSecondChildExpand(secondChildExpand === value ? "0" : value)
-                break
-        }
-    }
 
     const handleAssignArea = () => {
         SetActionFunc()
@@ -165,9 +144,6 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
         if(response.success){
             enqueueSnackbar(response.message, {variant: "success"});
             setAssignArea(false)
-            setExpand("0")
-            setChildExpand("0")
-            setSecondChildExpand("0")
         }else {
             enqueueSnackbar(response.message, {variant: "error"})
         }
@@ -183,17 +159,12 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
         >
             <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
                 <label>Unassigned Requests</label>
-                <Button variant={"contained"} color={"success"} onClick={() => {
-                    setExpand("0")
-                    setChildExpand("0")
-                    setSecondChildExpand("0")
-                }}>Collapse all</Button>
             </DialogTitle>
             <DialogContent dividers={true}>
                 <Box>
                     {
                         groups.map((group, index) => (
-                            <Accordion key={index} expanded={expand === (index + 1).toString()} onChange={() => handleExpand((index + 1).toString(), "1")}>
+                            <Accordion key={index}>
                                 <AccordionSummary expandIcon={<ArrowDropDown/>}>
                                     <Typography component={"span"}>
                                         {(index + 1) + ". " + CapitalizeFirstLetter(group.items[0].partner) + " - " + group.items.length + " equipment(s) - " + group.request.requestDate}
@@ -212,7 +183,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                     {/*Status*/}
                                     <RenderInfoTextField label={"Status"} data={group.status} isCapital={true}/>
 
-                                    <Accordion expanded={childExpand === expand + ".1"} onChange={() => handleExpand(expand + ".1", "2")}>
+                                    <Accordion>
                                         <AccordionSummary expandIcon={<ArrowDropDown/>}>
                                             <Typography component={"span"}>
                                                 {"Request information"}
@@ -226,7 +197,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                             <RenderInfoTextField label={"Type"} data={group.request.type} isCapital={true}/>
                                         </AccordionDetails>
                                     </Accordion>
-                                    <Accordion expanded={childExpand === expand + ".2"} onChange={() => handleExpand(expand + ".2", "2")}>
+                                    <Accordion>
                                         <AccordionSummary expandIcon={<ArrowDropDown/>}>
                                             <Typography component={"span"}>
                                                 {"Items information"}
@@ -234,7 +205,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             {group.items.map((item, index) => (
-                                                <Accordion key={index} expanded={secondChildExpand === expand + "." + childExpand + "." + (index + 1)} onChange={() => handleExpand(expand + "." + childExpand + "." + (index + 1), "3")}>
+                                                <Accordion key={index}>
                                                     <AccordionSummary expandIcon={<ArrowDropDown/>}>
                                                         <Typography component={"span"}>
                                                             {(index + 1) + ". " + item.equipment + " - " + item.category}
@@ -245,7 +216,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                         <RenderInfoTextField label={"Quantity"} data={item.quantity} isCapital={false}/>
 
                                                         {/*Unit price*/}
-                                                        <RenderInfoTextField label={"Quantity"} data={"$" + item.unitPrice} isCapital={false}/>
+                                                        <RenderInfoTextField label={"Price"} data={"$" + item.unitPrice} isCapital={false}/>
                                                     </AccordionDetails>
                                                 </Accordion>
                                             ))}
@@ -303,62 +274,62 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
     )
 }
 
-function RenderTaskDetailModal({modalVisible, CloseModalFunc, SetActionFunc}){
-    const [expand, setExpand] = useState("0")
-    const [childExpand, setChildExpand] = useState("0")
-    const [secondChildExpand, setSecondChildExpand] = useState("0")
-    const [assignArea, setAssignArea] = useState(false)
-    const [input, setInput] = useState({
-        description: "",
-        staff: ""
-    })
-
-    const handleExpand = (value, type) => {
-        switch (type) {
-            case "1":
-                setExpand(expand === value ? "0" : value)
-                break
-            case "2":
-                setChildExpand(childExpand === value ? "0" : value)
-                break
-            case "3":
-                setSecondChildExpand(secondChildExpand === value ? "0" : value)
-                break
-        }
-    }
-
-    const handleAssignArea = () => {
-        SetActionFunc()
-        setAssignArea(!assignArea)
-    }
-
-    return (
-        <Dialog
-            open={modalVisible}
-            onClose={CloseModalFunc}
-            scroll={"paper"}
-            maxWidth={"md"}
-            fullWidth={true}
-        >
-            <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
-                <label>Task Detail</label>
-                <Button variant={"contained"} color={"success"} onClick={() => {
-                    setExpand("0")
-                    setChildExpand("0")
-                    setSecondChildExpand("0")
-                }}>Collapse all</Button>
-            </DialogTitle>
-            <DialogContent dividers={true}>
-                <Box>
-
-                </Box>
-            </DialogContent>
-            <DialogActions>
-                <Button variant={"contained"} color={"error"} onClick={CloseModalFunc}>Close</Button>
-            </DialogActions>
-        </Dialog>
-    )
-}
+// function RenderTaskDetailModal({modalVisible, CloseModalFunc, SetActionFunc}){
+//     const [expand, setExpand] = useState("0")
+//     const [childExpand, setChildExpand] = useState("0")
+//     const [secondChildExpand, setSecondChildExpand] = useState("0")
+//     const [assignArea, setAssignArea] = useState(false)
+//     const [input, setInput] = useState({
+//         description: "",
+//         staff: ""
+//     })
+//
+//     const handleExpand = (value, type) => {
+//         switch (type) {
+//             case "1":
+//                 setExpand(expand === value ? "0" : value)
+//                 break
+//             case "2":
+//                 setChildExpand(childExpand === value ? "0" : value)
+//                 break
+//             case "3":
+//                 setSecondChildExpand(secondChildExpand === value ? "0" : value)
+//                 break
+//         }
+//     }
+//
+//     const handleAssignArea = () => {
+//         SetActionFunc()
+//         setAssignArea(!assignArea)
+//     }
+//
+//     return (
+//         <Dialog
+//             open={modalVisible}
+//             onClose={CloseModalFunc}
+//             scroll={"paper"}
+//             maxWidth={"md"}
+//             fullWidth={true}
+//         >
+//             <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
+//                 <label>Task Detail</label>
+//                 <Button variant={"contained"} color={"success"} onClick={() => {
+//                     setExpand("0")
+//                     setChildExpand("0")
+//                     setSecondChildExpand("0")
+//                 }}>Collapse all</Button>
+//             </DialogTitle>
+//             <DialogContent dividers={true}>
+//                 <Box>
+//
+//                 </Box>
+//             </DialogContent>
+//             <DialogActions>
+//                 <Button variant={"contained"} color={"error"} onClick={CloseModalFunc}>Close</Button>
+//             </DialogActions>
+//         </Dialog>
+//     )
+// }
 
 export default function Task() {
     const [tasks, setTasks] = useState([]);
