@@ -1,6 +1,9 @@
 package com.medic115.mwms_be.controllers;
 
+import com.medic115.mwms_be.dto.requests.EditAccountRequest;
 import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
+import com.medic115.mwms_be.dto.requests.SignUpRequest;
+import com.medic115.mwms_be.dto.response.AccountResponse;
 import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
 import com.medic115.mwms_be.dto.response.UserResponse;
 import com.medic115.mwms_be.services.AuthenticationService;
@@ -18,8 +21,35 @@ public class UserController {
 
     private final UserService userService;
 
+    private final AuthenticationService authenticationService;
+
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<List<AccountResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllAccountExceptAdmin());
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) {
+        return authenticationService.signUp(request);
+    }
+
+    @PatchMapping("/delete/{userId}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> deleteUser(@PathVariable Integer userId) {
+        return authenticationService.deleteUser(userId);
+    }
+
+    @PatchMapping("/activate/{userId}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> activateUser(@PathVariable Integer userId) {
+        return authenticationService.activateUser(userId);
+    }
+
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> updateAccount(@PathVariable Integer userId,@RequestBody EditAccountRequest request) {
+        return authenticationService.updateUser(userId, request);
     }
 }
