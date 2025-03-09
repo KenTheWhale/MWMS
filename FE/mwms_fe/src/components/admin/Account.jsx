@@ -392,9 +392,9 @@ const Admin = () => {
                 isInvalid={!!errors.roleName}
               >
                 <option value="">Select Role</option>
-                <option value="manager">manager</option>
                 <option value="staff">staff</option>
-                <option value="partner">partner</option>
+                <option value="supplier">supplier</option>
+                <option value="requester">requester</option>
               </Form.Control>
               <Form.Control.Feedback type="invalid">{errors.roleName}</Form.Control.Feedback>
             </Form.Group>
