@@ -8,9 +8,11 @@ import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.Account;
+import com.medic115.mwms_be.models.Partner;
 import com.medic115.mwms_be.models.Token;
 import com.medic115.mwms_be.models.User;
 import com.medic115.mwms_be.repositories.AccountRepo;
+import com.medic115.mwms_be.repositories.PartnerRepo;
 import com.medic115.mwms_be.repositories.TokenRepo;
 import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.services.AuthenticationService;
@@ -39,6 +41,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AccountRepo accountRepo;
 
     private final TokenRepo tokenRepo;
+
+    private final PartnerRepo partnerRepo;
 
     private final UserRepo userRepo;
 
@@ -269,27 +273,33 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     );
         }
 
-        Account acc = Account.builder()
-                .username(request.username())
-                .password(request.password())
-                .status(Status.ACCOUNT_ACTIVE.getValue())
-                .role(Role.valueOf(request.roleName().toUpperCase()))
-                .build();
-        accountRepo.save(acc);
+        if(!request.roleName().equals("staff") && !request.roleName().equals("supplier") && !request.roleName().equals("requester")) {
+            throw new IllegalArgumentException("Invalid role");
+        } else {
+            Account acc = Account.builder()
+                    .username(request.username())
+                    .password(request.password())
+                    .status(Status.ACCOUNT_ACTIVE.getValue())
+                    .role(request.roleName().equals("staff") ? Role.STAFF : Role.PARTNER)
+                    .build();
+            accountRepo.save(acc);
 
-        User user = User.builder()
-                .phone(request.phone())
-                .email(request.email())
-                .name(request.name())
-                .account(acc)
-                .build();
+            User user = User.builder()
+                    .phone(request.phone())
+                    .email(request.email())
+                    .name(request.name())
+                    .account(acc)
+                    .build();
+            userRepo.save(user);
 
-        userRepo.save(user);
-
-//        String accessToken = jwtService.generateAccessToken(acc);
-//        String refreshToken = jwtService.generateRefreshToken(acc);
-//
-//        this.saveAccountToken(acc, accessToken, refreshToken);
+            if(request.roleName().equals("supplier") || request.roleName().equals("requester")){
+                Partner partner = Partner.builder()
+                        .type(request.roleName())
+                        .user(user)
+                        .build();
+                partnerRepo.save(partner);
+            }
+        }
 
         return ResponseEntity
                 .status(HttpStatus.OK)
