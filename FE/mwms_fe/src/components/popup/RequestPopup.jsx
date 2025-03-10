@@ -1,10 +1,9 @@
 import {Button, Form, Modal, Table} from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import {approveRequest} from "../../services/ManagerService.jsx";
-import {FaCheck} from "react-icons/fa";
-import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
 import {useState} from "react";
+import Divider from "@mui/material/Divider";
 
 const RequestPopup = ({request, show, handleClose, onAccept, onReject, setRequest}) => {
     const [deliveryDate, setDeliveryDate] = useState("");
@@ -98,7 +97,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                         <p><strong>Request Date:</strong> {request.requestDate}</p>
                         <p><strong>Last Modified:</strong> {request.lastModifiedDate}</p>
 
-                        <h5>Request Detail:</h5>
+                        <h5 className={`${style.title_area}`}>Request List</h5>
                         <div className={style.popup_table_area}>
                             <Table striped bordered hover>
                                 <thead>
@@ -106,9 +105,6 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                     <th>#</th>
                                     <th>Equipment Name</th>
                                     <th>Quantity</th>
-                                    <th>Unit Price</th>
-                                    <th>Length(cm)</th>
-                                    <th>Width(cm)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -118,9 +114,6 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                             <td>{index + 1}</td>
                                             <td>{item.equipmentName}</td>
                                             <td>{item.quantity}</td>
-                                            <td>${item.unitPrice}</td>
-                                            <td>{item.length}</td>
-                                            <td>{item.width}</td>
                                         </tr>
                                     ))
                                 ) : (
@@ -131,6 +124,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 </tbody>
                             </Table>
                         </div>
+                        <Divider/>
                         <h5 className={`${style.title_area}`}>Delivery Information</h5>
                         <Form>
                             <Form.Group className="mb-3">

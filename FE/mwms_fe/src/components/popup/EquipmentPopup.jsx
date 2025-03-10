@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import {addEquipment} from "../../services/ManagerService.jsx";
 import {getCategoryList} from "../../services/ManagerService.jsx";
 import style from "../../styles/manager/Equipment.module.css"
+import Divider from '@mui/material/Divider';
+import {CardActions, CardContent, Typography, Box} from "@mui/material";
 
 const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDelete }) => {
     const [editedEquipment, setEditedEquipment] = useState({
@@ -118,6 +120,14 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
     };
 
     const renderContent = () => {
+        // const bull = (
+        //     <Box
+        //         component="span"
+        //         sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}
+        //     >
+        //         •
+        //     </Box>
+        // );
         if (actionType === 'view' && !equipment) return null;
 
         switch (actionType) {
@@ -129,7 +139,27 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
                         <p className={style.text_color}><strong>Category:</strong> {equipment.category}</p>
                         <p className={style.text_color}><strong>Unit:</strong> {equipment.unit}</p>
                         <p className={style.text_color}><strong>Price:</strong> {equipment.price}</p>
+                        <Divider />
                         <p className={style.text_color}><strong>Description:</strong> {equipment.description}</p>
+                        {/*<React.Fragment>*/}
+                        {/*    <CardContent>*/}
+                        {/*        <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>*/}
+                        {/*            Word of the Day*/}
+                        {/*        </Typography>*/}
+                        {/*        <Typography variant="h5" component="div">*/}
+                        {/*            be{bull}nev{bull}o{bull}lent*/}
+                        {/*        </Typography>*/}
+                        {/*        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>adjective</Typography>*/}
+                        {/*        <Typography variant="body2">*/}
+                        {/*            well meaning and kindly.*/}
+                        {/*            <br />*/}
+                        {/*            {'"a benevolent smile"'}*/}
+                        {/*        </Typography>*/}
+                        {/*    </CardContent>*/}
+                        {/*    <CardActions>*/}
+                        {/*        <Button size="small">Learn More</Button>*/}
+                        {/*    </CardActions>*/}
+                        {/*</React.Fragment>*/}
                     </>
                 );
             case 'add':
@@ -232,7 +262,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onDe
     return (
         <Modal show={show} onHide={handleClose} className={`${style.modal_index}`}>
             <Modal.Header closeButton>
-                <Modal.Title className={style.text_color}>{actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : equipment?.name}</Modal.Title>
+                <Modal.Title className={style.text_color}>{actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : 'Equipment Detail'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {renderContent()}
