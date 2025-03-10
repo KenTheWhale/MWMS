@@ -15,7 +15,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
     const [showConfirm, setShowConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
-    const isDeliveryDisabled = request?.status === "accepted" || request?.status === "rejected" || request?.status === "canceled";
+    const isDeliveryDisabled = request?.status !== "pending" ;
 
     const validateForm = () => {
         let errors = {};
