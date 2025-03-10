@@ -79,7 +79,7 @@ public class SupplierServiceImpl implements SupplierService {
                             .filter(Objects::nonNull)
                             .findFirst()
                             .orElse(null);
-                    map.put("carrierPhone", carrierPhone);
+                    map.put("carrierPhone", carrierPhone == null ? "" : carrierPhone);
 
                     String rejectionReason = request.getItemGroups().stream()
                             .map(ItemGroup::getRejectionReason)

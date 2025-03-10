@@ -10,8 +10,7 @@ import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.validations.*;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +20,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
 
+@Data
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -179,18 +179,23 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
 
-        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
-        List<Equipment> equipmentList = peList.stream()
-                .map(PartnerEquipment::getEquipment)
-                .distinct()
-                .toList();
+//        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
+//        List<Equipment> equipmentList = peList.stream()
+//                .map(PartnerEquipment::getEquipment)
+//                .distinct()
+//                .toList();
+//
+//        if (equipmentList.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(ResponseObject.builder()
+//                            .message("No equipment found for this supplier")
+//                            .build());
+//        }
 
-        if (equipmentList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseObject.builder()
-                            .message("No equipment found for this supplier")
-                            .build());
-        }
+        List<Equipment> equipmentList = equipmentRepo.findAll();
+        List<Equipment> result = equipmentList.stream()
+
+                .toList();
 
         return ResponseEntity.ok(ResponseObject.builder()
                 .message("Supplier equipment retrieved successfully")
