@@ -144,6 +144,11 @@
     align-items: center;
 }
 
+.confirmModal{
+    z-index: 2000 !important;
+    color: black;
+}
+
 
 
 
