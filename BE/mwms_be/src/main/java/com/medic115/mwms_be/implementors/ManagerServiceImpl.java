@@ -1,7 +1,7 @@
 package com.medic115.mwms_be.implementors;
 
 import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.response.*;
+import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.enums.CodeFormat;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
@@ -9,8 +9,13 @@ import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.services.ManagerService;
-import com.medic115.mwms_be.validations.*;
-import lombok.*;
+import com.medic115.mwms_be.validations.CategoryValidation;
+import com.medic115.mwms_be.validations.DeleteCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -178,28 +183,34 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
-
-//        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
-//        List<Equipment> equipmentList = peList.stream()
-//                .map(PartnerEquipment::getEquipment)
-//                .distinct()
-//                .toList();
-//
-//        if (equipmentList.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(ResponseObject.builder()
-//                            .message("No equipment found for this supplier")
-//                            .build());
-//        }
-
-        List<Equipment> equipmentList = equipmentRepo.findAll();
-        List<Equipment> result = equipmentList.stream()
-
+        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByEquipment_Id(request.getEqId());
+        List<Partner> result = peList.stream()
+                .map(PartnerEquipment::getPartner)
+                .filter(partner -> partner.getType().equals("supplier"))
+                .distinct()
                 .toList();
+
+        if (result.isEmpty()) {
+            return ResponseEntity.ok(ResponseObject.builder()
+                    .message("No supplier found for this equipment")
+                    .success(false)
+                    .data(null)
+                    .build());
+        }
 
         return ResponseEntity.ok(ResponseObject.builder()
                 .message("Supplier equipment retrieved successfully")
-                .data(MapToEquipment(equipmentList))
+                .success(true)
+                .data(result.stream()
+                        .map(
+                                partner -> {
+                                    Map<String, Object> item = new HashMap<>();
+                                    item.put("id", partner.getId());
+                                    item.put("name", partner.getUser().getName());
+                                    return item;
+                                }
+                        )
+                        .toList())
                 .build());
     }
 
