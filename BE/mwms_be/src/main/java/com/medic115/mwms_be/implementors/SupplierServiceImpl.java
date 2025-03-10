@@ -7,6 +7,7 @@ import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.ItemGroup;
 import com.medic115.mwms_be.models.Partner;
 import com.medic115.mwms_be.models.RequestApplication;
+import com.medic115.mwms_be.repositories.ItemGroupRepo;
 import com.medic115.mwms_be.repositories.PartnerRepo;
 import com.medic115.mwms_be.repositories.RequestApplicationRepo;
 import com.medic115.mwms_be.services.SupplierService;
@@ -29,6 +30,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     RequestApplicationRepo requestApplicationRepo;
     private final PartnerRepo partnerRepo;
+    private final ItemGroupRepo itemGroupRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getRequestList(GetWarehouseRequest warehouseRequest) {
@@ -142,15 +144,16 @@ public class SupplierServiceImpl implements SupplierService {
                     .anyMatch(requestItem -> requestItem.getPartner().getUser().getName() != null
                             && requestItem.getPartner().getUser().getName().equals(supplier.getUser().getName()));
 
-            if (hasMatchingSupplier && Status.REQUEST_ACCEPTED.getValue().equals(itemGroup.getStatus())) {
+            if (hasMatchingSupplier) {
                 itemGroup.setStatus(request.getStatus());
-                itemGroup.setDeliveryDate(request.getDeliveryDate());
-                itemGroup.setCarrierName(request.getCarrierName());
-                itemGroup.setCarrierPhone(request.getCarrierPhone());
-                requestApplication.setLastModifiedDate(LocalDate.now());
-            } else {
-                itemGroup.setStatus(request.getStatus());
-                itemGroup.setRejectionReason(request.getRejectionReason());
+
+                if (Status.REQUEST_ACCEPTED.getValue().equals(request.getStatus())) {
+                    itemGroup.setDeliveryDate(request.getDeliveryDate());
+                    itemGroup.setCarrierName(request.getCarrierName());
+                    itemGroup.setCarrierPhone(request.getCarrierPhone());
+                } else {
+                    itemGroup.setRejectionReason(request.getRejectionReason());
+                }
             }
         }
         requestApplicationRepo.save(requestApplication);
