@@ -21,7 +21,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
         let errors = {};
         if (!deliveryDate) errors.deliveryDate = "Delivery date is required";
         if (!carrierName) errors.carrierName = "Carrier name is required";
-        if (!carrierPhone) errors.carrierPhone = "Carrier phone is required";
+        if (carrierPhone.length < 10) errors.carrierPhone = "Phone must be 10 number";
 
         setErrors(errors);
         return Object.keys(errors).length === 0;
@@ -29,6 +29,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
 
     const handleAcceptClick = () => {
         setShowConfirm(true);
+
     };
 
     const handleConfirmAccept  = async () => {
@@ -57,7 +58,6 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
 
     const handleRejectClick = () => {
         setShowRejectConfirm(true);
-        console.log(request);
     };
 
     const handleConfirmReject = async () => {
@@ -78,6 +78,8 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
         setRejectionReason("");
         window.location.reload();
     };
+
+
 
     return (
         <Modal show={show} onHide={handleClose} size="lg" className={`${style.modal_index}`}>
@@ -135,11 +137,11 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Label>Delivery Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={request.deliveryDate}
+                                    value={request.deliveryDate === "" ? deliveryDate : request.deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
                                     disabled={isDeliveryDisabled}
-                                    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                                    min={new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0]}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.deliveryDate}</Form.Control.Feedback>
                             </Form.Group>
@@ -149,7 +151,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier name"
-                                    value={request.carrierName}
+                                    value={request.carrierName === "" ? carrierName : request.carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
                                     disabled={isDeliveryDisabled}
@@ -162,10 +164,10 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier phone"
-                                    value={request.carrierPhone}
+                                    value={request.carrierPhone === "" ? carrierPhone : request.carrierPhone}
                                     onChange={(e) => {
                                         const newValue = e.target.value.replace(/\D/g, "");
-                                        if (newValue.length <= 10) {
+                                        if (newValue.length === 10) {
                                             setCarrierPhone(newValue);
                                         }
                                     }}
@@ -180,6 +182,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                             e.preventDefault();
                                         }
                                     }}
+                                    minLength={10}
                                     maxLength={10}
                                     isInvalid={errors.carrierPhone}
                                     disabled={isDeliveryDisabled}
@@ -195,10 +198,10 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="success" onClick={handleAcceptClick} disabled={isDeliveryDisabled}>
-                    <FaCheck/>
+                    Accept
                 </Button>
                 <Button variant="danger" onClick={handleRejectClick} disabled={isDeliveryDisabled}>
-                    <FaX/>
+                    Reject
                 </Button>
             </Modal.Footer>
             <Modal show={showConfirm} onHide={() => setShowConfirm(false)} className={`${style.confirm_index}`}>
