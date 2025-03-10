@@ -4,9 +4,11 @@ import com.medic115.mwms_be.dto.requests.ChangeWarehouseRequestStatusRequest;
 import com.medic115.mwms_be.dto.requests.GetWarehouseRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
 import com.medic115.mwms_be.enums.Status;
+import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.ItemGroup;
 import com.medic115.mwms_be.models.Partner;
 import com.medic115.mwms_be.models.RequestApplication;
+import com.medic115.mwms_be.repositories.ItemGroupRepo;
 import com.medic115.mwms_be.repositories.PartnerRepo;
 import com.medic115.mwms_be.repositories.RequestApplicationRepo;
 import com.medic115.mwms_be.services.SupplierService;
@@ -29,88 +31,27 @@ public class SupplierServiceImpl implements SupplierService {
 
     RequestApplicationRepo requestApplicationRepo;
     private final PartnerRepo partnerRepo;
+    private final ItemGroupRepo itemGroupRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getRequestList(GetWarehouseRequest warehouseRequest) {
-        List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
-                .filter(request -> "import".equalsIgnoreCase(request.getType())
-                                && request.getItemGroups() != null
-                                && request.getItemGroups().stream().anyMatch(itemGroup ->
-                                itemGroup.getRequestItems() != null &&
-                                        itemGroup.getRequestItems().stream().anyMatch(requestItem ->
-                                                requestItem.getPartner() != null &&
-                                                        requestItem.getPartner().getUser().getName().equals(warehouseRequest.getUsername())
-                                        )
-                        )
-                )
-                .map(request -> {
+        List<Map<String, Object>> data = itemGroupRepo.findAll().stream()
+                .filter(itemGroup -> checkItemGroupCondition(itemGroup, warehouseRequest.getUsername()))
+                .map(itemGroup -> {
                     Map<String, Object> map = new HashMap<>();
-                    map.put("id", request.getId());
-                    map.put("code", request.getCode());
-
-                    List<String> statuses = request.getItemGroups().stream()
-                            .map(ItemGroup::getStatus)
-                            .filter(Objects::nonNull)
-                            .distinct()
-                            .toList();
-                    map.put("status", statuses.size() == 1 ? statuses.get(0) : statuses);
-
-                    map.put("requestDate", request.getRequestDate());
-                    map.put("lastModifiedDate", request.getLastModifiedDate());
-
-                    LocalDate earliestDeliveryDate = request.getItemGroups().stream()
-                            .map(ItemGroup::getDeliveryDate)
-                            .filter(Objects::nonNull)
-                            .min(LocalDate::compareTo)
-                            .orElse(null);
-                    map.put("deliveryDate", earliestDeliveryDate);
-
-                    String carrierName = request.getItemGroups().stream()
-                            .map(ItemGroup::getCarrierName)
-                            .filter(Objects::nonNull)
-                            .findFirst()
-                            .orElse(null);
-                    map.put("carrierName", carrierName);
-
-                    String carrierPhone = request.getItemGroups().stream()
-                            .map(ItemGroup::getCarrierPhone)
-                            .filter(Objects::nonNull)
-                            .findFirst()
-                            .orElse(null);
-                    map.put("carrierPhone", carrierPhone);
-
-                    String rejectionReason = request.getItemGroups().stream()
-                            .map(ItemGroup::getRejectionReason)
-                            .filter(Objects::nonNull)
-                            .findFirst()
-                            .orElse(null);
-                    map.put("rejectionReason", rejectionReason);
-
-                    List<Map<String, Object>> requestItems = request.getItemGroups().stream()
-                            .flatMap(itemGroup -> itemGroup.getRequestItems().stream())
-                            .filter(requestItem -> requestItem.getPartner() != null &&
-                                    requestItem.getPartner().getUser().getName().equals(warehouseRequest.getUsername()))
-                            .map(requestItem -> {
-                                Map<String, Object> itemMap = new HashMap<>();
-                                itemMap.put("id", requestItem.getId());
-                                itemMap.put("quantity", requestItem.getQuantity());
-                                itemMap.put("unitPrice", requestItem.getUnitPrice());
-
-                                if (requestItem.getEquipment() != null) {
-                                    itemMap.put("equipmentName", requestItem.getEquipment().getName());
-                                }
-
-                                itemMap.put("length", requestItem.getLength());
-                                itemMap.put("width", requestItem.getWidth());
-
-                                return itemMap;
-                            })
-                            .toList();
-
-                    map.put("requestItems", requestItems);
-
+                    map.put("id", itemGroup.getId());
+                    map.put("code", itemGroup.getRequestApplication().getCode());
+                    map.put("status", itemGroup.getStatus());
+                    map.put("requestDate", itemGroup.getRequestApplication().getRequestDate());
+                    map.put("lastModifiedDate", itemGroup.getRequestApplication().getLastModifiedDate());
+                    map.put("deliveryDate", itemGroup.getDeliveryDate());
+                    map.put("carrierName", itemGroup.getCarrierName());
+                    map.put("carrierPhone", itemGroup.getCarrierPhone());
+                    map.put("rejectionReason", itemGroup.getRejectionReason());
+                    map.put("requestItems", getItemsFromGroup(itemGroup));
                     return map;
-                }).toList();
+                })
+                .toList();
 
         return ResponseEntity.ok(ResponseObject.builder()
                 .message("Get request list success")
@@ -118,6 +59,24 @@ public class SupplierServiceImpl implements SupplierService {
                 .build());
     }
 
+    private boolean checkItemGroupCondition(ItemGroup itemGroup, String partnerName) {
+        return !itemGroup.getRequestItems().isEmpty()
+                && itemGroup.getRequestItems().get(0).getPartner().getUser().getName().equalsIgnoreCase(partnerName);
+    }
+
+    private List<Map<String, Object>> getItemsFromGroup(ItemGroup itemGroup) {
+        return itemGroup.getRequestItems().stream()
+                .map(item -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", item.getId());
+                    map.put("quantity", item.getQuantity());
+                    map.put("equipmentName", item.getEquipment().getName());
+                    map.put("length", item.getLength());
+                    map.put("width", item.getWidth());
+                    return map;
+                })
+                .toList();
+    }
 
     @Override
     public ResponseEntity<ResponseObject> changeRequestStatus(ChangeWarehouseRequestStatusRequest request) {
@@ -142,15 +101,16 @@ public class SupplierServiceImpl implements SupplierService {
                     .anyMatch(requestItem -> requestItem.getPartner().getUser().getName() != null
                             && requestItem.getPartner().getUser().getName().equals(supplier.getUser().getName()));
 
-            if (hasMatchingSupplier && Status.REQUEST_ACCEPTED.getValue().equals(itemGroup.getStatus())) {
+            if (hasMatchingSupplier) {
                 itemGroup.setStatus(request.getStatus());
-                itemGroup.setDeliveryDate(request.getDeliveryDate());
-                itemGroup.setCarrierName(request.getCarrierName());
-                itemGroup.setCarrierPhone(request.getCarrierPhone());
-                requestApplication.setLastModifiedDate(LocalDate.now());
-            } else {
-                itemGroup.setStatus(request.getStatus());
-                itemGroup.setRejectionReason(request.getRejectionReason());
+
+                if (Status.REQUEST_ACCEPTED.getValue().equals(request.getStatus())) {
+                    itemGroup.setDeliveryDate(request.getDeliveryDate());
+                    itemGroup.setCarrierName(request.getCarrierName());
+                    itemGroup.setCarrierPhone(request.getCarrierPhone());
+                } else {
+                    itemGroup.setRejectionReason(request.getRejectionReason());
+                }
             }
         }
         requestApplicationRepo.save(requestApplication);

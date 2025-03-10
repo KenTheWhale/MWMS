@@ -38,11 +38,6 @@ function Request() {
 
     const handleCloseModal = () => setShowModal(false);
 
-    const handleAddClick = () => {
-        setSelectedRequest(null);
-        setShowModal(true);
-    }
-
     return (
         <div className={style.main}>
             <div className={style.title_area}>
