@@ -29,16 +29,16 @@ import {AddRounded, ArrowDropDown, DeleteForeverRounded} from "@mui/icons-materi
 
 /* eslint-disable react/prop-types */
 function CapitalizeFirstLetter(input) {
-    return input[0].toUpperCase() + input.slice(1);
+    return input === "" ? input : input[0].toUpperCase() + input.slice(1);
 }
 
-function RenderInfoTextField({label, data, isCapital}){
-    return(
+function RenderInfoTextField({label, data, isCapital}) {
+    return (
         <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
             <InputLabel shrink>
                 {label}
             </InputLabel>
-            <Input readOnly defaultValue={isCapital ? CapitalizeFirstLetter(data) : data} />
+            <Input readOnly defaultValue={isCapital ? CapitalizeFirstLetter(data) : data}/>
         </FormControl>
     )
 }
@@ -96,8 +96,10 @@ function RenderTable({tasks, SetActionFunc}) {
                                     <TableCell>{task.description}</TableCell>
                                     <TableCell>{task.status}</TableCell>
                                     <TableCell align={"center"}>
-                                        <DeleteForeverRounded className="delete-btn"
-                                                              onClick={() => handleDeleteTask(task.id)}/>
+                                        <DeleteForeverRounded
+                                            className="delete-btn"
+                                            onClick={() => handleDeleteTask(task.id)}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -141,10 +143,10 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
     const handleAssign = async (staffId, description, groupId) => {
         SetActionFunc()
         const response = await addTask(staffId, description, groupId)
-        if(response.success){
+        if (response.success) {
             enqueueSnackbar(response.message, {variant: "success"});
             setAssignArea(false)
-        }else {
+        } else {
             enqueueSnackbar(response.message, {variant: "error"})
         }
     }
@@ -158,7 +160,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
             fullWidth={true}
         >
             <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
-                <label>Unassigned Requests</label>
+                <Typography variant={"h5"} color={"textPrimary"}>Unassigned Requests</Typography>
             </DialogTitle>
             <DialogContent dividers={true}>
                 <Box>
@@ -178,7 +180,8 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                     <RenderInfoTextField label={"Carrier phone"} data={group.cPhone} isCapital={false}/>
 
                                     {/*Delivery date*/}
-                                    <RenderInfoTextField label={"Delivery date"} data={group.delivery} isCapital={false}/>
+                                    <RenderInfoTextField label={"Delivery date"} data={group.delivery}
+                                                         isCapital={false}/>
 
                                     {/*Status*/}
                                     <RenderInfoTextField label={"Status"} data={group.status} isCapital={true}/>
@@ -191,10 +194,12 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                         </AccordionSummary>
                                         <AccordionDetails>
                                             {/*Code*/}
-                                            <RenderInfoTextField label={"Code"} data={group.request.code} isCapital={false}/>
+                                            <RenderInfoTextField label={"Code"} data={group.request.code}
+                                                                 isCapital={false}/>
 
                                             {/*Type*/}
-                                            <RenderInfoTextField label={"Type"} data={group.request.type} isCapital={true}/>
+                                            <RenderInfoTextField label={"Type"} data={group.request.type}
+                                                                 isCapital={true}/>
                                         </AccordionDetails>
                                     </Accordion>
                                     <Accordion>
@@ -213,10 +218,12 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         {/*Quantity*/}
-                                                        <RenderInfoTextField label={"Quantity"} data={item.quantity} isCapital={false}/>
+                                                        <RenderInfoTextField label={"Quantity"} data={item.quantity}
+                                                                             isCapital={false}/>
 
                                                         {/*Unit price*/}
-                                                        <RenderInfoTextField label={"Price"} data={"$" + item.unitPrice} isCapital={false}/>
+                                                        <RenderInfoTextField label={"Price"} data={"$" + item.unitPrice}
+                                                                             isCapital={false}/>
                                                     </AccordionDetails>
                                                 </Accordion>
                                             ))}
@@ -247,7 +254,10 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                         multiline
                                                         required
                                                         value={input.description}
-                                                        onChange={(e) => setInput({...input, description: e.target.value})}
+                                                        onChange={(e) => setInput({
+                                                            ...input,
+                                                            description: e.target.value
+                                                        })}
                                                     />
                                                 </FormControl>
                                             </>
@@ -258,9 +268,12 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                 <AccordionActions>
                                     {
                                         assignArea &&
-                                        <Button variant="contained" color="error" onClick={handleAssignArea}>Cancel assign</Button>
+                                        <Button variant="contained" color="error" onClick={handleAssignArea}>Cancel
+                                            assign</Button>
                                     }
-                                    <Button variant="contained" color="primary" onClick={assignArea ? () => handleAssign(input.staff, input.description, group.id) : handleAssignArea}>Assign staff</Button>
+                                    <Button variant="contained" color="primary"
+                                            onClick={assignArea ? () => handleAssign(input.staff, input.description, group.id) : handleAssignArea}>Assign
+                                        staff</Button>
                                 </AccordionActions>
                             </Accordion>
                         ))
@@ -347,7 +360,7 @@ export default function Task() {
             const taskResponse = await getTasks()
             const groupResponse = await getUnassignedGroups()
             const staffResponse = await getStaffs()
-            if(taskResponse.success && groupResponse.success && staffResponse.success) {
+            if (taskResponse.success && groupResponse.success && staffResponse.success) {
                 setTasks(taskResponse.data)
                 setUnassignedGrp(groupResponse.data)
                 setStaffs(staffResponse.data)
@@ -361,12 +374,12 @@ export default function Task() {
         setAction(!action)
     }
 
-    function CloseCurrentModal(nextType){
+    function CloseCurrentModal(nextType) {
         setModal({...modal, visible: false, type: nextType})
         SetAction()
     }
 
-    function OpenModal(openType){
+    function OpenModal(openType) {
         setModal({...modal, visible: true, type: openType})
         SetAction()
     }
@@ -386,7 +399,8 @@ export default function Task() {
 
     return (
         <>
-            <Typography component={"span"} style={{fontSize: "2.5rem"}}>TASK MANAGEMENT</Typography>
+            <Typography component={"span"}  className={'d-flex justify-content-center'} color={"textPrimary"} style={{fontSize: "2.5rem"}}>TASK
+                MANAGEMENT</Typography>
             <div className={"assign"}>
                 <Button style={{width: "12vw", height: "6vh"}}
                         variant={"contained"}
