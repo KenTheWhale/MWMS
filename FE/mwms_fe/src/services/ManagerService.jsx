@@ -28,15 +28,13 @@ export const getEquipmentList = async () => {
     }
 }
 
-
-export const addEquipment = async (code, name, description, categoryId, unit, price) => {
+export const addEquipment = async (code, name, description, categoryId, unit) => {
     const response = await axiosClient.post("/manager/equipment", {
         code: code,
         name: name,
         description: description,
         categoryId: categoryId,
-        unit: unit,
-        price: price
+        unit: unit
     })
     if (response.status === 200) {
         const body = response.data;
@@ -44,8 +42,14 @@ export const addEquipment = async (code, name, description, categoryId, unit, pr
     }
 }
 
-export const updateEquipment = async () => {
-    const response = await axiosClient.put("/manager/equipment")
+export const updateEquipment = async (code, name, description, category, unit) => {
+    const response = await axiosClient.put("/manager/equipment", {
+        code: code,
+        name: name,
+        description: description,
+        category: category,
+        unit: unit
+    })
     if (response.status === 200) {
         const body = response.data;
         return body.data;
@@ -144,5 +148,10 @@ export const updateRequestApplication = async (requestItemId,equipmentId,quantit
         quantity
     }
     const response = await axiosClient.put("/manager/request/import", body);
+    return response ? response.data : null;
+}
+
+export const updateItemQuantity = async (id, quantity) => {
+    const response = await axiosClient.put("/supplier/request/item", {id: id, quantity: quantity});
     return response ? response.data : null;
 }
