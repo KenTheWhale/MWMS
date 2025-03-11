@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.implementors;
 
+import com.medic115.mwms_be.dto.requests.EditAccountRequest;
 import com.medic115.mwms_be.dto.requests.SignInRequest;
 import com.medic115.mwms_be.dto.requests.SignUpRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
@@ -7,9 +8,11 @@ import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.Account;
+import com.medic115.mwms_be.models.Partner;
 import com.medic115.mwms_be.models.Token;
 import com.medic115.mwms_be.models.User;
 import com.medic115.mwms_be.repositories.AccountRepo;
+import com.medic115.mwms_be.repositories.PartnerRepo;
 import com.medic115.mwms_be.repositories.TokenRepo;
 import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.services.AuthenticationService;
@@ -38,6 +41,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AccountRepo accountRepo;
 
     private final TokenRepo tokenRepo;
+
+    private final PartnerRepo partnerRepo;
 
     private final UserRepo userRepo;
 
@@ -258,32 +263,118 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalArgumentException("Sign up request cannot be null");
         }
 
-        Account acc = Account.builder()
-                .username(request.username())
-                .password(request.password())
-                .status(Status.TOKEN_ACTIVE.getValue())
-                .role(Role.valueOf(request.roleName().toUpperCase()))
-                .build();
-        accountRepo.save(acc);
+        boolean check = accountRepo.findByUsername(request.username()).isPresent();
 
-        User user = User.builder()
-                .phone(request.phone())
-                .email(request.email())
-                .name(request.name())
-                .account(acc)
-                .build();
+        if(check){
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            "Username is already existed !"
+                    );
+        }
 
-        userRepo.save(user);
+        if(!request.roleName().equals("staff") && !request.roleName().equals("supplier") && !request.roleName().equals("requester")) {
+            throw new IllegalArgumentException("Invalid role");
+        } else {
+            Account acc = Account.builder()
+                    .username(request.username())
+                    .password(request.password())
+                    .status(Status.ACCOUNT_ACTIVE.getValue())
+                    .role(request.roleName().equals("staff") ? Role.STAFF : Role.PARTNER)
+                    .build();
+            accountRepo.save(acc);
 
-        String accessToken = jwtService.generateAccessToken(acc);
-        String refreshToken = jwtService.generateRefreshToken(acc);
+            User user = User.builder()
+                    .phone(request.phone())
+                    .email(request.email())
+                    .name(request.name())
+                    .account(acc)
+                    .build();
+            userRepo.save(user);
 
-        this.saveAccountToken(acc, accessToken, refreshToken);
+            if(request.roleName().equals("supplier") || request.roleName().equals("requester")){
+                Partner partner = Partner.builder()
+                        .type(request.roleName())
+                        .user(user)
+                        .build();
+                partnerRepo.save(partner);
+            }
+        }
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
                         "Sign up successful !"
                 );
+    }
+
+    @Override
+    public ResponseEntity<String> deleteUser(Integer id) {
+        if(id == null){
+            throw new IllegalArgumentException("User id cannot be null");
+        }
+
+        Account acc = accountRepo.findById(id).orElse(null);
+        if(acc == null){
+            throw new IllegalArgumentException("User not found");
+        }
+
+        acc.setStatus(Status.ACCOUNT_DELETE.getValue());
+
+        accountRepo.save(acc);
+        return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
+    }
+
+    @Override
+    public ResponseEntity<String> activateUser(Integer id) {
+        if(id == null){
+            throw new IllegalArgumentException("User id cannot be null");
+        }
+
+        Account acc = accountRepo.findById(id).orElse(null);
+        if(acc == null){
+            throw new IllegalArgumentException("User not found");
+        }
+
+        acc.setStatus(Status.ACCOUNT_ACTIVE.getValue());
+
+        accountRepo.save(acc);
+        return ResponseEntity.status(HttpStatus.OK).body("User activate successfully");
+    }
+
+    @Override
+    public ResponseEntity<String> updateUser(Integer id, EditAccountRequest request) {
+        if (id == null || request == null) {
+            throw new IllegalArgumentException("User id and request edit cannot be null");
+        }
+
+        Account acc = accountRepo.findById(id).orElse(null);
+        if (acc == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        boolean checked = accountRepo.findByUsername(request.getUsername()).isPresent();
+
+        if(checked){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Username is already existed !");
+        }
+
+        checked = userRepo.findByEmail(request.getEmail()).isPresent();
+
+        if(checked){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Email is already existed !");
+        }
+
+
+        acc.setUsername(request.getUsername());
+        acc.setPassword(request.getPassword());
+        acc.setRole(Role.valueOf(request.getRoleName().toUpperCase()));
+        acc.getUser().setEmail(request.getEmail());
+        acc.getUser().setName(request.getName());
+        acc.getUser().setPhone(request.getPhone());
+
+        accountRepo.save(acc);
+
+        return ResponseEntity.status(HttpStatus.OK).body("User updated successfully");
     }
 }
