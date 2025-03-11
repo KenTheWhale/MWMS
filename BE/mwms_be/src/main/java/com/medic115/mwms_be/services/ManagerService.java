@@ -55,8 +55,6 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
 
-    ResponseEntity<ResponseObject> searchCategory(SearchRequest request);
-
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();
 
@@ -68,7 +66,6 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
 
-    ResponseEntity<ResponseObject> searchEquipment(SearchRequest request);
 
 
 

@@ -18,14 +18,8 @@ public class UpdateEquipmentRequest {
 
     String description;
 
-    LocalDate expiredDate;
-
     String category;
 
     String unit;
-
-    double price;
-
-    int quantity;
 
 }

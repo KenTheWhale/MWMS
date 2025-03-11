@@ -22,6 +22,4 @@ public class AddEquipmentRequest {
 
     String unit;
 
-    double price;
-
 }

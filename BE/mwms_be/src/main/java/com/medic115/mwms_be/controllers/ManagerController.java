@@ -55,12 +55,6 @@ public class ManagerController {
         return managerService.deleteCategory(request);
     }
 
-    @PostMapping("/category/search")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> searchCategory(@RequestBody SearchRequest request) {
-        return managerService.searchCategory(request);
-    }
-
     //-------------------------------------------------Equipment-------------------------------------------------//
 
     @GetMapping("/equipment")
@@ -91,12 +85,6 @@ public class ManagerController {
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> deleteEquipment(@RequestBody DeleteEquipmentRequest request) {
         return managerService.deleteEquipment(request);
-    }
-
-    @PostMapping("/equipment/search")
-    @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> searchEquipment(@RequestBody SearchRequest request) {
-        return managerService.searchEquipment(request);
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
