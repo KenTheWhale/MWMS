@@ -18,6 +18,8 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> createTask(CreateTaskRequest request);
 
+  ResponseEntity<ResponseObject> getTaskByCode(GetTaskByCodeRequest request);
+
     //----------------------------Item Group----------------------------//
 
     ResponseEntity<ResponseObject> getUnassignedGroups();
@@ -69,8 +71,5 @@ public interface ManagerService {
     ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
 
     ResponseEntity<ResponseObject> searchEquipment(SearchRequest request);
-
-
-
 
 }
