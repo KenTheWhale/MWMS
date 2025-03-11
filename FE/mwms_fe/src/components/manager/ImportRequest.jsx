@@ -6,17 +6,18 @@ import {
     createRequestApplication,
     getImportRequest,
     getSupplierEquipment,
-    getSupplierList, updateRequestApplication,
+    getSupplierList,
+    updateRequestApplication,
     viewDetail
 } from "../../services/ManagerService.jsx";
 import {FaSearch} from "react-icons/fa";
 import {GrUpdate, GrView} from "react-icons/gr";
 import {CgAddR} from "react-icons/cg";
-import {CustomAlertHUY} from "../CustomAlert.jsx";
 import {LuSave} from "react-icons/lu";
 import {MdOutlineCancel} from "react-icons/md";
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {enqueueSnackbar} from "notistack";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -31,8 +32,6 @@ function ImportRequest() {
     const [partners, setPartners] = useState([]);
     const [equipments, setEquipments] = useState([]);
     const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
-    const [alertMessage, setAlertMessage] = useState("");
-    const [alertType, setAlertType] = useState("");
     const [editRows, setEditRows] = useState({});
     const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
     const [showConfirmCancel, setShowConfirmCancel] = useState(false);
@@ -142,8 +141,7 @@ function ImportRequest() {
         async function createRequest() {
 
             if (rows.length === 0 || rows.every(row => !row.partner || !row.name || !row.quantity)) {
-                setAlertMessage("Please fill in at least one item.");
-                setAlertType("danger");
+                enqueueSnackbar("Please fill in at least one item.", {variant: "error"});
                 return;
             }
 
@@ -155,13 +153,11 @@ function ImportRequest() {
             const response = await createRequestApplication(requestItems);
 
             if (response) {
-                setAlertMessage(response.message);
-                setAlertType("success");
+                enqueueSnackbar(response.message, {variant: "success"})
                 const updatedRequests = await getImportRequest();
                 setRequestList(updatedRequests.data || []);
             } else {
-                setAlertMessage(response.message);
-                setAlertType("danger");
+                enqueueSnackbar(response.message, {variant: "error"})
             }
         }
 
@@ -250,11 +246,9 @@ function ImportRequest() {
                 return newRows;
             });
             handleViewDetail(selectedRequest.code)
-            setAlertMessage("update successfully");
-            setAlertType("success");
+            enqueueSnackbar("Update successfully", {variant: "success"})
         } else {
-            setAlertMessage("update false please try again");
-            setAlertType("danger");
+            enqueueSnackbar("Update false please try again", {variant: "error"})
         }
     };
 
@@ -268,18 +262,15 @@ function ImportRequest() {
 
         console.log("Response:", response);
         if (response) {
-            setAlertMessage("cancel successfully");
-            setAlertType("success");
+            enqueueSnackbar("Cancel successfully", {variant: "success"})
             setShowConfirmCancel(false)
             handleViewDetail(selectedRequest.code)
         } else {
-            setAlertMessage("cancel false please try again");
-            setAlertType("danger");
+            enqueueSnackbar("cancel false please try again", {variant: "error"})
         }
     }
     return (
         <div className="container-fluid">
-            <CustomAlertHUY message={alertMessage} type={alertType} onClose={() => setAlertMessage("")}/>
             <div className="row">
                 <label className="d-flex justify-content-center fs-1">Import Request</label>
             </div>
@@ -520,7 +511,7 @@ function ImportRequest() {
                                                                     <td>{item.unit}</td>
                                                                     <td>
                                                                         {
-                                                                            group.status !== "canceled" && (
+                                                                            group.status === "pending"  && (
                                                                                 isEditing ? (
                                                                                     <div>
                                                                                         <Button
@@ -548,7 +539,7 @@ function ImportRequest() {
                                                         </tbody>
                                                     </Table>
                                                     {
-                                                        group.status !== "canceled" ? (
+                                                        group.status === "pending" ? (
                                                             <div className={style.footCard}>
                                                                 <Button
                                                                     onClick={() => handleCancelClick(group.groupId)}
