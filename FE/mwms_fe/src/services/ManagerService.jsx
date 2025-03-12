@@ -115,7 +115,7 @@ export const getSupplierList = async () => {
 };
 
 export const getSupplierEquipment = async (id) => {
-    const response = await axiosClient.post("/manager/equipment/supplier", {partnerId: id});
+    const response = await axiosClient.post("/manager/equipment/supplier", {eqId: id});
     return response && response.status === 200 ? response.data : null;
 };
 

@@ -24,8 +24,7 @@
 .importTable thead {
     width: 100%;
     position: sticky;
-    top: -25px;
-    background-color: var(--table-background);
+    top: 0;
 }
 
 .importTable table {
@@ -111,7 +110,7 @@
     background: transparent;
 }
 .addCard{
-    max-height: 40vh;
+    height: 43vh;
     overflow-x: auto;
     display: block;
 }
