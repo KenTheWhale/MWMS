@@ -29,7 +29,7 @@ import {AddRounded, ArrowDropDown, DeleteForeverRounded} from "@mui/icons-materi
 
 /* eslint-disable react/prop-types */
 function CapitalizeFirstLetter(input) {
-    return input === "" ? input : input[0].toUpperCase() + input.slice(1);
+    return input === "" || !input ? "N/A" : input[0].toUpperCase() + input.slice(1);
 }
 
 function RenderInfoTextField({label, data, isCapital}) {

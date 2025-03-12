@@ -1,4 +1,5 @@
 import {
+    Accordion, AccordionDetails, AccordionSummary,
     Box,
     Dialog, DialogContent, DialogTitle, FormControl,
     IconButton, Input, InputLabel,
@@ -15,12 +16,12 @@ import {
 import '../../styles/staff/TaskStaff.css'
 import {useEffect, useState} from "react";
 import {getAllTasks} from "../../services/StaffService.jsx";
-import {Info} from "@mui/icons-material";
+import {ArrowDropDown, Info} from "@mui/icons-material";
 
 /* eslint-disable react/prop-types */
 
 function CapitalizeFirstLetter(input) {
-    return input === "" ? input : input[0].toUpperCase() + input.slice(1);
+    return input === "" || !input ? "N/A" : input[0].toUpperCase() + input.slice(1);
 }
 
 function RenderInfoTextField({label, data, isCapital}) {
@@ -138,6 +139,30 @@ function RenderTaskDetailModal({task, modal, CloseDetailModal}) {
                         data={task.status}
                         isCapital={true}
                     />
+                    <Accordion>
+                        <AccordionSummary expandIcon={<ArrowDropDown/>}>
+                            <Typography variant="span" color="textPrimary">
+                                Request
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <RenderInfoTextField
+                                label={"Carrier name"}
+                                data={task.group.cName}
+                                isCapital={true}
+                            />
+                        </AccordionDetails>
+                    </Accordion>
+                    <Accordion>
+                        <AccordionSummary expandIcon={<ArrowDropDown/>}>
+                            <Typography variant="span" color="textPrimary">
+                                Equipments
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+
+                        </AccordionDetails>
+                    </Accordion>
                 </Box>
             </DialogContent>
         </Dialog>
