@@ -252,16 +252,14 @@ public class ManagerController {
 
     @PostMapping("/position")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> createPosition(@RequestBody PositionRequest positionRequest) {
-        positionService.createPosition(positionRequest);
-        return ResponseEntity.ok("Create position successful");
+    public ResponseEntity<?> createPosition(@RequestBody PositionRequest positionRequest) {
+        return positionService.createPosition(positionRequest);
     }
 
     @PutMapping("/position/{positionId}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
-        positionService.updatePosition(positionId, positionRequest);
-        return ResponseEntity.ok("Update position successful");
+    public ResponseEntity<?> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
+        return positionService.updatePosition(positionId, positionRequest);
     }
 
     @DeleteMapping("/position/{positionId}")

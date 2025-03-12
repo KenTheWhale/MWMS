@@ -13,6 +13,7 @@ import com.medic115.mwms_be.repositories.PositionRepo;
 import com.medic115.mwms_be.services.PositionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,20 +34,32 @@ public class PositionServiceImpl implements PositionService {
     private final BatchRepo batchRepo;
 
     @Override
-    public void createPosition(PositionRequest request) {
-        if(request == null || request.areaId() == null){
-            throw new IllegalArgumentException("request and id cannot be null");
+    public ResponseEntity<?> createPosition(PositionRequest request) {
+        if (request == null || request.areaId() == null) {
+            throw new IllegalArgumentException("Request and area ID cannot be null");
         }
 
-        Area area = areaRepo.findById(request.areaId()).orElseThrow(() -> new EntityNotFoundException("Area not found"));
+        Area area = areaRepo.findById(request.areaId())
+                .orElseThrow(() -> new EntityNotFoundException("Area not found"));
+
+        int usedSquare = positionRepo.sumOfAllPositionsInArea(request.areaId());
+
+        int remainingSquare = area.getSquare() - usedSquare;
+
+        if (remainingSquare < request.square()) {
+            return ResponseEntity.badRequest().body("Only " + remainingSquare + " square meters left! Cannot create position.");
+        }
 
         Position position = Position.builder()
                 .name(request.name())
+                .square(request.square())
                 .area(area)
                 .build();
 
         positionRepo.save(position);
+        return ResponseEntity.ok("Created position successfully!");
     }
+
 
     @Override
     public List<PositionResponse> getAllPosition(Integer areaId) {
@@ -66,18 +79,28 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public PositionResponse updatePosition(Integer id, PositionRequest request) {
-        if(id == null || request == null){
+    public ResponseEntity<?> updatePosition(Integer id, PositionRequest request) {
+        if (id == null || request == null) {
             throw new IllegalArgumentException("id and request cannot be null");
         }
 
-        Position position = positionRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Position not found"));
+        Position position = positionRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Position not found"));
+
+        Area area = areaRepo.findById(request.areaId())
+                .orElseThrow(() -> new EntityNotFoundException("Area not found"));
+
+        int totalUsedSquare = positionRepo.sumOfAllPositionsInArea(area.getId()) - position.getSquare();
+
+        if (totalUsedSquare + request.square() > area.getSquare()) {
+            return ResponseEntity.badRequest().body("Total square in this area cannot exceed " + area.getSquare() + "m²");
+        }
+
         position.setName(request.name());
-
-        Area area = areaRepo.findById(request.areaId()).orElseThrow(() -> new EntityNotFoundException("Area not found"));
         position.setArea(area);
+        position.setSquare(request.square()); // Cập nhật square mới
 
-        return mapPositionToDto2(positionRepo.save(position));
+        return ResponseEntity.ok(mapPositionToDto2(positionRepo.save(position)));
     }
 
     @Transactional
