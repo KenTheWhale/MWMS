@@ -4,11 +4,13 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ViewSupplierEquipmentRequest {
+public class ChangeItemQuantityRequest {
 
-    int partnerId;
+    int id;
+
+    int quantity;
 }

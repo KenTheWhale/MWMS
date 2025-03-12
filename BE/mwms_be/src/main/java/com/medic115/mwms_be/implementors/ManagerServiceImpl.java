@@ -126,32 +126,6 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-    @Override
-    public ResponseEntity<ResponseObject> searchCategory(SearchRequest request) {
-        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
-            return ResponseEntity.badRequest().body(ResponseObject.builder()
-                    .message("Keyword cannot be empty")
-                    .build());
-        }
-
-        List<Category> result = categoryRepo.findAll().stream()
-                .filter(cate -> cate.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
-                        || cate.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
-                .toList();
-
-        if (result.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseObject.builder()
-                            .message("No equipment found")
-                            .build());
-        }
-
-        return ResponseEntity.ok(ResponseObject.builder()
-                .message("Search successful")
-                .data(MapToCategory(result))
-                .build());
-    }
-
     private Object MapToCategory(List<Category> result) {
         return result.stream()
                 .map(
@@ -182,7 +156,7 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> viewEquipmentSupplier(ViewEquipmentSupplierRequest request) {
         List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByEquipment_Id(request.getEqId());
         List<Partner> result = peList.stream()
                 .map(PartnerEquipment::getPartner)
@@ -215,6 +189,28 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+
+        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
+        List<Equipment> equipmentList = peList.stream()
+                .map(PartnerEquipment::getEquipment)
+                .distinct()
+                .toList();
+
+        if (equipmentList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found for this supplier")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Supplier equipment retrieved successfully")
+                .data(MapToEquipment(equipmentList))
+                .build());
+    }
+
+    @Override
     public ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request) {
         Category category = categoryRepo.findById(request.getCategoryId()).orElse(null);
 //        String error = CategoryValidation.validateCategory(request, equipmentRepo);
@@ -232,7 +228,6 @@ public class ManagerServiceImpl implements ManagerService {
                         .description(request.getDescription())
                         .category(category)
                         .unit(request.getUnit())
-                        .price(request.getPrice())
                         .status(Status.EQUIPMENT_ACTIVE.getValue())
                         .build()
         );
@@ -255,7 +250,6 @@ public class ManagerServiceImpl implements ManagerService {
             );
         }
         Equipment equipment = equipmentRepo.findByCode(request.getCode());
-        equipment.setPrice(request.getPrice());
         equipment.setUnit(request.getUnit());
         equipment.setCategory(category);
         equipment.setName(request.getName());
@@ -278,38 +272,12 @@ public class ManagerServiceImpl implements ManagerService {
 //                            .build()
 //            );
 //        }
-        equipmentRepo.deleteByCode(request.getCode());
+        equipmentRepo.findByCode(request.getCode()).setStatus(Status.EQUIPMENT_DELETED.getValue());
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Delete equipment successfully")
                         .build()
         );
-    }
-
-    @Override
-    public ResponseEntity<ResponseObject> searchEquipment(SearchRequest request) {
-        if (request.getKeyword() == null || request.getKeyword().isBlank()) {
-            return ResponseEntity.badRequest().body(ResponseObject.builder()
-                    .message("Keyword cannot be empty")
-                    .build());
-        }
-
-        List<Equipment> result = equipmentRepo.findAll().stream()
-                .filter(equipment -> equipment.getName().toLowerCase().contains(request.getKeyword().toLowerCase())
-                        || equipment.getCode().toLowerCase().contains(request.getKeyword().toLowerCase()))
-                .toList();
-
-        if (result.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseObject.builder()
-                            .message("No equipment found")
-                            .build());
-        }
-
-        return ResponseEntity.ok(ResponseObject.builder()
-                .message("Search successful")
-                .data(MapToEquipment(result))
-                .build());
     }
 
     private Object MapToEquipment(List<Equipment> result) {
@@ -321,13 +289,22 @@ public class ManagerServiceImpl implements ManagerService {
                             item.put("name", equipment.getName());
                             item.put("code", equipment.getCode());
                             item.put("description", equipment.getDescription());
+                            item.put("quantity", getEquipmentQuantity(equipment.getId()));
                             item.put("unit", equipment.getUnit());
-                            item.put("price", equipment.getPrice());
                             item.put("category", equipment.getCategory().getName());
+                            item.put("status", equipment.getStatus());
                             return item;
                         }
                 )
                 .toList();
+    }
+
+    private int getEquipmentQuantity(int equipmentId) {
+        return requestItemRepo.findAll().stream()
+                .filter(requestItem -> requestItem.getEquipment().getId() == equipmentId)
+                .filter(requestItem -> requestItem.getBatch() != null)
+                .map(RequestItem::getQuantity)
+                .reduce(0, Integer::sum);
     }
 
     //-----------------------------------------------TASK-----------------------------------------------//
@@ -453,6 +430,48 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    @Override
+    public ResponseEntity<ResponseObject> getTaskByCode(GetTaskByCodeRequest request) {
+        Task task = taskRepo.findByCode(request.getCode()).orElse(null);
+        if(task == null){
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Task not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", task.getId());
+        data.put("code", task.getCode());
+        data.put("assignDate", task.getAssignedDate());
+        data.put("staff", task.getUser().getName());
+        data.put("description", task.getDescription());
+        data.put("status", task.getStatus());
+        data.put("group", getItemGroupFromTask(task));
+
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get task successfully")
+                        .success(true)
+                        .data(data)
+                        .build()
+        );
+    }
+
+    private Map<String, Object> getItemGroupFromTask(Task task) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", task.getItemGroup().getId());
+        data.put("cName", task.getItemGroup().getCarrierName());
+        data.put("cPhone", task.getItemGroup().getCarrierPhone());
+        data.put("delivery", task.getItemGroup().getDeliveryDate());
+        data.put("status", task.getItemGroup().getStatus());
+        data.put("request", getRequestDataFromGroup(task.getItemGroup()));
+        data.put("items", getItemDataFromGroup(task.getItemGroup()));
+        return data;
+    }
 
     //-----------------------------------------------STAFF-----------------------------------------------//
     @Override

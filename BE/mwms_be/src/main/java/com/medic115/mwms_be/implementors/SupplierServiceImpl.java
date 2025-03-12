@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.implementors;
 
+import com.medic115.mwms_be.dto.requests.ChangeItemQuantityRequest;
 import com.medic115.mwms_be.dto.requests.ChangeWarehouseRequestStatusRequest;
 import com.medic115.mwms_be.dto.requests.GetWarehouseRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
@@ -8,9 +9,11 @@ import com.medic115.mwms_be.enums.Type;
 import com.medic115.mwms_be.models.ItemGroup;
 import com.medic115.mwms_be.models.Partner;
 import com.medic115.mwms_be.models.RequestApplication;
+import com.medic115.mwms_be.models.RequestItem;
 import com.medic115.mwms_be.repositories.ItemGroupRepo;
 import com.medic115.mwms_be.repositories.PartnerRepo;
 import com.medic115.mwms_be.repositories.RequestApplicationRepo;
+import com.medic115.mwms_be.repositories.RequestItemRepo;
 import com.medic115.mwms_be.services.SupplierService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class SupplierServiceImpl implements SupplierService {
     RequestApplicationRepo requestApplicationRepo;
     private final PartnerRepo partnerRepo;
     private final ItemGroupRepo itemGroupRepo;
+    private final RequestItemRepo requestItemRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getRequestList(GetWarehouseRequest warehouseRequest) {
@@ -124,5 +128,18 @@ public class SupplierServiceImpl implements SupplierService {
                     .message("Request is rejected")
                     .build());
         }
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> changeItemQuantity(ChangeItemQuantityRequest request) {
+        RequestItem requestItem = requestItemRepo.findById(request.getId()).orElse(null);
+        assert requestItem != null;
+        requestItem.setQuantity(request.getQuantity());
+        requestItemRepo.save(requestItem);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Change item quantity success")
+                .success(true)
+                .build());
+
     }
 }

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,8 +35,5 @@ public class AuthController {
         return authenticationService.refresh(request, response);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) {
-        return authenticationService.signUp(request);
-    }
+
 }

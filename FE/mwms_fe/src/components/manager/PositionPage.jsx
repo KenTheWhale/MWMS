@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
-import {Accordion, Button, Card, Container, Form, Modal, Spinner, Table,} from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Accordion, Button, Card, Container, Form, Modal, Spinner, Table } from "react-bootstrap";
 import axiosClient from "../../config/api";
-import {useParams} from "react-router-dom";
-import {MdAddCircleOutline} from "react-icons/md";
-import {toast} from "react-toastify";
+import { useParams } from "react-router-dom";
+import { MdAddCircleOutline } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const PositionPage = () => {
   const { id } = useParams();
@@ -16,12 +16,25 @@ const PositionPage = () => {
   const [showDelete, setShowDelete] = useState(false);
   const [batch, setBatch] = useState([]);
   const [form, setForm] = useState({
-    name: null,
+    name: "",
     areaId: null,
   });
+  const [formErrors, setFormErrors] = useState({}); // Trạng thái lưu lỗi validation
 
   const [activeBatchDetails, setActiveBatchDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // Modal styling
+  const modalStyle = { width: "350px", maxWidth: "350px", margin: "0 auto" };
+  const modalHeaderStyle = { padding: "10px 15px", borderBottom: "1px solid #dee2e6" };
+  const modalBodyStyle = { padding: "15px" };
+  const modalFooterStyle = {
+    padding: "10px 15px",
+    display: "flex",
+    gap: "8px",
+    justifyContent: "flex-end",
+    borderTop: "1px solid #dee2e6",
+  };
 
   const fetchData = async () => {
     try {
@@ -45,24 +58,42 @@ const PositionPage = () => {
     return position.status === "occupied" ? "danger" : "light";
   };
 
+  // Validation cho form tạo position
+  const validateForm = () => {
+    let tempErrors = {};
+    if (!form.name) tempErrors.name = "Position name is required";
+    else if (form.name.length < 2) tempErrors.name = "Position name must be at least 2 characters";
+    else if (form.name.length > 50) tempErrors.name = "Position name must not exceed 50 characters";
+
+    setFormErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
   const handleCreate = async () => {
-    try {
-      await axiosClient.post("/manager/position", form);
-      setShowCreate(false);
-      setForm({ name: "", areaId: null });
-      fetchData();
-      toast.success("Position created successfully !");
-    } catch (error) {
-      toast.error("Error creating position", error);
+    if (validateForm()) {
+      try {
+        await axiosClient.post("/manager/position", form);
+        setShowCreate(false);
+        setForm({ name: "", areaId: null });
+        setFormErrors({});
+        fetchData();
+        toast.success("Position created successfully!");
+      } catch (error) {
+        toast.error("Error creating position", error);
+      }
+    } else {
+      toast.error("Please fix the errors in the form");
     }
   };
 
   const handleOpen = () => {
     setShowCreate(true);
-    setForm({
-      ...form,
-      areaId: id,
-    });
+    setForm({ ...form, areaId: id });
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, name: e.target.value });
+    setFormErrors({ ...formErrors, name: "" }); // Xóa lỗi khi người dùng nhập
   };
 
   if (loading) {
@@ -87,16 +118,15 @@ const PositionPage = () => {
 
   const handlePositionClose = () => {
     setShowPosition(false);
+    setBatch([]); // Reset batch khi đóng modal
+    setActiveBatchDetails([]); // Reset chi tiết batch
   };
 
   const handleShowPosition = async (positionId) => {
     try {
       setShowPosition(true);
-      const response = await axiosClient.get(
-        `/manager/position/individual/${positionId}`
-      );
-      // console.log(response.data);
-      setBatch(response.data.batches);
+      const response = await axiosClient.get(`/manager/position/individual/${positionId}`);
+      setBatch(response.data.batches || []);
     } catch (error) {
       toast.error("Something Wrong .....", error);
     }
@@ -127,46 +157,37 @@ const PositionPage = () => {
       const response = await axiosClient.delete(`/manager/position/${chosePositionId}`);
       toast.success(response.data);
       setShowDelete(false);
-      // setShowPosition(false)
+      setShowPosition(false);
+      fetchData();
     } catch (error) {
       toast.error("Something Wrong....", error);
     }
-  }
+  };
 
   const handleOpenDeleteModal = (positionId) => {
-    setShowDelete(true)
+    setShowDelete(true);
     setChosePositionId(positionId);
-  }
+  };
 
   return (
     <>
       <Container className="py-4">
         <Button variant="success" onClick={handleOpen}>
-          <MdAddCircleOutline
-            style={{ fontSize: "20px", marginRight: "5px" }}
-          />
+          <MdAddCircleOutline style={{ fontSize: "20px", marginRight: "5px" }} />
           Create New Position
         </Button>
 
         <Card>
           <Card.Header>
-            <Card.Title className="text-center">
-              Quản Lý Vị Trí Trong Khu Vực {id}
-            </Card.Title>
+            <Card.Title className="text-center">Area Management in Position {id}</Card.Title>
           </Card.Header>
           <Card.Body>
             {positions.length === 0 ? (
-              <div className="text-center">
-                Không có vị trí nào trong khu vực này
-              </div>
+              <div className="text-center">No have any position in this area</div>
             ) : (
               <div
                 className="position-grid center"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(5, 1fr)",
-                  gap: "10px",
-                }}
+                style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}
               >
                 {positions.map((position) => (
                   <div
@@ -174,11 +195,7 @@ const PositionPage = () => {
                     className={`border rounded d-flex flex-column align-items-center justify-content-center p-2 bg-${getPositionColor(
                       position
                     )} position-relative`}
-                    style={{
-                      width: "180px",
-                      height: "80px",
-                      cursor: "pointer",
-                    }}
+                    style={{ width: "180px", height: "80px", cursor: "pointer" }}
                     onClick={() => handleShowPosition(position.id)}
                   >
                     <span
@@ -193,13 +210,12 @@ const PositionPage = () => {
                         zIndex: 10,
                       }}
                       onClick={(e) => {
+                        e.stopPropagation();
                         handleOpenDeleteModal(position.id);
                       }}
                     >
                       x
                     </span>
-
-                    
                     <span className="fs-6">{position.name}</span>
                   </div>
                 ))}
@@ -209,46 +225,44 @@ const PositionPage = () => {
         </Card>
       </Container>
 
-      <Modal show={showPosition} onHide={handlePositionClose}>
-        <Modal.Title className="text-center">Detail Batch</Modal.Title>
-        <Modal.Body>
+      <Modal show={showPosition} onHide={handlePositionClose} centered style={{ color: "black" }}>
+        <Modal.Header closeButton style={modalHeaderStyle}>
+          <Modal.Title style={{ fontSize: "16px" }}>Detail Batch</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ padding: "10px", maxHeight: "300px", overflowY: "auto" }}>
           <Accordion
             defaultActiveKey="0"
             onSelect={(selectedKey) => {
-              // Gọi hàm xử lý khi có accordion được chọn
-              if (selectedKey) {
-                handSelectBatch(selectedKey);
-              }
+              if (selectedKey) handSelectBatch(selectedKey);
             }}
           >
             {batch.map((item) => (
               <Accordion.Item eventKey={item.id.toString()} key={item.id}>
-                <Accordion.Header>
-                  <div className="d-flex justify-content-between w-100">
+                <Accordion.Header style={{ padding: "5px" }}>
+                  <div className="d-flex justify-content-between w-100" style={{ fontSize: "12px" }}>
                     <span>{item.id}</span>
                     <span>{item.code}</span>
-                    <span>{item.createdDate}</span>
+                    <span style={{ fontSize: "11px" }}>{item.createdDate}</span>
                     <span>{item.equipmentQty}</span>
                   </div>
                 </Accordion.Header>
-                <Accordion.Body>
-                  <div className="batch-details p-3">
-                    <h5 className="mb-3">Chi tiết của Batch {item.code}</h5>
-                    {/* Sử dụng state để hiển thị dữ liệu chi tiết */}
-                    {activeBatchDetails != null ? (
+                <Accordion.Body style={{ padding: "8px" }}>
+                  <div className="batch-details">
+                    <h6 className="mb-2">Batch Detail: {item.code}</h6>
+                    {activeBatchDetails.length > 0 ? (
                       <>
                         {loadingDetails ? (
                           <div className="text-center">
                             <Spinner animation="border" size="sm" />
-                            <span className="ms-2">Đang tải chi tiết...</span>
+                            <span className="ms-2" style={{ fontSize: "12px" }}>Loading.....</span>
                           </div>
                         ) : (
-                          <Table striped bordered hover>
+                          <Table striped bordered hover size="sm" style={{ fontSize: "12px" }}>
                             <thead>
                               <tr>
                                 <th>ID</th>
-                                <th>Serial number</th>
-                                <th>Import Date</th>
+                                <th>Serial</th>
+                                <th>Date</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -256,7 +270,7 @@ const PositionPage = () => {
                                 <tr key={item.id}>
                                   <td>{item.id}</td>
                                   <td>{item.serialNumber}</td>
-                                  <td>{item.importedDate}</td>
+                                  <td style={{ fontSize: "11px" }}>{item.importedDate}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -265,7 +279,7 @@ const PositionPage = () => {
                       </>
                     ) : (
                       <div className="text-center">
-                        <span>Đang tải dữ liệu...</span>
+                        <span style={{ fontSize: "12px" }}>No details available</span>
                       </div>
                     )}
                   </div>
@@ -274,46 +288,59 @@ const PositionPage = () => {
             ))}
           </Accordion>
         </Modal.Body>
+        <Modal.Footer style={{ padding: "8px", justifyContent: "center" }}>
+          <Button size="sm" variant="secondary" onClick={handlePositionClose}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)}>
-        <Modal.Title className="text-center">Create New Position</Modal.Title>
-        <Modal.Body>
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} size="sm" centered style={{ color: "black" }}>
+        <Modal.Header closeButton style={modalHeaderStyle}>
+          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>Create New Position</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={modalBodyStyle}>
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Position Name</Form.Label>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Position Name</Form.Label>
               <Form.Control
+                size="sm"
                 type="text"
                 placeholder="Name..."
                 name="name"
-                value={form.name}
-                onChange={(e) => {
-                  setForm({
-                    ...form,
-                    name: e.target.value,
-                  });
-                }}
+                value={form.name || ""}
+                onChange={handleChange}
+                isInvalid={!!formErrors.name}
               />
+              <Form.Control.Feedback type="invalid">{formErrors.name}</Form.Control.Feedback>
             </Form.Group>
           </Form>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowCreate(false)}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={handleCreate}>
-              Create
-            </Button>
-          </Modal.Footer>
         </Modal.Body>
+        <Modal.Footer style={modalFooterStyle}>
+          <Button size="sm" variant="secondary" onClick={() => setShowCreate(false)}>
+            Close
+          </Button>
+          <Button size="sm" variant="primary" onClick={handleCreate}>
+            Create
+          </Button>
+        </Modal.Footer>
       </Modal>
 
-
-      <Modal show={showDelete} onHide={() => setShowDelete(false)}>
-        <Modal.Header>Do you really want to delete ?</Modal.Header>
-        <Modal.Body>
-          <Button variant="primary" onClick={() => setShowDelete(false)}>Close</Button>
-          <Button variant="primary" onClick={() => handleDeletePosition()}>Delete</Button>
+      <Modal show={showDelete} onHide={() => setShowDelete(false)} size="sm" centered style={{ color: "black" }}>
+        <Modal.Header closeButton style={modalHeaderStyle}>
+          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ ...modalBodyStyle, textAlign: "center" }}>
+          <p style={{ fontSize: "14px", marginBottom: "15px" }}>Do you really want to delete this?</p>
         </Modal.Body>
+        <Modal.Footer style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <Button size="sm" variant="secondary" onClick={() => setShowDelete(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" variant="danger" onClick={handleDeletePosition}>
+            Delete
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
