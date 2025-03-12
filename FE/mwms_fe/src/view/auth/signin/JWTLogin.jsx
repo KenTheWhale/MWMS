@@ -23,6 +23,7 @@ const JWTLogin = () => {
                 localStorage.setItem(
                     "user",
                     JSON.stringify({
+                        id: response.data.id,
                         name: response.data.name,
                         role: response.data.role,
                         email: response.data.email,

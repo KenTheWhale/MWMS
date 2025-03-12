@@ -139,6 +139,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private Map<String, Object> buildLoginBody(Account account) {
         Map<String, Object> body = new HashMap<>();
+        body.put("id", account.getId());
         body.put("role", account.getRole().name().toLowerCase());
         if(account.getRole() == Role.PARTNER){
             body.put("type", account.getUser().getPartner().getType());

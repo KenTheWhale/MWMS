@@ -6,6 +6,7 @@ import {FaX} from "react-icons/fa6";
 import style from '../../styles/partner/Request.module.css';
 import {useState} from "react";
 
+// eslint-disable-next-line react/prop-types
 const RequestPopup = ({request, show, handleClose, onAccept, onReject, setRequest}) => {
     const [deliveryDate, setDeliveryDate] = useState("");
     const [carrierName, setCarrierName] = useState("");
@@ -135,11 +136,11 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Label>Delivery Date</Form.Label>
                                 <Form.Control
                                     type="date"
-                                    value={request.deliveryDate}
+                                    value={request.deliveryDate === "" ? deliveryDate : request.deliveryDate}
                                     onChange={(e) => setDeliveryDate(e.target.value)}
                                     isInvalid={errors.deliveryDate}
                                     disabled={isDeliveryDisabled}
-                                    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                                    min={new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0]}
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.deliveryDate}</Form.Control.Feedback>
                             </Form.Group>
@@ -149,7 +150,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier name"
-                                    value={request.carrierName}
+                                    value={request.carrierName === "" ? carrierName : request.carrierName}
                                     onChange={(e) => setCarrierName(e.target.value)}
                                     isInvalid={errors.carrierName}
                                     disabled={isDeliveryDisabled}
@@ -162,7 +163,7 @@ const RequestPopup = ({request, show, handleClose, onAccept, onReject, setReques
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter carrier phone"
-                                    value={request.carrierPhone}
+                                    value={request.carrierPhone === "" ? carrierPhone : request.carrierPhone}
                                     onChange={(e) => {
                                         const newValue = e.target.value.replace(/\D/g, "");
                                         if (newValue.length <= 10) {

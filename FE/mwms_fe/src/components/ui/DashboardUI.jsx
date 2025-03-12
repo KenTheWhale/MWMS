@@ -1,4 +1,4 @@
-import {DashboardLayout} from "@toolpad/core";
+import {Account, DashboardLayout} from "@toolpad/core";
 import {Outlet} from "react-router-dom";
 import '../../styles/ui/dashboard.css'
 import {Typography} from "@mui/material";
@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import {ReactRouterAppProvider} from "@toolpad/core/react-router";
 import {enqueueSnackbar} from "notistack";
 import Cookies from 'js-cookie'
-import {logout} from "../../services/AuthService.jsx";
+import {Logout} from "@mui/icons-material";
 
 DashboardUI.proTypes = {
     navigate: PropTypes.array.isRequired,
@@ -20,17 +20,40 @@ function SidebarFooter({mini}) {
         <Typography
             variant="caption"
             sx={{m: 1, whiteSpace: 'nowrap', overflow: 'hidden'}}
+            color={"textPrimary"}
         >
             {mini ? '© M115' : `© ${new Date().getFullYear()} Medic115. All rights reversed`}
         </Typography>
     );
 }
 
+function ToolbarAccount() {
+    return (
+        <Typography
+            variant="caption"
+            color={"textPrimary"}>
+            <div className={'d-flex justify-content-between align-items-center me-4 gap-2'}>
+                <Account
+                    slotProps={{
+                        signOutButton: {
+                            variant: "contained",
+                            color: "error"
+                        }
+                    }}
+                />
+                <Typography variant={"body1"} color={"textPrimary"}>
+                    {localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).name : ""}
+                </Typography>
+            </div>
+        </Typography>
+    )
+}
+
 export function DashboardUI({navigate, homeUrl}) {
     const [session, setSession] = useState({
         user: {
-            name: JSON.parse(localStorage.getItem("user")).name ,
-            email: JSON.parse(localStorage.getItem("user")).email
+            name: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).name : "",
+            email: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).email : ""
         }
     })
 
@@ -53,19 +76,11 @@ export function DashboardUI({navigate, homeUrl}) {
         }
     }, [checkCookie]);
 
-
-    const originalWarn = console.warn;
-    console.warn = (...args) => {
-        if (!args[0].includes("Failed prop type: Invalid prop `router.Link`")) {
-            originalWarn(...args);
-        }
-    };
-
-    const component = (
+    return (
         <ReactRouterAppProvider
             navigation={navigate}
             branding={{
-                logo: <img src="/medic.png" alt="Medic icon" />,
+                logo: <img src="/medic.png" alt="Medic icon"/>,
                 title: "MEDIC115",
                 homeUrl: homeUrl,
             }}
@@ -75,6 +90,7 @@ export function DashboardUI({navigate, homeUrl}) {
             <DashboardLayout
                 slots={{
                     sidebarFooter: SidebarFooter,
+                    toolbarAccount: ToolbarAccount
                 }}
             >
                 <div className="outlet">
@@ -83,9 +99,4 @@ export function DashboardUI({navigate, homeUrl}) {
             </DashboardLayout>
         </ReactRouterAppProvider>
     );
-
-    // Restore original console.warn
-    console.warn = originalWarn;
-
-    return component;
 }
