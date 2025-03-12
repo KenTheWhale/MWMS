@@ -91,6 +91,13 @@ export const addTask = async (staffId, description, groupId) => {
     return response ? response.data : null;
 }
 
+export const getTaskByCode = async (code) => {
+    const response = await axiosClient.post("/manager/task/detail", {
+        code: code,
+    })
+    return response ? response.data : null;
+}
+
 //-----------------------------------------REQUEST-----------------------------------------//
 export const getImportRequest = async () => {
     const response = await axiosClient.get("/manager/request/import");
@@ -154,4 +161,9 @@ export const updateRequestApplication = async (requestItemId,equipmentId,quantit
 export const updateItemQuantity = async (id, quantity) => {
     const response = await axiosClient.put("/supplier/request/item", {id: id, quantity: quantity});
     return response ? response.data : null;
+}
+
+export const cancelRequest = async (groupId) => {
+    const response = await axiosClient.put("/manager/request/requestItem", groupId)
+    return response && response.status === 200 ? response.data : null;
 }

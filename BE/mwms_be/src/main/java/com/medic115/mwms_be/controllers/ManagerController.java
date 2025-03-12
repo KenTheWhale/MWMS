@@ -109,6 +109,12 @@ public class ManagerController {
         return managerService.getTaskList();
     }
 
+    @PostMapping("/task/detail")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getTaskByCode(@RequestBody GetTaskByCodeRequest request){
+        return managerService.getTaskByCode(request);
+    }
+
     @DeleteMapping("/task/{id}")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> deleteTask(@PathVariable int id){
@@ -183,6 +189,12 @@ public class ManagerController {
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> addImportRequest(@RequestBody AddForUpdateRequest request) {
         return managerService.addForUpdateRequest(request);
+    }
+
+    @PutMapping("/request/requestItem")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> cancelRequest(@RequestBody CancelImportRequest request) {
+        return managerService.cancelImportRequest(request);
     }
 
 

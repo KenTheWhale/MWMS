@@ -88,8 +88,8 @@ public class MwmsBeApplication {
                     User u = User.builder()
                             .account(acc)
                             .name(acc.getUsername())
-                            .email(acc.getUsername() + "@bulldozer.com")
-                            .phone("0909")
+                            .email(acc.getUsername() + "@medic.com")
+                            .phone("0908765432")
                             .build();
 
                     users.add(u);

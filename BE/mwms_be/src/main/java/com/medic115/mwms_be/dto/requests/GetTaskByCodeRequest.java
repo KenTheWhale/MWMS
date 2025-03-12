@@ -8,6 +8,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CancelImportRequest {
-     int groupId;
+public class GetTaskByCodeRequest {
+    String code;
 }

@@ -430,6 +430,48 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    @Override
+    public ResponseEntity<ResponseObject> getTaskByCode(GetTaskByCodeRequest request) {
+        Task task = taskRepo.findByCode(request.getCode()).orElse(null);
+        if(task == null){
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .message("Task not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", task.getId());
+        data.put("code", task.getCode());
+        data.put("assignDate", task.getAssignedDate());
+        data.put("staff", task.getUser().getName());
+        data.put("description", task.getDescription());
+        data.put("status", task.getStatus());
+        data.put("group", getItemGroupFromTask(task));
+
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get task successfully")
+                        .success(true)
+                        .data(data)
+                        .build()
+        );
+    }
+
+    private Map<String, Object> getItemGroupFromTask(Task task) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", task.getItemGroup().getId());
+        data.put("cName", task.getItemGroup().getCarrierName());
+        data.put("cPhone", task.getItemGroup().getCarrierPhone());
+        data.put("delivery", task.getItemGroup().getDeliveryDate());
+        data.put("status", task.getItemGroup().getStatus());
+        data.put("request", getRequestDataFromGroup(task.getItemGroup()));
+        data.put("items", getItemDataFromGroup(task.getItemGroup()));
+        return data;
+    }
 
     //-----------------------------------------------STAFF-----------------------------------------------//
     @Override
@@ -740,6 +782,32 @@ public class ManagerServiceImpl implements ManagerService {
                         .message("200 OK")
                         .data(requestDetail)
                         .build());
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request) {
+        ItemGroup itemGroup = itemGroupRepo.findById(request.getGroupId()).orElse(null);
+
+        if (itemGroup == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    ResponseObject
+                            .builder()
+                            .message("204 No Content Item group not found")
+                            .success(false)
+                            .data(null)
+                            .build()
+            );
+        }
+
+        itemGroup.setStatus(Status.REQUEST_CANCELLED.getValue());
+        itemGroupRepo.save(itemGroup);
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message("200 OK Cancel Group successfully")
+                        .success(true)
+                        .build()
+        );
     }
 
     @Override

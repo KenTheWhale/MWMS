@@ -18,6 +18,8 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> createTask(CreateTaskRequest request);
 
+  ResponseEntity<ResponseObject> getTaskByCode(GetTaskByCodeRequest request);
+
     //----------------------------Item Group----------------------------//
 
     ResponseEntity<ResponseObject> getUnassignedGroups();
@@ -36,7 +38,7 @@ public interface ManagerService {
 
 //    ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
 
-//    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
+    ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
 
   ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
