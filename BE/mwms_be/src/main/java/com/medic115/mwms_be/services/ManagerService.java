@@ -58,6 +58,8 @@ public interface ManagerService {
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();
 
+    ResponseEntity<ResponseObject> viewEquipmentSupplier(ViewEquipmentSupplierRequest request);
+
     ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request);
 
     ResponseEntity<ResponseObject> addEquipment(AddEquipmentRequest request);
@@ -65,8 +67,6 @@ public interface ManagerService {
     ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request);
 
     ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
-
-
 
 
 

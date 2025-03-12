@@ -156,7 +156,7 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> viewEquipmentSupplier(ViewEquipmentSupplierRequest request) {
         List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByEquipment_Id(request.getEqId());
         List<Partner> result = peList.stream()
                 .map(PartnerEquipment::getPartner)
@@ -185,6 +185,28 @@ public class ManagerServiceImpl implements ManagerService {
                                 }
                         )
                         .toList())
+                .build());
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request) {
+
+        List<PartnerEquipment> peList = partnerEquipmentRepo.findAllByPartner_Id(request.getPartnerId());
+        List<Equipment> equipmentList = peList.stream()
+                .map(PartnerEquipment::getEquipment)
+                .distinct()
+                .toList();
+
+        if (equipmentList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ResponseObject.builder()
+                            .message("No equipment found for this supplier")
+                            .build());
+        }
+
+        return ResponseEntity.ok(ResponseObject.builder()
+                .message("Supplier equipment retrieved successfully")
+                .data(MapToEquipment(equipmentList))
                 .build());
     }
 

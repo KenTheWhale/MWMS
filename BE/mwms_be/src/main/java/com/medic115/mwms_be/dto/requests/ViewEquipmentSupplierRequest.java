@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ViewSupplierEquipmentRequest {
+public class ViewEquipmentSupplierRequest {
 
-    int partnerId;
+    int eqId;
 }
