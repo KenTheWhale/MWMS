@@ -8,4 +8,6 @@ import java.util.List;
 public interface PartnerEquipmentRepo extends JpaRepository<PartnerEquipment, Integer> {
 
     List<PartnerEquipment> findAllByPartner_Id(Integer partnerId);
+
+    List<PartnerEquipment> findAllByEquipment_Id(Integer equipmentId);
 }

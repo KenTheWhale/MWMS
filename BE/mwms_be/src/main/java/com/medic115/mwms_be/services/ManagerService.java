@@ -57,10 +57,10 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
 
-    ResponseEntity<ResponseObject> searchCategory(SearchRequest request);
-
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();
+
+    ResponseEntity<ResponseObject> viewEquipmentSupplier(ViewEquipmentSupplierRequest request);
 
     ResponseEntity<ResponseObject> viewSupplierEquipment(ViewSupplierEquipmentRequest request);
 
@@ -70,6 +70,6 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
 
-    ResponseEntity<ResponseObject> searchEquipment(SearchRequest request);
+
 
 }

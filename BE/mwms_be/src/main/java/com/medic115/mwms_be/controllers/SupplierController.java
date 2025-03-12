@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
+import com.medic115.mwms_be.dto.requests.ChangeItemQuantityRequest;
 import com.medic115.mwms_be.dto.requests.ChangeWarehouseRequestStatusRequest;
 import com.medic115.mwms_be.dto.requests.GetWarehouseRequest;
 import com.medic115.mwms_be.dto.response.ResponseObject;
@@ -23,6 +24,11 @@ public class SupplierController {
     @PutMapping("/request/status")
     public ResponseEntity<ResponseObject> changeRequestStatus(@RequestBody ChangeWarehouseRequestStatusRequest request) {
         return supplierService.changeRequestStatus(request);
+    }
+
+    @PutMapping("/request/item")
+    public ResponseEntity<ResponseObject> changeItemQuantity(@RequestBody ChangeItemQuantityRequest request) {
+        return supplierService.changeItemQuantity(request);
     }
 
 }
