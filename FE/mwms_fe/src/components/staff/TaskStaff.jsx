@@ -16,12 +16,12 @@ import {
 import '../../styles/staff/TaskStaff.css'
 import {useEffect, useState} from "react";
 import {getAllTasks} from "../../services/StaffService.jsx";
-import {ArrowDropDown, Info} from "@mui/icons-material";
+import {ArrowDropDown, Create, Info} from "@mui/icons-material";
 
 /* eslint-disable react/prop-types */
 
 function CapitalizeFirstLetter(input) {
-    return input === "" || !input ? "N/A" : input[0].toUpperCase() + input.slice(1);
+    return input === "" || !input ? input : input[0].toUpperCase() + input.slice(1);
 }
 
 function RenderInfoTextField({label, data, isCapital}) {
@@ -30,12 +30,13 @@ function RenderInfoTextField({label, data, isCapital}) {
             <InputLabel shrink>
                 {label}
             </InputLabel>
-            <Input readOnly defaultValue={isCapital ? CapitalizeFirstLetter(data) : data}/>
+            <Input readOnly
+                   defaultValue={!data || data === "" ? "N/A" : (isCapital ? CapitalizeFirstLetter(data) : data)}/>
         </FormControl>
     )
 }
 
-function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc}) {
+function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatchModalFunc}) {
 
     const [rowPerPage, setRowPerPage] = useState(5);
     const [page, setPage] = useState(0);
@@ -54,6 +55,11 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc}) {
         SetSelectedTaskFunc(task)
     }
 
+    const handleCreateBatch = (task) => {
+        OpenBatchModalFunc()
+        SetSelectedTaskFunc(task)
+    }
+
     return (
         <Paper sx={{height: "60vh"}}>
             <TableContainer style={{height: '53vh'}} className={'table-container'}>
@@ -65,6 +71,7 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc}) {
                             <TableCell>Description</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell align={"center"}>Detail</TableCell>
+                            <TableCell align={"center"}>Create Batch</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -81,6 +88,11 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc}) {
                                         <TableCell align={"center"}>
                                             <IconButton color={"info"} onClick={() => handleSelectedTask(task)}>
                                                 <Info/>
+                                            </IconButton>
+                                        </TableCell>
+                                        <TableCell align={"center"}>
+                                            <IconButton color={"success"} onClick={() => handleCreateBatch(task)}>
+                                                <Create/>
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -139,6 +151,12 @@ function RenderTaskDetailModal({task, modal, CloseDetailModal}) {
                         data={task.status}
                         isCapital={true}
                     />
+
+                    <RenderInfoTextField
+                        label={"Partner"}
+                        data={task.items.length > 0 ? task.items[0].partner.name : ""}
+                        isCapital={true}
+                    />
                     <Accordion>
                         <AccordionSummary expandIcon={<ArrowDropDown/>}>
                             <Typography variant="span" color="textPrimary">
@@ -147,8 +165,38 @@ function RenderTaskDetailModal({task, modal, CloseDetailModal}) {
                         </AccordionSummary>
                         <AccordionDetails>
                             <RenderInfoTextField
+                                label={"Code"}
+                                data={task.requestApp.code}
+                                isCapital={false}
+                            />
+
+                            <RenderInfoTextField
                                 label={"Carrier name"}
                                 data={task.group.cName}
+                                isCapital={true}
+                            />
+
+                            <RenderInfoTextField
+                                label={"Carrier phone"}
+                                data={task.group.cPhone}
+                                isCapital={false}
+                            />
+
+                            <RenderInfoTextField
+                                label={"Last modified"}
+                                data={task.requestApp.modifiedDate}
+                                isCapital={false}
+                            />
+
+                            <RenderInfoTextField
+                                label={"Request date"}
+                                data={task.requestApp.requestDate}
+                                isCapital={false}
+                            />
+
+                            <RenderInfoTextField
+                                label={"Status"}
+                                data={task.group.status}
                                 isCapital={true}
                             />
                         </AccordionDetails>
@@ -160,10 +208,50 @@ function RenderTaskDetailModal({task, modal, CloseDetailModal}) {
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-
+                            {
+                                task.items.map(
+                                    (item, index) => (
+                                        <Accordion key={index}>
+                                            <AccordionSummary expandIcon={<ArrowDropDown/>}>
+                                                <Typography variant="span" color="textPrimary">
+                                                    {(index + 1) + ". " + item.equipment + " - " + item.category}
+                                                </Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <RenderInfoTextField
+                                                    label={"Quantity"}
+                                                    data={item.quantity + " " + item.unit}
+                                                    isCapital={false}
+                                                />
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    )
+                                )
+                            }
                         </AccordionDetails>
                     </Accordion>
                 </Box>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function RenderCreateBatchModal({modal, CloseBatchModal, task}) {
+    return (
+        <Dialog
+            open={modal.visible}
+            onClose={CloseBatchModal}
+            scroll={"paper"}
+            maxWidth={"md"}
+            fullWidth
+        >
+            <DialogTitle color={"textPrimary"}>Create batch</DialogTitle>
+            <DialogContent dividers>
+                <RenderInfoTextField
+                    label={"Code"}
+                    data={task.code}
+                    isCapital={false}
+                />
             </DialogContent>
         </Dialog>
     )
@@ -191,33 +279,39 @@ export function TaskStaff() {
 
     function HandleOpenModal(open, type) {
         setAction(!action)
-        switch (type) {
-            case "detail":
-                setModal({...modal, visible: open, type: open ? type : ""})
-                break
-        }
+        setModal({...modal, visible: open, type: open ? type : ""})
     }
 
-    function HandleGetSelectedTask(task){
+    function HandleGetSelectedTask(task) {
         setSelectedTask(task)
     }
 
     return (
         <>
-            <Typography component={"span"} className={'d-flex justify-content-center'} color={"textPrimary"} style={{fontSize: "2.5rem"}}>TASK
+            <Typography component={"span"} className={'d-flex justify-content-center'} color={"textPrimary"}
+                        style={{fontSize: "2.5rem"}}>TASK
                 MANAGEMENT</Typography>
             <RenderTable
                 tasks={tasks}
                 OpenDetailModalFunc={() => HandleOpenModal(true, "detail")}
                 SetSelectedTaskFunc={HandleGetSelectedTask}
+                OpenBatchModalFunc={() => HandleOpenModal(true, "batch")}
             />
             {
                 modal.type === "detail" &&
-                    <RenderTaskDetailModal
-                        modal={modal}
-                        CloseDetailModal={() => HandleOpenModal(false, "detail")}
-                        task={selectedTask}
-                    />
+                <RenderTaskDetailModal
+                    modal={modal}
+                    CloseDetailModal={() => HandleOpenModal(false, "detail")}
+                    task={selectedTask}
+                />
+            }
+            {
+                modal.type === 'batch' &&
+                <RenderCreateBatchModal
+                    modal={modal}
+                    CloseBatchModal={() => HandleOpenModal(false, "batch")}
+                    task={selectedTask}
+                />
             }
         </>
 
