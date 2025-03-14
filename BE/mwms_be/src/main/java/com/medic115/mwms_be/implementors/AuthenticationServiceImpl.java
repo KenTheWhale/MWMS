@@ -239,7 +239,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return true;
     }
 
-    // save all token relate to account
     private void saveAccountToken(Account account, String jwtToken, String refreshToken) {
         Token access = Token.builder()
                 .account(account)
@@ -354,13 +353,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalArgumentException("User not found");
         }
 
-        boolean checked = accountRepo.findByUsername(request.getUsername()).isPresent();
+        boolean checked = accountRepo.existsByUsernameAndNotId(request.getUsername(), acc.getId());
 
         if(checked){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Username is already existed !");
         }
 
-        checked = userRepo.findByEmail(request.getEmail()).isPresent();
+        checked = userRepo.existsByEmailAndNotId(request.getEmail(), acc.getUser().getId());
 
         if(checked){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Email is already existed !");

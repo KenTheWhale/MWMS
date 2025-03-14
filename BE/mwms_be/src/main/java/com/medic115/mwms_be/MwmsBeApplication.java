@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,7 +21,8 @@ import java.util.Random;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-public class MwmsBeApplication {
+@EnableScheduling
+public class MwmsBeApplication{
 
     private final AccountRepo accountRepo;
 
@@ -165,20 +167,7 @@ public class MwmsBeApplication {
                 }
 
                 // ----------------------------- Category & Equipment ----------------------------- //
-                List<String> categoryNames = List.of(
-                        "Diagnostic Equipment",
-                        "Surgical Equipment",
-                        "Monitoring Equipment"
-//                        "Therapeutic Equipment",
-//                        "Anesthesia Equipment",
-//                        "Therapeutic Equipment",
-//                        "Rehabilitation Equipment",
-//                        "Imaging Equipment",
-//                        "Infusion Equipment",
-//                        "Respiratory Equipment",
-//                        "Laboratory Equipment",
-//                        "Other"
-                );
+                List<String> categoryNames = List.of("Medical Devices", "Laboratory Equipment", "Personal Protective Equipment");
                 List<Category> categories = new ArrayList<>();
 
                 for (String categoryName : categoryNames) {
@@ -354,9 +343,7 @@ public class MwmsBeApplication {
                     }
                 }
                 partnerEquipmentRepo.saveAll(partnerEquipments);
-            }
-
-            ;
+            };
         };
     }
 }

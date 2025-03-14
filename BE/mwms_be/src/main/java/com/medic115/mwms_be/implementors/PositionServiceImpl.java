@@ -13,6 +13,7 @@ import com.medic115.mwms_be.repositories.PositionRepo;
 import com.medic115.mwms_be.services.PositionService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,12 @@ public class PositionServiceImpl implements PositionService {
             return ResponseEntity.badRequest().body("Only " + remainingSquare + " square meters left! Cannot create position.");
         }
 
+        boolean check = positionRepo.existsByPositionName(request.name());
+
+        if(check) {
+            return ResponseEntity.badRequest().body("Position name already exists!");
+        }
+
         Position position = Position.builder()
                 .name(request.name())
                 .square(request.square())
@@ -57,7 +64,11 @@ public class PositionServiceImpl implements PositionService {
                 .build();
 
         positionRepo.save(position);
-        return ResponseEntity.ok("Created position successfully!");
+        try {
+            return ResponseEntity.ok("Created position successfully!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -96,11 +107,19 @@ public class PositionServiceImpl implements PositionService {
             return ResponseEntity.badRequest().body("Total square in this area cannot exceed " + area.getSquare() + "m²");
         }
 
+        boolean check = positionRepo.existsByPositionNameAndNotId(request.name(), id);
+
+        if(check){
+            return ResponseEntity.badRequest().body("Position name already exists!");
+        }
+
         position.setName(request.name());
         position.setArea(area);
-        position.setSquare(request.square()); // Cập nhật square mới
+        position.setSquare(request.square());
 
-        return ResponseEntity.ok(mapPositionToDto2(positionRepo.save(position)));
+        positionRepo.save(position);
+
+        return ResponseEntity.ok("Updated successfully!");
     }
 
     @Transactional
@@ -149,6 +168,7 @@ public class PositionServiceImpl implements PositionService {
         return PositionResponse.builder()
                 .id(position.getId())
                 .name(position.getName())
+                .square(position.getSquare())
                 .build();
     }
 
@@ -156,6 +176,8 @@ public class PositionServiceImpl implements PositionService {
         return PositionResponse.builder()
                 .id(position.getId())
                 .name(position.getName())
+                .square(position.getSquare())
+                .areaId(position.getArea().getId())
                 .batches(position.getBatches().stream().map(this::mapBatchToDto).collect(Collectors.toList()))
                 .build();
     }
