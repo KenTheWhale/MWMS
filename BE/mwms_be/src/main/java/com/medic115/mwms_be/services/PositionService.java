@@ -1,8 +1,9 @@
 package com.medic115.mwms_be.services;
 
-import com.medic115.mwms_be.dto.requests.PositionRequest;
-import com.medic115.mwms_be.dto.response.PositionResponse;
+
 import org.springframework.http.ResponseEntity;
+import com.medic115.mwms_be.requests.PositionRequest;
+import com.medic115.mwms_be.response.PositionResponse;
 
 import java.util.List;
 

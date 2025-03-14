@@ -1,16 +1,13 @@
 package com.medic115.mwms_be.controllers;
 
 
-import com.medic115.mwms_be.dto.requests.SignInRequest;
-import com.medic115.mwms_be.dto.requests.SignUpRequest;
-import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.requests.SignInRequest;
+import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

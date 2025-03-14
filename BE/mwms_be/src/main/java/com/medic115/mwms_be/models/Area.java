@@ -25,6 +25,10 @@ public class Area {
 
     int square;
 
+    @ManyToOne
+    @JoinColumn(name = "`equipment_id`")
+    Equipment equipment;
+
     @OneToMany(mappedBy = "area")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

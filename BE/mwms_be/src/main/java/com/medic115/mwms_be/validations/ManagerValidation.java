@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.validations;
 
-import com.medic115.mwms_be.dto.requests.AssignStaffRequest;
+import com.medic115.mwms_be.requests.AssignStaffRequest;
 import com.medic115.mwms_be.models.ItemGroup;
 import com.medic115.mwms_be.models.User;
 import com.medic115.mwms_be.repositories.ItemGroupRepo;
