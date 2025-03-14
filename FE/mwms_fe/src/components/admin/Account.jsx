@@ -69,51 +69,60 @@ const Admin = () => {
     fetchData();
   }, []);
 
-  // Validation cho form tạo người dùng
-  const validateForm = () => {
-    let tempErrors = {};
-    if (!formData.username) tempErrors.username = "Username is required";
-    else if (formData.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+const nameRegex = /^[a-zA-Z0-9_ ]+$/; // Cho phép khoảng trắng trong tên
 
-    if (!formData.password) tempErrors.password = "Password is required";
-    else if (formData.password.length < 6) tempErrors.password = "Password must be at least 6 characters";
+const validateForm = () => {
+  let tempErrors = {};
 
-    if (!formData.roleName) tempErrors.roleName = "Role is required";
+  if (!formData.username) tempErrors.username = "Username is required";
+  else if (formData.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+  else if (!usernameRegex.test(formData.username)) tempErrors.username = "Username cannot contain special characters";
 
-    if (!formData.name) tempErrors.name = "Full Name is required";
+  if (!formData.name) tempErrors.name = "Full Name is required";
+  else if (!nameRegex.test(formData.name)) tempErrors.name = "Full Name cannot contain special characters";
 
-    if (!formData.email) tempErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) tempErrors.email = "Email is invalid";
+  if (!formData.password) tempErrors.password = "Password is required";
+  else if (formData.password.length < 6) tempErrors.password = "Password must be at least 6 characters";
 
-    if (!formData.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(formData.phone)) tempErrors.phone = "Phone number must be 10 digits";
+  if (!formData.roleName) tempErrors.roleName = "Role is required";
 
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+  if (!formData.email) tempErrors.email = "Email is required";
+  else if (!/\S+@\S+\.\S+/.test(formData.email)) tempErrors.email = "Email is invalid";
 
-  // Validation cho form chỉnh sửa người dùng
-  const validateEditForm = () => {
-    let tempErrors = {};
-    if (!formEdit.username) tempErrors.username = "Username is required";
-    else if (formEdit.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+  if (!formData.phone) tempErrors.phone = "Phone number is required";
+  else if (!/^\d{10}$/.test(formData.phone)) tempErrors.phone = "Phone number must be 10 digits";
 
-    if (!formEdit.password) tempErrors.password = "Password is required";
-    else if (formEdit.password.length < 6) tempErrors.password = "Password must be at least 6 characters";
+  setErrors(tempErrors);
+  return Object.keys(tempErrors).length === 0;
+};
 
-    if (!formEdit.roleName) tempErrors.roleName = "Role is required";
+const validateEditForm = () => {
+  let tempErrors = {};
 
-    if (!formEdit.name) tempErrors.name = "Full Name is required";
+  if (!formEdit.username) tempErrors.username = "Username is required";
+  else if (formEdit.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+  else if (!usernameRegex.test(formEdit.username)) tempErrors.username = "Username cannot contain special characters";
 
-    if (!formEdit.email) tempErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formEdit.email)) tempErrors.email = "Email is invalid";
+  if (!formEdit.name) tempErrors.name = "Full Name is required";
+  else if (!nameRegex.test(formEdit.name)) tempErrors.name = "Full Name cannot contain special characters";
 
-    if (!formEdit.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(formEdit.phone)) tempErrors.phone = "Phone number must be 10 digits";
+  if (!formEdit.password) tempErrors.password = "Password is required";
+  else if (formEdit.password.length < 6) tempErrors.password = "Password must be at least 6 characters";
 
-    setEditErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+  if (!formEdit.roleName) tempErrors.roleName = "Role is required";
+
+  if (!formEdit.email) tempErrors.email = "Email is required";
+  else if (!/\S+@\S+\.\S+/.test(formEdit.email)) tempErrors.email = "Email is invalid";
+
+  if (!formEdit.phone) tempErrors.phone = "Phone number is required";
+  else if (!/^\d{10}$/.test(formEdit.phone)) tempErrors.phone = "Phone number must be 10 digits";
+
+  setEditErrors(tempErrors);
+  return Object.keys(tempErrors).length === 0;
+};
+
+
 
   const handleClose = () => {
     setShow(false);
@@ -484,6 +493,9 @@ const Admin = () => {
               <Form.Control
                 type="text"
                 name="roleName"
+                readOnly
+                style={{opacity: 0.5, cursor: "not-allowed"}}
+                
                 value={formEdit.roleName}
                 onChange={handleEditChange}
                 isInvalid={!!editErrors.roleName}
