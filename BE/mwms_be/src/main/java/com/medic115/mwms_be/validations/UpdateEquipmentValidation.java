@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.validations;
 
-import com.medic115.mwms_be.dto.requests.UpdateEquipmentRequest;
+import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
 import com.medic115.mwms_be.models.Equipment;
 import com.medic115.mwms_be.repositories.EquipmentRepo;
 

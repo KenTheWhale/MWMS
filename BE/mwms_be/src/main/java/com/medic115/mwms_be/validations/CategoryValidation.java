@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.validations;
 
-import com.medic115.mwms_be.dto.requests.AddCategoryRequest;
+import com.medic115.mwms_be.requests.AddCategoryRequest;
 import com.medic115.mwms_be.repositories.CategoryRepo;
 
 public class CategoryValidation {

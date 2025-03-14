@@ -1,11 +1,8 @@
 package com.medic115.mwms_be.controllers;
 
-import com.medic115.mwms_be.dto.requests.EditAccountRequest;
-import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
-import com.medic115.mwms_be.dto.requests.SignUpRequest;
-import com.medic115.mwms_be.dto.response.AccountResponse;
-import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
-import com.medic115.mwms_be.dto.response.UserResponse;
+import com.medic115.mwms_be.requests.EditAccountRequest;
+import com.medic115.mwms_be.requests.SignUpRequest;
+import com.medic115.mwms_be.response.AccountResponse;
 import com.medic115.mwms_be.services.AuthenticationService;
 import com.medic115.mwms_be.services.UserService;
 import lombok.RequiredArgsConstructor;
