@@ -106,6 +106,9 @@ export const getImportRequest = async () => {
 
 export const getExportRequest = async () => {
     const response = await axiosClient.get("/manager/request/export");
+    console.log(response)
+    console.log(response.data.data)
+    console.log(response.data.success)
     return response && response.status === 200 ? response.data : null;
 };
 
@@ -126,7 +129,12 @@ export const getSupplierList = async () => {
 };
 
 export const getSupplierEquipment = async (id) => {
-    const response = await axiosClient.post("/manager/supplier/equipment", {partnerId: id});
+    const response = await axiosClient.post("/manager/supplier/equipment", {eqId: id});
+    return response && response.status === 200 ? response.data : null;
+};
+
+export const getEquipmentSupplier = async (id) => {
+    const response = await axiosClient.post("/manager/equipment/supplier", {partnerId: id});
     return response && response.status === 200 ? response.data : null;
 };
 

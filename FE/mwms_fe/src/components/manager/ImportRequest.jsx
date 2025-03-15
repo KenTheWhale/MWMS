@@ -1,23 +1,45 @@
 import {useEffect, useState} from "react";
-import {Button, Card, Form, Modal, Table} from "react-bootstrap";
+import {Modal} from "react-bootstrap";
 import style from "../../styles/manager/ImportRequest.module.css";
 import {
     cancelRequest,
     createRequestApplication,
+    getEquipmentList, getEquipmentSupplier,
     getImportRequest,
     getSupplierEquipment,
-    getSupplierList,
     updateRequestApplication,
     viewDetail
 } from "../../services/ManagerService.jsx";
-import {FaSearch} from "react-icons/fa";
-import {GrUpdate, GrView} from "react-icons/gr";
-import {CgAddR} from "react-icons/cg";
-import {LuSave} from "react-icons/lu";
-import {MdOutlineCancel} from "react-icons/md";
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {enqueueSnackbar} from "notistack";
+import {
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TextField,
+    Typography
+} from "@mui/material";
+import {Add, Cancel, CheckCircle, EditNote, Info, RemoveCircleOutline, Save, Visibility} from "@mui/icons-material";
 
 function ImportRequest() {
     const [requestList, setRequestList] = useState([]);
@@ -31,11 +53,16 @@ function ImportRequest() {
     const [showAddCard, setShowAddCard] = useState(false);
     const [partners, setPartners] = useState([]);
     const [equipments, setEquipments] = useState([]);
-    const [rows, setRows] = useState([{name: "", description: "", quantity: "", unit: ""}]);
+    const [rows, setRows] = useState([{eqId: "", description: "", quantity: 0, unit: "", partner: ""}]);
     const [editRows, setEditRows] = useState({});
     const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
     const [showConfirmCancel, setShowConfirmCancel] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [selectedEqId, setSelectedEqId] = useState([]);
+
 
     useEffect(() => {
         async function fetchData() {
@@ -45,6 +72,15 @@ function ImportRequest() {
 
         fetchData();
     }, []);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     const handleViewDetail = async (code) => {
         try {
@@ -59,7 +95,6 @@ function ImportRequest() {
             console.error("Error in handleViewDetail:", error);
         }
     };
-
 
     const toggleGroup = (groupId) => {
         setExpandedGroups((previousState) => {
@@ -87,50 +122,73 @@ function ImportRequest() {
 
     const handleAddClick = () => {
 
-        async function GetSuppliers() {
-            const response = await getSupplierList();
-            console.log(response.data);
-            if (response && response.data) {
+        async function GetEquipment() {
+            const response = await getEquipmentList();
+
+            if (response) {
+                setEquipments(response);
+                // setFilterEquipments(response)
+            } else {
+                setEquipments([]);
+            }
+        }
+
+        GetEquipment();
+        setRows([{eqId: "", description: "", quantity: "", unit: "", partner: ""}]);
+        setShowAddCard(!showAddCard);
+    };
+
+    const handleAddRow = () => {
+        setRows(prevRows => {
+            const newRow = { eqId: "", name: "", description: "", quantity: "", unit: "", partner: "" };
+            return [...prevRows, newRow];
+        });
+    };
+    console.log("Rows", rows)
+
+    const handleInputRow = async (index, e, name) => {
+        const value = e.target.value;
+        setRows(prevRows => prevRows.map((item, i) => {
+            if (i === index) {
+                let updatedItem = { ...item, [name]: e.target.value };
+
+                if (name === "eqId") {
+                    const selectedEquipment = equipments.find(e => e.id === value);
+                    if (selectedEquipment) {
+                        updatedItem.description = selectedEquipment.description || "";
+                        updatedItem.unit = selectedEquipment.unit || "";
+                    }
+                }
+
+                return updatedItem;
+            }
+            return item;
+        }));
+
+        if(name === "eqId") {
+            const response = await getSupplierEquipment(e.target.value);
+            console.log("Partners", response)
+            if (response.success){
                 setPartners(response.data);
             } else {
                 setPartners([]);
             }
         }
+        if(name === "description"){
 
-        GetSuppliers();
-        setShowAddCard(!showAddCard);
-    };
-
-    const handleAddRow = () => {
-        setRows([
-            ...rows,
-            {name: "", description: "", quantity: "", unit: "", partner: ""}
-        ]);
-    };
-
-    const handleInputRow = (index, field, value) => {
-        const updatedRows = [...rows];
-        updatedRows[index][field] = value;
-
-        if (field === "name") {
-            const selectedEquipment = equipments.find(e => e.name === value);
-            if (selectedEquipment) {
-                updatedRows[index]["description"] = selectedEquipment.description || "";
-                updatedRows[index]["unit"] = selectedEquipment.unit || "";
-            }
-        }
-        if (field === "partner") {
-            async function getSupplierEq() {
-                const response = await getSupplierEquipment(value)
-                console.log(response.data);
-                setEquipments(response.data || []);
-            }
-
-            getSupplierEq();
         }
 
-        setRows(updatedRows);
     };
+
+
+    useEffect(() => {
+        if(rows.length > 0) {
+            const selectedId = rows
+                .filter(rows => rows.eqId !== "").map(row => row.eqId);
+            setSelectedEqId(selectedId)
+        }
+    },[rows])
+
 
     const handleRemoveRow = (index) => {
         const updatedRows = rows.filter((_, i) => i !== index);
@@ -140,8 +198,8 @@ function ImportRequest() {
     const handleSubmit = () => {
         async function createRequest() {
 
-            if (rows.length === 0 || rows.every(row => !row.partner || !row.name || !row.quantity)) {
-                enqueueSnackbar("Please fill in at least one item.", {variant: "error"});
+            if (rows.length === 0 || rows.every(row => !row.partner || !row.eqId || !row.quantity)) {
+                enqueueSnackbar("Please fill in at least one item", {variant: "error"});
                 return;
             }
 
@@ -153,17 +211,17 @@ function ImportRequest() {
             const response = await createRequestApplication(requestItems);
 
             if (response) {
-                enqueueSnackbar(response.message, {variant: "success"})
+                enqueueSnackbar(response.message, {variant: "success"});
                 const updatedRequests = await getImportRequest();
                 setRequestList(updatedRequests.data || []);
             } else {
-                enqueueSnackbar(response.message, {variant: "error"})
+                enqueueSnackbar(response.message, {variant: "error"});
             }
         }
 
         createRequest();
         setShowAddCard(false);
-
+        setRows([]);
     }
 
     const handleEditRow = async (groupId, index, item) => {
@@ -172,7 +230,7 @@ function ImportRequest() {
 
         const existingEquipmentIds = selectedGroup?.requestItems?.map(item => item.eqId) || [];
 
-        getSupplierEquipment(selectedGroup.partnerId).then(response => {
+        getEquipmentSupplier(selectedGroup.partnerId).then(response => {
             const filteredEquipments = response.data.filter(eq =>
                 !(existingEquipmentIds.includes(eq.id) && eq.id === item.eqId)
             );
@@ -185,7 +243,6 @@ function ImportRequest() {
         });
     };
 
-
     const cancelEditRow = (groupId, index) => {
         setEditRows(prev => {
             const updatedEditRows = {...prev};
@@ -193,7 +250,6 @@ function ImportRequest() {
             return updatedEditRows;
         });
     };
-
 
     const handleUpdateChange = (groupId, index, field, value) => {
         const rowKey = `${groupId}-${index}`;
@@ -208,7 +264,6 @@ function ImportRequest() {
             }
         }));
     };
-
 
     const handleUpdateSave = async (groupId, index, item) => {
         const rowKey = `${groupId}-${index}`;
@@ -246,9 +301,11 @@ function ImportRequest() {
                 return newRows;
             });
             handleViewDetail(selectedRequest.code)
-            enqueueSnackbar("Update successfully", {variant: "success"})
+            enqueueSnackbar(response.message, {variant: "success"});
+
         } else {
-            enqueueSnackbar("Update false please try again", {variant: "error"})
+            enqueueSnackbar(response.message, {variant: "success"});
+
         }
     };
 
@@ -260,13 +317,14 @@ function ImportRequest() {
     const handleCancel = async () => {
         const response = await cancelRequest(selectedGroupId);
 
-        console.log("Response:", response);
         if (response) {
-            enqueueSnackbar("Cancel successfully", {variant: "success"})
+            enqueueSnackbar(response.message, {variant: "success"});
+
             setShowConfirmCancel(false)
             handleViewDetail(selectedRequest.code)
         } else {
-            enqueueSnackbar("cancel false please try again", {variant: "error"})
+            enqueueSnackbar(response.message, {variant: "error"});
+
         }
     }
     return (
@@ -276,7 +334,7 @@ function ImportRequest() {
             </div>
 
             <div className="row">
-                <div className="col-12 d-flex justify-content-end align-items-center gap-2">
+                <div className="col-12 d-flex justify-content-end align-items-center mb-4 gap-2">
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker slotProps={{field: {clearable: true, onClear: clearDatePicker}}}
                                     format={"YYYY-MM-DD"} timezone={"system"}
@@ -284,291 +342,343 @@ function ImportRequest() {
                                     value={filterDate.value}
                                     label="Request Date"/>
                     </LocalizationProvider>
-                    <Button onClick={handleAddClick}><CgAddR/></Button>
+                    <Button size={"large"} startIcon={<Add/>} variant={"contained"} onClick={handleAddClick}>Add</Button>
                 </div>
             </div>
 
-            <div className="row">
-                <div className={style.importTable}>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Request Date</th>
-                            <th>Last Modified</th>
-                            <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {requestList
-                            .filter((item) => item.requestDate.includes(filterDate.format))
-                            .reverse()
-                            .map((item, index) => (
-                                <tr key={index}>
-                                    <td>{item.code}</td>
-                                    <td>{item.requestDate}</td>
-                                    <td>{item.lastModifiedDate}</td>
-                                    <td>
-                                        <Button onClick={() => handleViewDetail(item.code)}><GrView/></Button>
+            <Paper sx={{overflowY: "hidden"}}>
+                <TableContainer sx={{height: "23vh"}}>
+                    <Table size={"small"} stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Code</TableCell>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Request
+                                    Date</TableCell>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Last
+                                    Modified</TableCell>
+                                <TableCell align={"center"} sx={{
+                                    fontWeight: "bold",
+                                    border: 1,
+                                    borderColor: "inherit"
+                                }}>Action</TableCell>
+                            </TableRow>
 
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        </TableHead>
+
+                        <TableBody>
+                            {requestList
+                                .filter((item) => item.requestDate.includes(filterDate.format))
+                                .reverse()
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((item, index) => (
+                                    <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                                        <TableCell sx={{border: 1, borderColor: "inherit"}}>{item.code}</TableCell>
+                                        <TableCell
+                                            sx={{border: 1, borderColor: "inherit"}}>{item.requestDate}</TableCell>
+                                        <TableCell
+                                            sx={{border: 1, borderColor: "inherit"}}>{item.lastModifiedDate}</TableCell>
+                                        <TableCell sx={{border: 1, borderColor: "inherit"}} align={"center"}>
+                                            <IconButton color={`white`} onClick={() => handleViewDetail(item.code)}>
+                                                <Visibility/>
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <TablePagination
+                    rowsPerPageOptions={[5, 25, 100]}
+                    component="div"
+                    count={requestList.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
 
             {showAddCard && (
-                <Card className={`${style.addCard} mt-3 p-3`}>
-                    <Form onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSubmit();
-                    }}>
-                        <Table striped bordered hover>
-                            <thead>
-                            <tr>
-                                <th>Partner Name</th>
-                                <th>Equipment Name</th>
-                                <th>Description</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {rows.map((row, index) => (
-                                <tr key={index}>
-                                    <td>
-                                        <Form.Select className="m-2" value={row.partner}
-                                                     onChange={(e) => handleInputRow(index, "partner", e.target.value)}
-                                                     required>
-                                            <option value="">Select Partner</option>
-                                            {partners.map((partner) => (
-                                                <option key={partner.partnerId} value={partner.partnerId}>
-                                                    {partner.partnerName}
-                                                </option>
-                                            ))}
-                                        </Form.Select>
-                                    </td>
+                <Card className={style.addCard} sx={{mt: 3, p: 3}}>
+                    <CardContent>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit();
+                        }}>
+                            <TableContainer sx={{maxHeight: `28vh`}}>
+                                <Table stickyHeader>
+                                    <TableHead >
+                                        <TableRow>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Equipment Name</TableCell>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Partner Name</TableCell>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Description</TableCell>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Quantity</TableCell>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Unit</TableCell>
+                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Remove Line</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {rows.map((row, index) => (
+                                            <TableRow key={index}>
 
-                                    <td>
-                                        <Form.Select className="m-2" value={row.name || ""}
-                                                     onChange={(e) => handleInputRow(index, "name", e.target.value)}
-                                                     required
-                                                     disabled={!row.partner}>
-                                            <option value="">Select Equipment</option>
-                                            {equipments.filter(eq =>
-                                                eq.name === row.name ||
-                                                !rows.some(r => r.partner === row.partner && r.name === eq.name)
-                                            )
-                                                .map(equipment => (
-                                                    <option key={equipment.id} value={equipment.name}>
-                                                        {equipment.name}
-                                                    </option>
-                                                ))}
-                                        </Form.Select>
+                                                <TableCell>
+                                                    <FormControl fullWidth sx={{ m: 1 }}>
+                                                        <InputLabel>Equipment</InputLabel>
+                                                        <Select
+                                                            variant="filled"
+                                                            label="Equipment"
+                                                            value={row.eqId}
+                                                            onChange={(e) => handleInputRow(index, e, "eqId")}
+                                                            required
 
-                                    </td>
+                                                        >
+                                                            <MenuItem disabled value="">Select Equipment</MenuItem>
+                                                            {equipments
+                                                                .map(equipment => (
+                                                                <MenuItem disabled={selectedEqId.includes(equipment.id)} key={equipment.id} value={equipment.id}>
+                                                                    {equipment.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                </TableCell>
 
-                                    <td>
-                                        <Form.Control className="m-2" type="text" value={row.description} readOnly/>
-                                    </td>
 
-                                    <td>
-                                        <Form.Control className="m-2" type="number" min="1" value={row.quantity}
-                                                      onChange={(e) => handleInputRow(index, "quantity", e.target.value)}
-                                                      required/>
-                                    </td>
+                                                <TableCell>
+                                                    <FormControl variant={"outlined"} fullWidth sx={{m: 1}}>
+                                                        <InputLabel>Partner</InputLabel>
+                                                        <Select
+                                                            variant={"filled"}
+                                                            label={"Partner"}
+                                                            value={row.partner}
+                                                            onChange={(e) => handleInputRow(index, e, "partner")}
+                                                            required
+                                                        >
+                                                            <MenuItem disabled value="">Select Partner</MenuItem>
+                                                            {partners.map((partner) => (
+                                                                <MenuItem key={partner.id}
+                                                                          value={partner.id}>
+                                                                    {partner.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                </TableCell>
 
-                                    <td>
-                                        <Form.Control className="m-2" type="text" value={row.unit} readOnly/>
-                                    </td>
+                                                <TableCell>
+                                                    <TextField
+                                                        fullWidth
+                                                        sx={{m: 1}}
+                                                        value={row.description}
+                                                        variant="outlined"
+                                                        InputProps={{readOnly: true}}
+                                                    />
+                                                </TableCell>
 
-                                    <td>
-                                        <Button variant="danger" className="m-2" onClick={() => handleRemoveRow(index)}>
-                                            -
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </Table>
+                                                <TableCell>
+                                                    <TextField
+                                                        fullWidth
+                                                        sx={{m: 1}}
+                                                        type="number"
+                                                        value={row.quantity}
+                                                        onChange={(e) => handleInputRow(index, e, "quantity")}
+                                                        required
+                                                        slotProps={{htmlInput:{min:1, max:100}}}
+                                                    />
+                                                </TableCell>
 
-                        <Button variant="primary" onClick={handleAddRow}>+</Button>
+                                                <TableCell>
+                                                    <TextField
+                                                        fullWidth
+                                                        sx={{m: 1}}
+                                                        value={row.unit}
+                                                        variant="outlined"
+                                                        InputProps={{readOnly: true}}
+                                                    />
+                                                </TableCell>
 
-                        <Card.Footer>
-                            <Button type="submit">Submit</Button>
-                        </Card.Footer>
-                    </Form>
+                                                <TableCell align={"center"}>
+                                                    <IconButton
+                                                        color="error"
+                                                        onClick={() => handleRemoveRow(index)}
+                                                    >
+                                                        <RemoveCircleOutline/>
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+
+                            <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
+                                <Button  variant="outlined" color="primary" onClick={handleAddRow}>
+                                    <Add/>
+                                </Button>
+                            </Box>
+
+                            <CardActions disableSpacing sx={{justifyContent: "flex-end"}}>
+                                <Button type="submit" variant="contained" color="success" endIcon={<CheckCircle/>}>
+                                    Create
+                                </Button>
+                            </CardActions>
+                        </form>
+                    </CardContent>
                 </Card>
             )}
 
 
-            <Modal
-                size="xl"
-                show={show}
-                onHide={handleClose}
-                backdrop="static"
-                keyboard={false}
-                className={`${style.modalDetail}`}
-            >
-                <Modal.Header closeButton>
-                    <div className={`${style.titleModal}`}>
-                        <Modal.Title>Request Detail - {selectedRequest?.code}</Modal.Title>
-                    </div>
+            <Dialog open={show} onClose={handleClose} fullWidth maxWidth="xl">
+                <DialogTitle>
+                    <Typography variant="h4" color="text.primary">
+                        Request Detail - {selectedRequest?.code}
+                    </Typography>
+                </DialogTitle>
 
-                </Modal.Header>
-                <Modal.Body className={style.modalBody}>
+                <DialogContent>
                     {selectedRequest ? (
                         <div>
-                            <div className="mb-3">
-                                <p><strong>Request Date:</strong> {selectedRequest.requestDate}</p>
-                                <p><strong>Last Modified:</strong> {selectedRequest.lastModified}</p>
+                            <div style={{ marginBottom: 16 }}>
+                                <Typography variant="body1"><strong>Request Date:</strong> {selectedRequest.requestDate}</Typography>
+                                <Typography variant="body1"><strong>Last Modified:</strong> {selectedRequest.lastModified}</Typography>
                             </div>
 
-                            {selectedRequest.itemGroups && selectedRequest.itemGroups.length > 0 ? (
+                            {selectedRequest.itemGroups?.length > 0 ? (
                                 selectedRequest.itemGroups.map((group) => (
-                                    <Card key={group.groupId} className={`mb-3`}>
-                                        <Card.Body>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <Card.Title>
+                                    <Card key={group.groupId} sx={{ mb: 3 }}>
+                                        <CardContent>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <Typography variant="h6" color="text.primary">
                                                     Partner : {group.partner}
-                                                </Card.Title>
-                                                <Button
-                                                    variant="outline-primary"
-                                                    size="sm"
-                                                    onClick={() => toggleGroup(group.groupId)}
-                                                >
-                                                    <FaSearch/> View
+                                                </Typography>
+                                                <Button variant="outlined" endIcon={<Info/>} color={"info"} size="small" onClick={() => toggleGroup(group.groupId)}>
+                                                     View
                                                 </Button>
                                             </div>
 
-                                            <Card.Subtitle className="mb-2 text-muted">
-                                                Carrier Name : {group.carrierName}
+                                            <Typography variant="body2">
+                                                Carrier Name : {group.carrierName ? group.carrierName : "N/A"}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                Carrier Phone: {group.carrierPhone ? group.carrierPhone : "N/A"}
+                                            </Typography>
+                                            <Typography variant="body2">Delivery Date: {group.deliveryDate ? group.deliveryDate : "N/A"}</Typography>
+                                            <Typography variant="body2"><span style={{fontWeight: "bold"}}>Status: </span>{group.status}</Typography>
 
-                                            </Card.Subtitle>
-                                            <Card.Subtitle className="mb-2 text-muted">
-                                                Carrier Phone: {group.carrierPhone}
-                                            </Card.Subtitle>
-                                            <Card.Text>Delivery Date: {group.deliveryDate}</Card.Text>
-                                            <Card.Text>Status: {group.status}</Card.Text>
-
-                                            {expandedGroups[group.groupId] &&
+                                            {expandedGroups[group.groupId] && (
                                                 <>
-                                                    <Table striped bordered hover className="mt-3 table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Equipment Name</th>
-                                                            <th>Description</th>
-                                                            <th>Quantity</th>
-                                                            <th>Unit</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {group.requestItems.map((item, index) => {
-                                                            const rowKey = `${group.groupId}-${index}`;
-                                                            const isEditing = editRows[rowKey];
+                                                    <TableContainer>
+                                                        <Table sx={{ mt: 2 }}>
+                                                            <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell>Equipment Name</TableCell>
+                                                                    <TableCell>Description</TableCell>
+                                                                    <TableCell>Quantity</TableCell>
+                                                                    <TableCell>Unit</TableCell>
+                                                                    <TableCell>Action</TableCell>
+                                                                </TableRow>
+                                                            </TableHead>
+                                                            <TableBody>
+                                                                {group.requestItems.map((item, index) => {
+                                                                    const rowKey = `${group.groupId}-${index}`;
+                                                                    const isEditing = editRows[rowKey];
 
-                                                            return (
-                                                                <tr key={index}>
-                                                                    <td>
-                                                                        {isEditing ? (
-                                                                            <Form.Select
-                                                                                value={isEditing.selectedEquipmentId || item.eqId}
-                                                                                onChange={(e) =>
-                                                                                    handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))
-                                                                                }
-                                                                            >
-                                                                                <option value={item.eqId}
-                                                                                        hidden>{item.equipmentName}</option>
-                                                                                {equipmentForUpdate
-                                                                                    .filter(eq => eq.id !== item.eqId)
-                                                                                    .map(eq => (
-                                                                                        <option key={eq.id}
-                                                                                                value={eq.id}>{eq.name}</option>
-                                                                                    ))}
-                                                                            </Form.Select>
-                                                                        ) : (
-                                                                            item.equipmentName
-                                                                        )}
-                                                                    </td>
-
-                                                                    <td>{item.equipmentDescription}</td>
-                                                                    <td>
-                                                                        {isEditing ? (
-                                                                            <Form.Control
-                                                                                type="number"
-                                                                                value={isEditing.quantity || item.quantity}
-                                                                                min={1} max={100}
-                                                                                onChange={(e) => handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)}
-                                                                            />
-                                                                        ) : (
-                                                                            item.quantity
-                                                                        )}
-                                                                    </td>
-                                                                    <td>{item.unit}</td>
-                                                                    <td>
-                                                                        {
-                                                                            group.status === "pending"  && (
-                                                                                isEditing ? (
-                                                                                    <div>
-                                                                                        <Button
-                                                                                            onClick={() => handleUpdateSave(group.groupId, index, item)}>
-                                                                                            <LuSave/>
-                                                                                        </Button>
-
-                                                                                        <Button variant="danger"
-                                                                                                onClick={() => cancelEditRow(group.groupId, index)}>
-                                                                                            <MdOutlineCancel/>
-                                                                                        </Button>
-                                                                                    </div>
+                                                                    return (
+                                                                        <TableRow key={index}>
+                                                                            <TableCell>
+                                                                                {isEditing ? (
+                                                                                    <Select
+                                                                                        value={isEditing.selectedEquipmentId || item.eqId}
+                                                                                        onChange={(e) =>
+                                                                                            handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))
+                                                                                        }
+                                                                                        fullWidth
+                                                                                    >
+                                                                                        <MenuItem value={item.eqId} disabled>{item.equipmentName}</MenuItem>
+                                                                                        {equipmentForUpdate
+                                                                                            .filter(eq => eq.id !== item.eqId)
+                                                                                            .map(eq => (
+                                                                                                <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
+                                                                                            ))}
+                                                                                    </Select>
                                                                                 ) : (
-                                                                                    <Button variant="outline-primary"
-                                                                                            onClick={() => handleEditRow(group.groupId, index, item)}>
-                                                                                        <GrUpdate/>
-                                                                                    </Button>
-                                                                                )
-                                                                            )
-                                                                        }
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                        </tbody>
-                                                    </Table>
-                                                    {
-                                                        group.status === "pending" ? (
-                                                            <div className={style.footCard}>
-                                                                <Button
-                                                                    onClick={() => handleCancelClick(group.groupId)}
-                                                                    className={`btn btn-danger`}>Cancel</Button>
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                            </>
-                                                        )
-                                                    }
+                                                                                    item.equipmentName
+                                                                                )}
+                                                                            </TableCell>
 
+                                                                            <TableCell>{item.equipmentDescription}</TableCell>
+                                                                            <TableCell>
+                                                                                {isEditing ? (
+                                                                                    <TextField
+                                                                                        type="number"
+                                                                                        value={isEditing.quantity || item.quantity}
+                                                                                        onChange={(e) =>
+                                                                                            handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)
+                                                                                        }
+                                                                                        inputProps={{ min: 1, max: 100 }}
+                                                                                        fullWidth
+                                                                                    />
+                                                                                ) : (
+                                                                                    item.quantity
+                                                                                )}
+                                                                            </TableCell>
+                                                                            <TableCell>{item.unit}</TableCell>
+                                                                            <TableCell>
+                                                                                {group.status !== "canceled" && (
+                                                                                    isEditing ? (
+                                                                                        <div>
+                                                                                            <IconButton size="small" color="primary" onClick={() => handleUpdateSave(group.groupId, index, item)}>
+                                                                                                <Save/>
+                                                                                            </IconButton>
+                                                                                            <IconButton size="small" color="error" onClick={() => cancelEditRow(group.groupId, index)}>
+                                                                                                <Cancel/>
+                                                                                            </IconButton>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <IconButton size="small" variant="outlined" onClick={() => handleEditRow(group.groupId, index, item)}>
+                                                                                            <EditNote/>
+                                                                                        </IconButton>
+                                                                                    )
+                                                                                )}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </TableContainer>
+
+                                                    {group.status !== "canceled" && (
+                                                        <div style={{ textAlign: "right", marginTop: 16 }}>
+                                                            <Button variant="contained" color="warning" onClick={() => handleCancelClick(group.groupId)}>
+                                                                Cancel
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </>
-                                            }
-                                        </Card.Body>
+                                            )}
+                                        </CardContent>
                                     </Card>
                                 ))
-
                             ) : (
-                                <p className="text-center">No groups available</p>
+                                <Typography variant="body2" align="center">No groups available</Typography>
                             )}
                         </div>
                     ) : (
-                        <p className="text-center">No request detail</p>
+                        <Typography variant="body2" align="center">No request detail</Typography>
                     )}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button className={`btn btn-danger`} onClick={handleClose}>Close</Button>
-                </Modal.Footer>
-            </Modal>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button variant="contained" color="error" onClick={handleClose}>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Modal
                 className={`${style.confirmModal}`}

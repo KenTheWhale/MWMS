@@ -194,12 +194,6 @@ public class ManagerController {
 //        return managerService.approveImportRequest(request);
 //    }
 //
-//    @PutMapping("/request/cancel")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> cancelImportRequest(@RequestBody CancelImportRequest request) {
-//        return managerService.cancelImportRequest(request);
-//    }
-//
     @PostMapping("/request/import")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {

@@ -608,7 +608,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.ok().body(
                     ResponseObject
                             .builder()
-                            .message("200 OK")
+                            .message("Get All Import Request successfully")
                             .data(data)
                             .build()
             );
@@ -616,7 +616,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                     ResponseObject
                             .builder()
-                            .message("204 No Content")
+                            .message("List Import Request Empty")
                             .data("")
                             .build()
             );
@@ -640,7 +640,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.ok().body(
                     ResponseObject
                             .builder()
-                            .message("200 OK")
+                            .message("Get All Export Request successfully")
                             .data(data)
                             .build()
             );
@@ -648,7 +648,7 @@ public class ManagerServiceImpl implements ManagerService {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                     ResponseObject
                             .builder()
-                            .message("204 No Content")
+                            .message("List Export Request Empty")
                             .data("")
                             .build()
             );
@@ -755,7 +755,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject
                         .builder()
-                        .message("200 OK Created Application successfully")
+                        .message("Created Application successfully")
                         .build()
         );
     }
@@ -769,7 +769,7 @@ public class ManagerServiceImpl implements ManagerService {
         if (requestApplication == null) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                     ResponseObject.builder()
-                            .message("204 No Content")
+                            .message("Dont have request application with code " + request.getCode())
                             .data(null)
                             .build()
             );
@@ -814,7 +814,7 @@ public class ManagerServiceImpl implements ManagerService {
         requestDetail.put("itemGroups", itemGroupList);
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
-                        .message("200 OK")
+                        .message("get Request Detail successfully")
                         .data(requestDetail)
                         .build());
     }
