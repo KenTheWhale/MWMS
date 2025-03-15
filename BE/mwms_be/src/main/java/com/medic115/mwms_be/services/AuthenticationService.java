@@ -1,11 +1,9 @@
 package com.medic115.mwms_be.services;
 
-import com.medic115.mwms_be.dto.requests.EditAccountRequest;
-import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
-import com.medic115.mwms_be.dto.requests.SignInRequest;
-import com.medic115.mwms_be.dto.requests.SignUpRequest;
-import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.requests.EditAccountRequest;
+import com.medic115.mwms_be.requests.SignInRequest;
+import com.medic115.mwms_be.requests.SignUpRequest;
+import com.medic115.mwms_be.response.ResponseObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;

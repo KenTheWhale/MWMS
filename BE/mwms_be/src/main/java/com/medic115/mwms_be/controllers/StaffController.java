@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.controllers;
 
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.StaffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

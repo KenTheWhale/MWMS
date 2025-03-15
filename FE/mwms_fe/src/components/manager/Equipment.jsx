@@ -183,10 +183,9 @@
 //
 // export default Equipment;
 
-import React, {useEffect, useState} from "react";
-import {Box, Button, IconButton, TablePagination, Typography} from "@mui/material";
+import {useEffect, useState} from "react";
+import {Box, Button, IconButton, Typography} from "@mui/material";
 import {DataGrid} from "@mui/x-data-grid";
-import {FaEdit, FaTrash} from "react-icons/fa";
 import EquipmentPopup from "../popup/EquipmentPopup.jsx";
 import {getEquipmentList} from "../../services/ManagerService.jsx";
 import {SearchBarHasSelector} from "../ui/SearchBarHasSelector.jsx";

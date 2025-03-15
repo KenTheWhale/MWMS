@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.services;
 
-import com.medic115.mwms_be.dto.response.BatchItemResponse;
+import com.medic115.mwms_be.response.BatchItemResponse;
 
 import java.util.List;
 

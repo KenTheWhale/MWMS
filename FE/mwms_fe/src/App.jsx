@@ -189,7 +189,7 @@ const router = createBrowserRouter([
 
 function App() {
     return (
-        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "bottom"}} autoHideDuration={3000}>
+        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={1000}>
             <RouterProvider router={router}/>
         </SnackbarProvider>
     )

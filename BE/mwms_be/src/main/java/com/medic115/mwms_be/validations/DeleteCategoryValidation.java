@@ -1,6 +1,6 @@
 package com.medic115.mwms_be.validations;
 
-import com.medic115.mwms_be.dto.requests.DeleteCategoryRequest;
+import com.medic115.mwms_be.requests.DeleteCategoryRequest;
 import com.medic115.mwms_be.models.Category;
 import com.medic115.mwms_be.repositories.CategoryRepo;
 
