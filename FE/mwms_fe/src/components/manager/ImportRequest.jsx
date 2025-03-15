@@ -4,7 +4,7 @@ import style from "../../styles/manager/ImportRequest.module.css";
 import {
     cancelRequest,
     createRequestApplication,
-    getEquipmentList,
+    getEquipmentList, getEquipmentSupplier,
     getImportRequest,
     getSupplierEquipment,
     updateRequestApplication,
@@ -230,7 +230,7 @@ function ImportRequest() {
 
         const existingEquipmentIds = selectedGroup?.requestItems?.map(item => item.eqId) || [];
 
-        getSupplierEquipment(selectedGroup.partnerId).then(response => {
+        getEquipmentSupplier(selectedGroup.partnerId).then(response => {
             const filteredEquipments = response.data.filter(eq =>
                 !(existingEquipmentIds.includes(eq.id) && eq.id === item.eqId)
             );
