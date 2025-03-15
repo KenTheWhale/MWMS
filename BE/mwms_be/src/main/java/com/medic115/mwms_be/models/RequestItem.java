@@ -40,7 +40,5 @@ public class RequestItem {
     @JoinColumn(name = "partner_id")
     Partner partner;
 
-    int length;
 
-    int width;
 }

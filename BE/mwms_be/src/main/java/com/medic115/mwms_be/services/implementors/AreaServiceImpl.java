@@ -2,11 +2,14 @@ package com.medic115.mwms_be.services.implementors;
 
 
 import com.medic115.mwms_be.enums.Status;
+import com.medic115.mwms_be.models.Position;
 import com.medic115.mwms_be.requests.AreaRequest;
+import com.medic115.mwms_be.response.AreaForStaffResponse;
 import com.medic115.mwms_be.response.AreaResponse;
 import com.medic115.mwms_be.models.Area;
 import com.medic115.mwms_be.repositories.AreaRepo;
 import com.medic115.mwms_be.repositories.PositionRepo;
+import com.medic115.mwms_be.response.PositionResponse;
 import com.medic115.mwms_be.services.AreaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,6 +107,34 @@ public class AreaServiceImpl implements AreaService {
         areaRepo.save(area);
 
         return ResponseEntity.ok("Area has been restored !");
+    }
+
+    @Override
+    public ResponseEntity<?> getAllForStaff() {
+        List<Area> areas = areaRepo.findAll();
+
+        List<AreaForStaffResponse> responses = areas.stream().map(this::mapToDto2).toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    private AreaForStaffResponse mapToDto2(Area area) {
+        return AreaForStaffResponse.builder()
+                .areaId(area.getId())
+                .areaName(area.getName())
+                .areaStatus(area.getStatus())
+                .squareArea(area.getSquare())
+                .equipmentId(area.getEquipment().getId())
+                .positions(area.getPositions().stream().map(this::mapToDto3).toList())
+                .build();
+    }
+
+    private PositionResponse mapToDto3(Position position) {
+        return PositionResponse.builder()
+                .id(position.getId())
+                .name(position.getName())
+                .square(position.getSquare())
+                .build();
     }
 
 

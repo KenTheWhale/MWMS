@@ -1,5 +1,7 @@
 package com.medic115.mwms_be.services.implementors;
 
+import com.medic115.mwms_be.models.*;
+import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.requests.EditAccountRequest;
 import com.medic115.mwms_be.requests.SignInRequest;
 import com.medic115.mwms_be.requests.SignUpRequest;
@@ -7,14 +9,6 @@ import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.Type;
-import com.medic115.mwms_be.models.Account;
-import com.medic115.mwms_be.models.Partner;
-import com.medic115.mwms_be.models.Token;
-import com.medic115.mwms_be.models.User;
-import com.medic115.mwms_be.repositories.AccountRepo;
-import com.medic115.mwms_be.repositories.PartnerRepo;
-import com.medic115.mwms_be.repositories.TokenRepo;
-import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.services.AuthenticationService;
 import com.medic115.mwms_be.services.JWTService;
 import com.medic115.mwms_be.utils.CookieUtil;
@@ -23,6 +17,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +40,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PartnerRepo partnerRepo;
 
     private final UserRepo userRepo;
+
+    private final PartnerEquipmentRepo partnerEquipmentRepo;
+
+    private final EquipmentRepo equipmentRepo;
 
     @Value("${jwt.expiration.access-token}")
     private long accessExpiration;
@@ -268,7 +267,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<String> signUp(SignUpRequest request) {
+    public ResponseEntity<String> signUp(SignUpRequest request) throws BadRequestException {
         if (request == null) {
             throw new IllegalArgumentException("Sign up request cannot be null");
         }
@@ -282,6 +281,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             "Username is already existed !"
                     );
         }
+
+        check = userRepo.existsByEmail(request.email());
+
+        if(check){
+            return ResponseEntity.badRequest().body("Email is already existed !");
+        }
+
+
 
         if(!request.roleName().equals("staff") && !request.roleName().equals("supplier") && !request.roleName().equals("requester")) {
             throw new IllegalArgumentException("Invalid role");
@@ -308,6 +315,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .user(user)
                         .build();
                 partnerRepo.save(partner);
+
+                if(request.roleName().equals("supplier") && !request.eqIds().isEmpty()){
+                    for (Integer id : request.eqIds()){
+                        Equipment equipment = equipmentRepo.findById(id).orElseThrow(() -> new BadRequestException("Equipment is not found !"));
+                        PartnerEquipment partnerEquipment = PartnerEquipment.builder()
+                                .partner(partner)
+                                .equipment(equipment)
+                            .build();
+                        partnerEquipmentRepo.save(partnerEquipment);
+                    }
+                }
             }
         }
 

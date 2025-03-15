@@ -20,4 +20,6 @@ public interface AreaService {
     ResponseEntity<?> deleteArea(Integer id);
 
     ResponseEntity<?> restoreArea(Integer id);
+
+    ResponseEntity<?> getAllForStaff();
 }

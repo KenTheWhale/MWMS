@@ -85,7 +85,7 @@ public class ManagerController {
     //-------------------------------------------------Equipment-------------------------------------------------//
 
     @GetMapping("/equipment")
-    @PreAuthorize("hasRole('manager')")
+    @PreAuthorize("hasAnyRole('manager', 'admin')")
     public ResponseEntity<ResponseObject> viewEquipment() {
         return managerService.viewEquipment();
     }

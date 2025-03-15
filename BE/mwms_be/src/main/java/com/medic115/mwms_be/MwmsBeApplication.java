@@ -255,8 +255,6 @@ public class MwmsBeApplication{
                                 .equipment(equipment)
                                 .itemGroup(group)
                                 .partner(randomPartner)
-                                .length(random2.nextInt(41) + 10)
-                                .width(random2.nextInt(21) + 10)
                                 .build();
 
                         requestItems.add(requestItem);
@@ -277,6 +275,8 @@ public class MwmsBeApplication{
                             .equipmentQty(20)
                             .createdDate(LocalDate.now())
                             .position(position)
+                            .length(random2.nextInt(41) + 10)
+                            .width(random2.nextInt(21) + 10)
                             .requestItem(requestItem)
                             .build();
                     batches.add(batch);
