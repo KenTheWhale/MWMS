@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface AccountRepo extends JpaRepository<Account, Integer> {
     Optional<Account> findByUsername(String username);
 
+    @Query("SELECT COUNT(a) > 0 FROM Account a WHERE a.username = :username AND a.id <> :id")
+    boolean existsByUsernameAndNotId(String username, Integer id);
+
     Optional<Account> findByUsernameAndPassword(String username, String password);
 
     @Query("SELECT a FROM Account a WHERE a.role != 'ADMIN'")

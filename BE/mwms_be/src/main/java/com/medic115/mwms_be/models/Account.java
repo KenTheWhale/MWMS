@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "`account`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class    Account implements UserDetails {
+public class Account implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

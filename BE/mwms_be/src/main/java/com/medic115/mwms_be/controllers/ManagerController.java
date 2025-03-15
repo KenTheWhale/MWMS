@@ -85,7 +85,7 @@ public class ManagerController {
     //-------------------------------------------------Equipment-------------------------------------------------//
 
     @GetMapping("/equipment")
-    @PreAuthorize("hasRole('manager')")
+    @PreAuthorize("hasAnyRole('manager', 'admin')")
     public ResponseEntity<ResponseObject> viewEquipment() {
         return managerService.viewEquipment();
     }
@@ -242,23 +242,26 @@ public class ManagerController {
 
     @PostMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> createArea(@RequestBody AreaRequest areaRequest) {
-        areaService.createArea(areaRequest);
-        return ResponseEntity.ok("created successfully !");
+    public ResponseEntity<?> createArea(@RequestBody AreaRequest areaRequest) {
+        return areaService.createArea(areaRequest);
     }
 
     @PutMapping("/area/{id}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<AreaResponse> updateArea(@PathVariable Integer id, @RequestBody AreaRequest areaRequest) {
-        AreaResponse response = areaService.updateArea(id, areaRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> updateArea(@PathVariable Integer id, @RequestBody AreaRequest areaRequest) {
+        return areaService.updateArea(id, areaRequest);
     }
 
-    @PatchMapping("/area/{id}")
+    @PatchMapping("/area/delete/{id}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<AreaResponse> deleteArea(@PathVariable("id") Integer id, @RequestParam String status) {
-        AreaResponse response = areaService.deleteArea(id, status);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> deleteArea(@PathVariable("id") Integer id) {
+        return areaService.deleteArea(id);
+    }
+
+    @PatchMapping("/area/restore/{id}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<?> restoreArea(@PathVariable("id") Integer id) {
+        return areaService.restoreArea(id);
     }
 
     //----------------------------------------------------------Position------------------------------------------//
@@ -279,16 +282,14 @@ public class ManagerController {
 
     @PostMapping("/position")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> createPosition(@RequestBody PositionRequest positionRequest) {
-        positionService.createPosition(positionRequest);
-        return ResponseEntity.ok("Create position successful");
+    public ResponseEntity<?> createPosition(@RequestBody PositionRequest positionRequest) {
+        return positionService.createPosition(positionRequest);
     }
 
     @PutMapping("/position/{positionId}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
-        positionService.updatePosition(positionId, positionRequest);
-        return ResponseEntity.ok("Update position successful");
+    public ResponseEntity<?> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
+        return positionService.updatePosition(positionId, positionRequest);
     }
 
     @DeleteMapping("/position/{positionId}")

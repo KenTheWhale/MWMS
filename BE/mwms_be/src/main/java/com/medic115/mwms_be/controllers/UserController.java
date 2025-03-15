@@ -6,6 +6,7 @@ import com.medic115.mwms_be.response.AccountResponse;
 import com.medic115.mwms_be.services.AuthenticationService;
 import com.medic115.mwms_be.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class UserController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) {
+    public ResponseEntity<String> signUp(@RequestBody SignUpRequest request) throws BadRequestException {
         return authenticationService.signUp(request);
     }
 

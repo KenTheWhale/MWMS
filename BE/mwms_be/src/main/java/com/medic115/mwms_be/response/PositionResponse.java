@@ -7,6 +7,8 @@ import lombok.Builder;
 public record PositionResponse(
         Integer id,
         String name,
+        Integer square,
+        Integer areaId,
         List<BatchResponse> batches
 ) {
 }
