@@ -72,8 +72,8 @@ public class SupplierServiceImpl implements SupplierService {
                     map.put("id", item.getId());
                     map.put("quantity", item.getQuantity());
                     map.put("equipmentName", item.getEquipment().getName());
-                    map.put("length", item.getLength());
-                    map.put("width", item.getWidth());
+                    map.put("length", 0);
+                    map.put("width", 0);
                     return map;
                 })
                 .toList();

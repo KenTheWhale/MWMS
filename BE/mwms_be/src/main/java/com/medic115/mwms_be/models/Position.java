@@ -21,6 +21,7 @@ public class Position {
 
     String name;
 
+    int square;
 
     @OneToMany(mappedBy = "position")
     @ToString.Exclude

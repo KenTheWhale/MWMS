@@ -10,12 +10,11 @@ import {
 import { TbScanPosition } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 const AreaPage = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
-
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -24,7 +23,6 @@ const AreaPage = () => {
   const [form, setForm] = useState({
     id: "",
     name: "",
-    status: "",
     square: 0,
   });
   const [updateErrors, setUpdateErrors] = useState({});
@@ -32,13 +30,12 @@ const AreaPage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
-    status: "ACTIVE",
     square: 0,
   });
   const [createErrors, setCreateErrors] = useState({});
-
   const [showDelete, setShowDelete] = useState(false);
   const [selectedDeleteArea, setSelectedDeleteArea] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const fetchData = async () => {
     try {
@@ -112,47 +109,55 @@ const AreaPage = () => {
   const handleUpdate = async () => {
     if (validateUpdateForm()) {
       try {
-        await axiosClient.put(`/manager/area/${selectedArea}`, form);
+        const response = await axiosClient.put(`/manager/area/${selectedArea}`, form);
         setShowUpdate(false);
         fetchData();
-        toast.success("Area updated successfully!");
+        enqueueSnackbar(response.data, { variant: "success" });
       } catch (error) {
-        console.error("Error updating area:", error);
-        toast.error("Error updating area");
+        enqueueSnackbar(error.response.data, { variant: "error" });
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
+  
 
   const handleToggleDelete = async (area) => {
     try {
-      const newStatus = area.status === "DELETED" ? "ACTIVE" : "DELETED";
-      await axiosClient.put(`/manager/area/${area.id}`, { ...area, status: newStatus });
+      const response = await axiosClient.patch(`/manager/area/delete/${area.id}`);
       fetchData();
-      toast.info(`Area ${newStatus === "DELETED" ? "deleted" : "restored"} successfully!`);
+      enqueueSnackbar(response.data, {variant: "success"});
     } catch (error) {
-      console.error("Error toggling delete:", error);
-      toast.error("Error toggling delete");
+      enqueueSnackbar(error.response.data, {variant: "error"});
+    }
+  };
+
+  const handleToggleRestore = async (area) => {
+    try {
+      const response = await axiosClient.patch(`/manager/area/restore/${area.id}`);
+      fetchData();
+      enqueueSnackbar(response.data, {variant: "success"});
+    } catch (error) {
+      enqueueSnackbar(error.response.data, {variant: "error"});
     }
   };
 
   const handleCreate = async () => {
     if (validateCreateForm()) {
       try {
-        await axiosClient.post("/manager/area", createForm);
+        const response = await axiosClient.post("/manager/area", createForm);
         setShowCreate(false);
-        setCreateForm({ name: "", status: "ACTIVE", square: 0 });
+        setCreateForm({ name: "", square: 0 });
         fetchData();
-        toast.success("Area created successfully!");
+        enqueueSnackbar(response.data, { variant: "success" });
       } catch (error) {
-        console.error("Error creating area:", error);
-        toast.error("Error creating area");
+        enqueueSnackbar(error.response.data, { variant: "error" });
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
+  
 
   const openDeleteModal = (area) => {
     setSelectedDeleteArea(area);
@@ -170,8 +175,6 @@ const AreaPage = () => {
     fetchData();
   }, []);
 
-  // Modal styling
-  const modalStyle = { width: "350px", maxWidth: "350px", margin: "0 auto" };
   const modalBodyStyle = { padding: "15px" };
   const modalFooterStyle = {
     padding: "10px 15px",
@@ -202,24 +205,24 @@ const AreaPage = () => {
         <tbody>
           {currentItems.length > 0 ? (
             currentItems.map((area) => (
-              <tr key={area.id} style={{ opacity: area.status === "DELETED" ? 0.5 : 1 }}>
+              <tr key={area.id} style={{ opacity: area.status === "deleted" ? 0.5 : 1 }}>
                 <td>{area.id}</td>
                 <td>{area.name}</td>
                 <td>{area.status}</td>
-                <td>{area.square}²</td>
+                <td>{area.square}m²</td>
                 <td>
                   <MdModeEditOutline
-                    onClick={area.status !== "DELETED" ? () => handleOpen(area.id) : null}
+                    onClick={area.status !== "deleted" ? () => handleOpen(area.id) : null}
                     style={{
-                      cursor: area.status === "DELETED" ? "not-allowed" : "pointer",
+                      cursor: area.status === "deleted" ? "not-allowed" : "pointer",
                       fontSize: "30px",
                       marginRight: "10px",
-                      color: area.status === "DELETED" ? "#ccc" : "black",
+                      color: area.status === "deleted" ? "#ccc" : "black",
                     }}
                   />
-                  {area.status === "DELETED" ? (
+                  {area.status === "deleted" ? (
                     <MdRestore
-                      onClick={() => handleToggleDelete(area)}
+                      onClick={() => handleToggleRestore(area)}
                       style={{ cursor: "pointer", fontSize: "30px", color: "green" }}
                     />
                   ) : (
@@ -228,13 +231,13 @@ const AreaPage = () => {
                       style={{ cursor: "pointer", fontSize: "30px", color: "red" }}
                     />
                   )}
-                  <Link to={area.status === "DELETED" ? "" : `/manager/position/${area.id}`}>
+                  <Link to={area.status === "deleted" ? "" : `/manager/position/${area.id}`}>
                     <TbScanPosition
                       style={{
                         fontSize: "30px",
                         marginLeft: "10px",
                         color: "blue",
-                        cursor: area.status === "DELETED" ? "not-allowed" : "pointer",
+                        cursor: area.status === "deleted" ? "not-allowed" : "pointer",
                       }}
                     />
                   </Link>
@@ -289,19 +292,7 @@ const AreaPage = () => {
               <Form.Control.Feedback type="invalid">{updateErrors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Status</Form.Label>
-              <Form.Control
-                size="sm"
-                type="text"
-                placeholder="Status..."
-                name="status"
-                value={form.status}
-                onChange={(e) => handleChange(e, "update")}
-                disabled
-              />
-            </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square (m²)</Form.Label>
               <Form.Control
                 size="sm"
                 type="number"
@@ -347,22 +338,7 @@ const AreaPage = () => {
               <Form.Control.Feedback type="invalid">{createErrors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Status</Form.Label>
-              <div style={{ fontSize: "14px" }}>
-                <Form.Check
-                  type="switch"
-                  id="custom-switch"
-                  label={createForm.status}
-                  checked={createForm.status === "ACTIVE"}
-                  onChange={(e) => {
-                    const newStatus = e.target.checked ? "ACTIVE" : "INACTIVE";
-                    setCreateForm({ ...createForm, status: newStatus });
-                  }}
-                />
-              </div>
-            </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square (m²)</Form.Label>
               <Form.Control
                 size="sm"
                 type="number"
@@ -395,7 +371,7 @@ const AreaPage = () => {
         <Modal.Body style={modalBodyStyle}>
           <p style={{ fontSize: "14px", marginBottom: "10px" }}>
             Are you sure you want to{" "}
-            {selectedDeleteArea?.status === "DELETED" ? "restore" : "delete"} area "{selectedDeleteArea?.name}"?
+            {selectedDeleteArea?.status === "deleted" ? "restore" : "delete"} area "{selectedDeleteArea?.name}"?
           </p>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>

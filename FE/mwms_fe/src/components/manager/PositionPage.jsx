@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
-import { Accordion, Button, Card, Container, Form, Modal, Spinner, Table } from "react-bootstrap";
+import {
+  Accordion,
+  Button,
+  Card,
+  Container,
+  Form,
+  Modal,
+  Spinner,
+  Table,
+} from "react-bootstrap";
 import axiosClient from "../../config/api";
 import { useParams } from "react-router-dom";
-import { MdAddCircleOutline } from "react-icons/md";
+import { MdAddCircleOutline, MdModeEditOutline } from "react-icons/md";
 import { toast } from "react-toastify";
+import { useSnackbar } from "notistack";
 
 const PositionPage = () => {
   const { id } = useParams();
@@ -14,19 +24,24 @@ const PositionPage = () => {
   const [showPosition, setShowPosition] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [batch, setBatch] = useState([]);
   const [form, setForm] = useState({
     name: "",
+    square: 0,
     areaId: null,
   });
-  const [formErrors, setFormErrors] = useState({}); // Trạng thái lưu lỗi validation
+
+  const { enqueueSnackbar } = useSnackbar();
+  const [formErrors, setFormErrors] = useState({});
 
   const [activeBatchDetails, setActiveBatchDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Modal styling
-  const modalStyle = { width: "350px", maxWidth: "350px", margin: "0 auto" };
-  const modalHeaderStyle = { padding: "10px 15px", borderBottom: "1px solid #dee2e6" };
+  const modalHeaderStyle = {
+    padding: "10px 15px",
+    borderBottom: "1px solid #dee2e6",
+  };
   const modalBodyStyle = { padding: "15px" };
   const modalFooterStyle = {
     padding: "10px 15px",
@@ -58,12 +73,13 @@ const PositionPage = () => {
     return position.status === "occupied" ? "danger" : "light";
   };
 
-  // Validation cho form tạo position
   const validateForm = () => {
     let tempErrors = {};
     if (!form.name) tempErrors.name = "Position name is required";
     else if (form.name.length < 2) tempErrors.name = "Position name must be at least 2 characters";
     else if (form.name.length > 50) tempErrors.name = "Position name must not exceed 50 characters";
+
+    if (!form.square || form.square <= 0) tempErrors.square = "Square must be greater than 0";
 
     setFormErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -74,15 +90,15 @@ const PositionPage = () => {
       try {
         await axiosClient.post("/manager/position", form);
         setShowCreate(false);
-        setForm({ name: "", areaId: null });
+        setForm({ name: "", square: 0, areaId: null });
         setFormErrors({});
         fetchData();
-        toast.success("Position created successfully!");
+        enqueueSnackbar("Position created successfully!", { variant: "success" });
       } catch (error) {
-        toast.error("Error creating position", error);
+        enqueueSnackbar(error.response?.data || "Something went wrong!", { variant: "error" });
       }
     } else {
-      toast.error("Please fix the errors in the form");
+      enqueueSnackbar("Please fix the errors in the form", { variant: "error" });
     }
   };
 
@@ -92,39 +108,56 @@ const PositionPage = () => {
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, name: e.target.value });
-    setFormErrors({ ...formErrors, name: "" }); // Xóa lỗi khi người dùng nhập
+    const { name, value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: name === "square" ? parseInt(value) || 0 : value, 
+    }));
   };
 
-  if (loading) {
-    return (
-      <Container className="py-4 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Đang tải...</span>
-        </Spinner>
-      </Container>
-    );
-  }
+  const handleOpenEditForm = async () => {
+    setShowEdit(true);
+    try {
+      const response = await axiosClient.get(`/manager/position/individual/${chosePositionId}`);
+      setForm({
+        name: response.data.name,
+        square: response.data.square,
+        areaId: response.data.areaId,
+      });
+    } catch (error) {
+      console.log(error);
+      enqueueSnackbar("Failed to load position data", { variant: "error" });
+    }
+  };
 
-  if (error) {
-    return (
-      <Container className="py-4">
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      </Container>
-    );
-  }
+  const handleEditPosition = async () => {
+    if (validateForm()) {
+      try {
+        const response = await axiosClient.put(`/manager/position/${chosePositionId}`, form);
+        setShowEdit(false);
+        setShowPosition(false);
+        setForm({ name: "", square: 0, areaId: null });
+        setFormErrors({});
+        fetchData();
+        enqueueSnackbar(response.data, { variant: "success" });
+      } catch (error) {
+        enqueueSnackbar(error.response?.data || "Something went wrong!", { variant: "error" });
+      }
+    } else {
+      enqueueSnackbar("Please fix the errors in the form", { variant: "error" });
+    }
+  };
 
   const handlePositionClose = () => {
     setShowPosition(false);
-    setBatch([]); // Reset batch khi đóng modal
-    setActiveBatchDetails([]); // Reset chi tiết batch
+    setBatch([]);
+    setActiveBatchDetails([]);
   };
 
   const handleShowPosition = async (positionId) => {
     try {
       setShowPosition(true);
+      setChosePositionId(positionId);
       const response = await axiosClient.get(`/manager/position/individual/${positionId}`);
       setBatch(response.data.batches || []);
     } catch (error) {
@@ -187,7 +220,11 @@ const PositionPage = () => {
             ) : (
               <div
                 className="position-grid center"
-                style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: "10px",
+                }}
               >
                 {positions.map((position) => (
                   <div
@@ -217,6 +254,8 @@ const PositionPage = () => {
                       x
                     </span>
                     <span className="fs-6">{position.name}</span>
+                    <br />
+                    <span className="fs-6">{position.square}m²</span>
                   </div>
                 ))}
               </div>
@@ -225,9 +264,18 @@ const PositionPage = () => {
         </Card>
       </Container>
 
-      <Modal show={showPosition} onHide={handlePositionClose} centered style={{ color: "black" }}>
+      <Modal show={showPosition} onHide={handlePositionClose} centered style={{ color: "black",padding: "10px",
+    filter: showEdit ? "blur(5px)" : "none", // Làm mờ khi mở Edit
+    transition: "0.3s ease-in-out", // Hiệu ứng mượt
+}}>
         <Modal.Header closeButton style={modalHeaderStyle}>
-          <Modal.Title style={{ fontSize: "16px" }}>Detail Batch</Modal.Title>
+          <Modal.Title style={{ fontSize: "16px" }}>
+            Detail Batch -{" "}
+            <MdModeEditOutline
+              style={{ color: "blue", cursor: "pointer" }}
+              onClick={() => handleOpenEditForm()}
+            />
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ padding: "10px", maxHeight: "300px", overflowY: "auto" }}>
           <Accordion
@@ -254,7 +302,9 @@ const PositionPage = () => {
                         {loadingDetails ? (
                           <div className="text-center">
                             <Spinner animation="border" size="sm" />
-                            <span className="ms-2" style={{ fontSize: "12px" }}>Loading.....</span>
+                            <span className="ms-2" style={{ fontSize: "12px" }}>
+                              Loading.....
+                            </span>
                           </div>
                         ) : (
                           <Table striped bordered hover size="sm" style={{ fontSize: "12px" }}>
@@ -295,14 +345,24 @@ const PositionPage = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} size="sm" centered style={{ color: "black" }}>
+      <Modal
+        show={showCreate}
+        onHide={() => setShowCreate(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
         <Modal.Header closeButton style={modalHeaderStyle}>
-          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>Create New Position</Modal.Title>
+          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>
+            Create New Position
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body style={modalBodyStyle}>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Position Name</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Position Name
+              </Form.Label>
               <Form.Control
                 size="sm"
                 type="text"
@@ -313,6 +373,18 @@ const PositionPage = () => {
                 isInvalid={!!formErrors.name}
               />
               <Form.Control.Feedback type="invalid">{formErrors.name}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Square</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter square meters"
+                name="square"
+                value={form.square}
+                onChange={handleChange}
+                isInvalid={!!formErrors.square}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.square}</Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -326,12 +398,22 @@ const PositionPage = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showDelete} onHide={() => setShowDelete(false)} size="sm" centered style={{ color: "black" }}>
+      <Modal
+        show={showDelete}
+        onHide={() => setShowDelete(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
         <Modal.Header closeButton style={modalHeaderStyle}>
-          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>Confirm Delete</Modal.Title>
+          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>
+            Confirm Delete
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ ...modalBodyStyle, textAlign: "center" }}>
-          <p style={{ fontSize: "14px", marginBottom: "15px" }}>Do you really want to delete this?</p>
+          <p style={{ fontSize: "14px", marginBottom: "15px" }}>
+            Do you really want to delete this?
+          </p>
         </Modal.Body>
         <Modal.Footer style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
           <Button size="sm" variant="secondary" onClick={() => setShowDelete(false)}>
@@ -339,6 +421,59 @@ const PositionPage = () => {
           </Button>
           <Button size="sm" variant="danger" onClick={handleDeletePosition}>
             Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showEdit}
+        onHide={() => setShowEdit(false)}
+        className="text-black"
+        size="sm"
+        centered
+      >
+        <Modal.Header closeButton style={modalHeaderStyle}>
+          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>
+            Edit Position
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={modalBodyStyle}>
+          <Form>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Position Name
+              </Form.Label>
+              <Form.Control
+                size="sm"
+                type="text"
+                placeholder="Name..."
+                name="name"
+                value={form.name || ""}
+                onChange={handleChange}
+                isInvalid={!!formErrors.name}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.name}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Square</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter square meters"
+                name="square"
+                value={form.square}
+                onChange={handleChange}
+                isInvalid={!!formErrors.square}
+              />
+              <Form.Control.Feedback type="invalid">{formErrors.square}</Form.Control.Feedback>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer style={modalFooterStyle}>
+          <Button variant="secondary" size="sm" onClick={() => setShowEdit(false)}>
+            Close
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleEditPosition}>
+            Save
           </Button>
         </Modal.Footer>
       </Modal>
