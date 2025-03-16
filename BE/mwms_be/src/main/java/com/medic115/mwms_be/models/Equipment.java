@@ -31,7 +31,7 @@ public class Equipment {
 
     String status;
 
-    int threshHold;
+    int threshold;
 
     @OneToMany(mappedBy = "equipment")
     @ToString.Exclude

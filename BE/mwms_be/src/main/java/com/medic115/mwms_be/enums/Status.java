@@ -23,6 +23,8 @@ public enum Status {
     TASK_COMPLETED("completed"),
     EQUIPMENT_ACTIVE("active"),
     EQUIPMENT_DELETED("deleted"),
+    CATEGORY_ACTIVE("active"),
+    CATEGORY_DELETED("deleted"),
     GROUP_PENDING("pending"),
     GROUP_REJECTED("rejected"),
     GROUP_ACCEPTED("accepted"),

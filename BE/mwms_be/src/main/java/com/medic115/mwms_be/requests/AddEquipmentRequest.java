@@ -22,6 +22,4 @@ public class AddEquipmentRequest {
 
     String unit;
 
-    int threshHold;
-
 }

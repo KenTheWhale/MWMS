@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -175,6 +176,7 @@ public class MwmsBeApplication{
                             .code("CAT-" + categoryName.replace(" ", "-").toUpperCase())
                             .name(categoryName)
                             .description("Various types of " + categoryName)
+                            .status(Status.CATEGORY_ACTIVE.getValue())
                             .build();
                     categories.add(category);
                     categoryRepo.save(category);
@@ -344,6 +346,7 @@ public class MwmsBeApplication{
                 }
                 partnerEquipmentRepo.saveAll(partnerEquipments);
             };
+
         };
     }
 }
