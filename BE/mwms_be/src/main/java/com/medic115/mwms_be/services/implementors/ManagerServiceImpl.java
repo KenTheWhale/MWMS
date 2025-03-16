@@ -633,33 +633,40 @@ public class ManagerServiceImpl implements ManagerService {
     public ResponseEntity<ResponseObject> getAllRequestExport() {
         List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
                 .filter(requestApplication -> "export".equals(requestApplication.getType()))
-                .map(
-                        requestExport -> {
-                            Map<String, Object> request = new HashMap<>();
-                            request.put("code", requestExport.getCode());
-                            request.put("requestDate", requestExport.getRequestDate());
-                            request.put("lastModifiedDate", requestExport.getLastModifiedDate());
-                            return request;
-                        }
-                ).toList();
-        if (!data.isEmpty()) {
-            return ResponseEntity.ok().body(
-                    ResponseObject
-                            .builder()
-                            .message("Get All Export Request successfully")
-                            .data(data)
-                            .build()
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                    ResponseObject
-                            .builder()
-                            .message("List Export Request Empty")
-                            .data("")
-                            .build()
-            );
-        }
+                .map(requestExport -> {
+                    Map<String, Object> request = new HashMap<>();
+                    request.put("code", requestExport.getCode());
+                    request.put("requestDate", requestExport.getRequestDate());
+                    request.put("lastModifiedDate", requestExport.getLastModifiedDate());
+
+                    List<String> partnerNames = requestExport.getItemGroups().stream()
+                            .flatMap(group -> group.getRequestItems().stream())
+                            .map(item -> item.getPartner().getUser().getName())
+                            .distinct()
+                            .toList();
+
+                    request.put("partnerNames", partnerNames);
+                    return request;
+                })
+                .toList();
+
+        return data.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ResponseObject.builder()
+                        .message("List Export Request Empty")
+                        .success(false)
+                        .data("")
+                        .build()
+        )
+                : ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get All Export Request successfully")
+                        .success(true)
+                        .data(data)
+                        .build()
+        );
     }
+
 
     @Override
     public ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request) {

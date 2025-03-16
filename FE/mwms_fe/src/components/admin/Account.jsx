@@ -36,6 +36,7 @@ const Admin = () => {
     name: "",
     phone: "",
     email: "",
+    eqIds: [],
   });
 
   const [formEdit, setFormEdit] = useState({
@@ -140,6 +141,7 @@ const Admin = () => {
 
   const handleClose = () => {
     setShow(false);
+    setShowEquipment(false)
     setFormData({
       username: "",
       password: "",
@@ -147,6 +149,7 @@ const Admin = () => {
       name: "",
       phone: "",
       email: "",
+      eqIds: []
     });
     setErrors({});
   };
@@ -193,11 +196,11 @@ const Admin = () => {
     if (validateForm()) {
       try {
         const response = await axiosClient.post("/user/register", formData);
-        toast.success(response.data);
+        enqueueSnackbar(response.data, {variant: "success"});
         fetchData();
         handleClose();
       } catch (error) {
-        if (error.status === 500) toast.error(error.response.data);
+        enqueueSnackbar(error.response.data, {variant: "error"});
       }
     } else {
       toast.error("Please fix the errors in the form");
@@ -319,6 +322,19 @@ const Admin = () => {
       );
     }
     return items;
+  };
+
+  const handleCheckboxChange = (id) => {
+    setFormData((prevData) => {
+      const isChecked = prevData.eqIds.includes(id);
+
+      return {
+        ...prevData,
+        eqIds: isChecked
+          ? prevData.eqIds.filter((eqId) => eqId !== id) 
+          : [...prevData.eqIds, id], 
+      };
+    });
   };
 
   return (
@@ -759,12 +775,13 @@ const Admin = () => {
               <input
                 className="form-check-input"
                 type="checkbox"
-                value={item.value} 
-                id={`flexCheckDefault-${index}`} 
+                id={`equipment-${item.id}`}
+                checked={formData.eqIds.includes(item.id)}
+                onChange={() => handleCheckboxChange(item.id)}
               />
               <label
                 className="form-check-label"
-                htmlFor={`flexCheckDefault-${index}`}
+                htmlFor={`equipment-${item.id}`}
               >
                 {item.name}
               </label>
@@ -773,6 +790,9 @@ const Admin = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={handleOpen}>Previous</Button>
+          <Button variant="primary" onClick={handleCreateUser}>
+              Create
+            </Button>
         </Modal.Footer>
       </Modal>
     </>

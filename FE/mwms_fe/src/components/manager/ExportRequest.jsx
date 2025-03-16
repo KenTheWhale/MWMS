@@ -29,17 +29,17 @@ function ExportRequest() {
     });
 
 
-    useEffect(() => {
-        async function fetchData() {
+    async function fetchData() {
+        const response = await getExportRequest();
+        console.log("API Response:", response);
+        if (response.success) {
+            setRequestList(response.data);
+        } else {
+            setRequestList([]);
+        }
+    }
 
-                const response = await getExportRequest();
-                console.log("API Response:", response);
-                if (response.success) {
-                    setRequestList([...response.data]);
-                } else {
-                    setRequestList([]);
-                }
-            }
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -91,7 +91,11 @@ function ExportRequest() {
                                            sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Last
                                     Modified</TableCell>
                                 <TableCell align={"center"}
-                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}> Partner</TableCell>
+                                           sx={{
+                                               fontWeight: "bold",
+                                               border: 1,
+                                               borderColor: "inherit"
+                                           }}> Partner</TableCell>
 
                                 <TableCell align={"center"} sx={{
                                     fontWeight: "bold",
