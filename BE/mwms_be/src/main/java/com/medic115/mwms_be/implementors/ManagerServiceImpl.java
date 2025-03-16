@@ -234,6 +234,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Add equipment successfully")
+                        .success(true)
                         .build()
         );
     }
