@@ -126,7 +126,7 @@ function ImportRequest() {
             const response = await getEquipmentList();
 
             if (response) {
-                setEquipments(response);
+                setEquipments(response.data);
                 // setFilterEquipments(response)
             } else {
                 setEquipments([]);
@@ -144,7 +144,6 @@ function ImportRequest() {
             return [...prevRows, newRow];
         });
     };
-    console.log("Rows", rows)
 
     const handleInputRow = async (index, e, name) => {
         const value = e.target.value;
@@ -167,7 +166,6 @@ function ImportRequest() {
 
         if(name === "eqId") {
             const response = await getSupplierEquipment(e.target.value);
-            console.log("Partners", response)
             if (response.success){
                 setPartners(response.data);
             } else {
@@ -179,7 +177,6 @@ function ImportRequest() {
         }
 
     };
-
 
     useEffect(() => {
         if(rows.length > 0) {
@@ -204,10 +201,11 @@ function ImportRequest() {
             }
 
             const requestItems = rows.map(row => ({
-                equipmentId: equipments.find(e => e.name === row.name)?.id,
+                equipmentId: equipments.find(e => e.id === row.eqId)?.id,
                 partnerId: row.partner,
                 quantity: parseInt(row.quantity, 10),
             }))
+
             const response = await createRequestApplication(requestItems);
 
             if (response) {
@@ -424,7 +422,6 @@ function ImportRequest() {
                                     <TableBody>
                                         {rows.map((row, index) => (
                                             <TableRow key={index}>
-
                                                 <TableCell>
                                                     <FormControl fullWidth sx={{ m: 1 }}>
                                                         <InputLabel>Equipment</InputLabel>
@@ -434,7 +431,6 @@ function ImportRequest() {
                                                             value={row.eqId}
                                                             onChange={(e) => handleInputRow(index, e, "eqId")}
                                                             required
-
                                                         >
                                                             <MenuItem disabled value="">Select Equipment</MenuItem>
                                                             {equipments
