@@ -114,10 +114,10 @@ public class ManagerController {
         return managerService.updateEquipment(request);
     }
 
-    @DeleteMapping("/equipment")
+    @DeleteMapping("/equipment/{code}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> deleteEquipment(@RequestBody DeleteEquipmentRequest request) {
-        return managerService.deleteEquipment(request);
+    public ResponseEntity<ResponseObject> deleteEquipment(@PathVariable String code) {
+        return managerService.deleteEquipment(code);
     }
 
     //-------------------------------------------------Staff-------------------------------------------------//
