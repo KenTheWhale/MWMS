@@ -16,10 +16,9 @@ import {
     TableHead,
     TableRow,
     Paper,
-    Typography, TextareaAutosize, Divider, CardContent, IconButton
+    Typography, TextareaAutosize, Divider, CardContent
 } from "@mui/material";
-import {Save, ModeEdit, Cancel } from "@mui/icons-material";
-import {approveRequest, updateItemQuantity} from "../../services/ManagerService.jsx";
+import {approveRequest} from "../../services/ManagerService.jsx";
 
 
 const RequestPopup = ({request, show, handleClose, onFetch}) => {
@@ -30,8 +29,6 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
     const [errors, setErrors] = useState({});
     const [showConfirm, setShowConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-    const [editRow, setEditRow] = useState(null);
-    const [editQuantity, setEditQuantity] = useState({});
 
     const isDeliveryDisabled = request?.status !== "pending";
 
@@ -72,28 +69,9 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
         onFetch();
     };
 
-    const handleEditClick = (id, quantity) => {
-        setEditRow(id);
-        setEditQuantity({ ...editQuantity, [id]: quantity });
-    };
-
-    const handleCancelEdit = () => {
-        setEditRow(null);
-    };
-
-    const handleQuantityChange = (id, newQuantity) => {
-        setEditQuantity({ ...editQuantity, [id]: newQuantity });
-    };
-
-    const handleSaveEdit = async (id) => {
-        await updateItemQuantity(id, editQuantity[id]);
-        setEditRow(null);
-        onFetch();
-    };
-
     return (
         <Dialog open={show} onClose={handleClose} maxWidth="md" fullWidth>
-            <DialogTitle className={`d-flex justify-content-center mb-3 mt-3`}>
+            <DialogTitle component={'div'} className={`d-flex justify-content-center mb-3 mt-3`}>
                 <Typography variant={'h4'} color={'textPrimary'}>Approve Request</Typography>
             </DialogTitle>
             <DialogContent>
@@ -151,34 +129,7 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
                                             <TableRow key={item.id}>
                                                 <TableCell>{index + 1}</TableCell>
                                                 <TableCell>{item.equipmentName}</TableCell>
-                                                <TableCell>
-                                                    {editRow === item.id ? (
-                                                        <TextField
-                                                            value={editQuantity[item.id]}
-                                                            onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                                                            type="number"
-                                                            size="small"
-                                                        />
-                                                    ) : (
-                                                        item.quantity
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {editRow === item.id ? (
-                                                        <>
-                                                            <IconButton color="primary" onClick={() => handleSaveEdit(item.id)}>
-                                                                <Save />
-                                                            </IconButton>
-                                                            <IconButton color="secondary" onClick={handleCancelEdit}>
-                                                                <Cancel />
-                                                            </IconButton>
-                                                        </>
-                                                    ) : (
-                                                        <IconButton color="primary" onClick={() => handleEditClick(item.id, item.quantity)}>
-                                                            <ModeEdit />
-                                                        </IconButton>
-                                                    )}
-                                                </TableCell>
+                                                <TableCell>{item.quantity}</TableCell>
                                             </TableRow>
                                         ))
                                     ) : (

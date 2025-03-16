@@ -104,11 +104,13 @@ export default function Request() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <RequestPopup
+            {showModal &&
+                <RequestPopup
                 request={selectedRequest}
                 show={showModal}
                 handleClose={handleCloseModal}
-                onFetch={FetchData}/>
+                onFetch={FetchData}/>}
+
         </div>
     );
 }

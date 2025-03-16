@@ -28,13 +28,14 @@ export const getEquipmentList = async () => {
     }
 }
 
-export const addEquipment = async (code, name, description, categoryId, unit) => {
+export const addEquipment = async (code, name, description, categoryId, unit, threshold) => {
     const response = await axiosClient.post("/manager/equipment", {
         code: code,
         name: name,
         description: description,
         categoryId: categoryId,
-        unit: unit
+        unit: unit,
+        threshold: threshold
     })
     if (response.status === 200) {
         const body = response.data;

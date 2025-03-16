@@ -256,7 +256,7 @@ import style from '../../styles/manager/Equipment.module.css';
 
 const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onFetch, onDelete }) => {
     const [editedEquipment, setEditedEquipment] = useState({
-        id: '', name: '', code: '', category: '', unit: '', description: ''
+        id: '', name: '', code: '', category: '', unit: '', description: '', threshHold: ''
     });
     const [errors, setErrors] = useState({});
     const [categories, setCategories] = useState([]);
@@ -265,7 +265,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onFe
         if (actionType === 'edit' && equipment) {
             setEditedEquipment({ ...equipment });
         } else if (actionType === 'add') {
-            setEditedEquipment({ id: '', name: '', code: '', category: '', unit: '', description: '' });
+            setEditedEquipment({ id: '', name: '', code: '', category: '', unit: '', description: '' , threshold: ''});
         }
     }, [equipment, actionType]);
 
@@ -284,6 +284,7 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onFe
         if (!editedEquipment.unit.trim()) newErrors.unit = 'Unit is required';
         if (!editedEquipment.code.trim()) newErrors.code = 'Code is required';
         if (!editedEquipment.description.trim()) newErrors.description = 'Description is required';
+        if (!editedEquipment.threshHold.trim()) newErrors.threshHold = 'ThreshHold is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -302,7 +303,8 @@ const EquipmentPopup = ({ equipment, show, handleClose, actionType, onSave, onFe
                 editedEquipment.name,
                 editedEquipment.description,
                 editedEquipment.category,
-                editedEquipment.unit
+                editedEquipment.unit,
+                editedEquipment.theshHold
             );
         }
         onSave(editedEquipment);
