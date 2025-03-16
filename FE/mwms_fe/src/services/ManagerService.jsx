@@ -8,24 +8,14 @@ export const getUnassignedGroups = async () => {
 
 //-----------------------------------------CATEGORY-----------------------------------------//
 export const getCategoryList = async () => {
-    try{
         const response = await axiosClient.get("/manager/category")
-        if (response.status === 200) {
-            const body = response.data;
-            return body.data;
-        }
-    } catch (error) {
-        console.log(error);
-    }
+        return response.data;
 }
 
 //-----------------------------------------EQUIPMENT-----------------------------------------//
 export const getEquipmentList = async () => {
     const response = await axiosClient.get("/manager/equipment")
-    if (response.status === 200) {
-        const body = response.data;
-        return body.data;
-    }
+        return response.data;
 }
 
 export const addEquipment = async (code, name, description, categoryId, unit) => {
@@ -36,38 +26,29 @@ export const addEquipment = async (code, name, description, categoryId, unit) =>
         categoryId: categoryId,
         unit: unit
     })
-    if (response.status === 200) {
-        const body = response.data;
-        return body.data;
-    }
+        return response.data;
 }
 
 export const updateEquipment = async (code, name, description, category, unit) => {
-    const response = await axiosClient.put("/manager/equipment", {
+    const response = await axiosClient.put("/equipment", {
         code: code,
         name: name,
         description: description,
         category: category,
         unit: unit
     })
-    if (response.status === 200) {
-        const body = response.data;
-        return body.data;
-    }
+    return response.data;
 }
 
-export const deleteEquipment = async () => {
-    const response = await axiosClient.delete("/manager/equipment")
-    if (response.status === 200) {
-        const body = response.data;
-        return body.data;
-    }
+export const deleteEquipment = async (code) => {
+    const response = await axiosClient.delete("/equipment", {data : {code: code}})
+        return response.data;
 }
 
 //-----------------------------------------STAFF-----------------------------------------//
 export const getStaffs = async () => {
     const response = await axiosClient.get("/manager/staff/list");
-    return response ? response.data : null;
+    return response.data;
 }
 
 //-----------------------------------------TASK-----------------------------------------//
@@ -163,11 +144,6 @@ export const updateRequestApplication = async (requestItemId,equipmentId,quantit
         quantity
     }
     const response = await axiosClient.put("/manager/request/import", body);
-    return response ? response.data : null;
-}
-
-export const updateItemQuantity = async (id, quantity) => {
-    const response = await axiosClient.put("/supplier/request/item", {id: id, quantity: quantity});
     return response ? response.data : null;
 }
 

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -175,6 +176,7 @@ public class MwmsBeApplication{
                             .code("CAT-" + categoryName.replace(" ", "-").toUpperCase())
                             .name(categoryName)
                             .description("Various types of " + categoryName)
+                            .status(Status.CATEGORY_ACTIVE.getValue())
                             .build();
                     categories.add(category);
                     categoryRepo.save(category);
@@ -221,9 +223,9 @@ public class MwmsBeApplication{
                         ItemGroup itemGroup = ItemGroup.builder()
                                 .requestApplication(request)
                                 .status(Status.REQUEST_PENDING.getValue())
-//                                .deliveryDate(LocalDate.now().plusDays(random.nextInt(5) + 3))
-//                                .carrierName("Carrier " + i + " for " + request.getCode())
-//                                .carrierPhone("0912-345-" + (600 + random.nextInt(400)))
+                                .deliveryDate(null)
+                                .carrierName("")
+                                .carrierPhone("")
                                 .build();
 
                         itemGroups.add(itemGroup);
@@ -344,6 +346,7 @@ public class MwmsBeApplication{
                 }
                 partnerEquipmentRepo.saveAll(partnerEquipments);
             };
+
         };
     }
 }
