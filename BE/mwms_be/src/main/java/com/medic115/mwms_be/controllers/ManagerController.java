@@ -1,10 +1,28 @@
 package com.medic115.mwms_be.controllers;
 
-import com.medic115.mwms_be.dto.requests.*;
-import com.medic115.mwms_be.dto.response.AreaResponse;
-import com.medic115.mwms_be.dto.response.BatchItemResponse;
-import com.medic115.mwms_be.dto.response.PositionResponse;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+
+import com.medic115.mwms_be.requests.AddCategoryRequest;
+import com.medic115.mwms_be.requests.AddEquipmentRequest;
+import com.medic115.mwms_be.requests.AddForUpdateRequest;
+import com.medic115.mwms_be.requests.AreaRequest;
+import com.medic115.mwms_be.requests.CancelImportRequest;
+import com.medic115.mwms_be.requests.CreateImportRequest;
+import com.medic115.mwms_be.requests.CreateTaskRequest;
+import com.medic115.mwms_be.requests.DeleteCategoryRequest;
+import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
+import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
+import com.medic115.mwms_be.requests.GetRequestDetailRequest;
+import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
+import com.medic115.mwms_be.requests.PositionRequest;
+import com.medic115.mwms_be.requests.UpdateCategoryRequest;
+import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
+import com.medic115.mwms_be.requests.UpdateImportRequest;
+import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
+import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
+import com.medic115.mwms_be.response.AreaResponse;
+import com.medic115.mwms_be.response.BatchItemResponse;
+import com.medic115.mwms_be.response.PositionResponse;
+import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.BatchService;
 import com.medic115.mwms_be.services.ManagerService;
@@ -12,7 +30,16 @@ import com.medic115.mwms_be.services.PositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -58,7 +85,7 @@ public class ManagerController {
     //-------------------------------------------------Equipment-------------------------------------------------//
 
     @GetMapping("/equipment")
-    @PreAuthorize("hasRole('manager')")
+    @PreAuthorize("hasAnyRole('manager', 'admin')")
     public ResponseEntity<ResponseObject> viewEquipment() {
         return managerService.viewEquipment();
     }
@@ -167,12 +194,6 @@ public class ManagerController {
 //        return managerService.approveImportRequest(request);
 //    }
 //
-//    @PutMapping("/request/cancel")
-//    @PreAuthorize("hasRole('manager')")
-//    public ResponseEntity<ResponseObject> cancelImportRequest(@RequestBody CancelImportRequest request) {
-//        return managerService.cancelImportRequest(request);
-//    }
-//
     @PostMapping("/request/import")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<ResponseObject> createImportRequest(@RequestBody CreateImportRequest request) {
@@ -215,23 +236,26 @@ public class ManagerController {
 
     @PostMapping("/area")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> createArea(@RequestBody AreaRequest areaRequest) {
-        areaService.createArea(areaRequest);
-        return ResponseEntity.ok("created successfully !");
+    public ResponseEntity<?> createArea(@RequestBody AreaRequest areaRequest) {
+        return areaService.createArea(areaRequest);
     }
 
     @PutMapping("/area/{id}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<AreaResponse> updateArea(@PathVariable Integer id, @RequestBody AreaRequest areaRequest) {
-        AreaResponse response = areaService.updateArea(id, areaRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> updateArea(@PathVariable Integer id, @RequestBody AreaRequest areaRequest) {
+        return areaService.updateArea(id, areaRequest);
     }
 
-    @PatchMapping("/area/{id}")
+    @PatchMapping("/area/delete/{id}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<AreaResponse> deleteArea(@PathVariable("id") Integer id, @RequestParam String status) {
-        AreaResponse response = areaService.deleteArea(id, status);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> deleteArea(@PathVariable("id") Integer id) {
+        return areaService.deleteArea(id);
+    }
+
+    @PatchMapping("/area/restore/{id}")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<?> restoreArea(@PathVariable("id") Integer id) {
+        return areaService.restoreArea(id);
     }
 
     //----------------------------------------------------------Position------------------------------------------//
@@ -252,16 +276,14 @@ public class ManagerController {
 
     @PostMapping("/position")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> createPosition(@RequestBody PositionRequest positionRequest) {
-        positionService.createPosition(positionRequest);
-        return ResponseEntity.ok("Create position successful");
+    public ResponseEntity<?> createPosition(@RequestBody PositionRequest positionRequest) {
+        return positionService.createPosition(positionRequest);
     }
 
     @PutMapping("/position/{positionId}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<String> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
-        positionService.updatePosition(positionId, positionRequest);
-        return ResponseEntity.ok("Update position successful");
+    public ResponseEntity<?> updatePosition(@PathVariable("positionId") Integer positionId, @RequestBody PositionRequest positionRequest) {
+        return positionService.updatePosition(positionId, positionRequest);
     }
 
     @DeleteMapping("/position/{positionId}")

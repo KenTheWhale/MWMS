@@ -46,4 +46,9 @@ public class Equipment {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<PartnerEquipment> partnerEquipments;
+
+    @OneToMany(mappedBy = "equipment")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Area> areas;
 }

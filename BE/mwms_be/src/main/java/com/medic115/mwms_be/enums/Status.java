@@ -17,6 +17,7 @@ public enum Status {
     REQUEST_CANCELLED("canceled"),
     AREA_AVAILABLE("available"),
     AREA_FULL("full"),
+    AREA_DELETED("deleted"),
     TASK_PROCESSING("processing"),
     TASK_ASSIGNED("assigned"),
     TASK_COMPLETED("completed"),

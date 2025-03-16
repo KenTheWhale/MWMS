@@ -4,111 +4,144 @@ import style from "../../styles/manager/ExportRequest.module.css";
 import {BsFilter} from "react-icons/bs";
 import {filterRequest, getExportRequest} from "../../services/ManagerService.jsx";
 import {IoReload} from "react-icons/io5";
+import {
+    Table,
+    Paper,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    IconButton
+} from "@mui/material";
+import {Add, Visibility} from "@mui/icons-material";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
 function ExportRequest() {
     const [requestList, setRequestList] = useState([]);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [filterDate, setFilterDate] = useState("");
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [filterDate, setFilterDate] = useState({
+        value: null,
+        format: ""
+    });
 
 
     useEffect(() => {
         async function fetchData() {
-            const response = await getExportRequest();
 
-            if (response.error) {
-                setErrorMessage(response.error);
-                setRequestList([]);
-            } else {
-                setErrorMessage("");
-                setRequestList(response);
+                const response = await getExportRequest();
+                console.log("API Response:", response);
+                if (response.success) {
+                    setRequestList([...response.data]);
+                } else {
+                    setRequestList([]);
+                }
             }
-        }
+        fetchData();
+    }, []);
 
-        fetchData()
-    }, [refreshTrigger]);
-
-    const handleDateChange = (event) => {
-        setFilterDate(event.target.value);
+    console.log(requestList);
+    const handleChangePage = (event, newPage) => setPage(newPage);
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(+event.target.value);
+        setPage(0);
     };
 
-    const handleFilter = async () => {
-        if (!filterDate) {
-            setErrorMessage("Please select a date.");
-            return;
-        }
 
-        const response = await filterRequest(filterDate);
-        if (response.error) {
-            setErrorMessage(response.error);
-            setRequestList([]);
-        } else {
-            setErrorMessage("");
-            setRequestList(response);
-        }
+    const handleDateChange = (value) => {
+        setFilterDate({
+            ...filterDate, value: value, format: value.format("YYYY-MM-DD")
+        });
     };
 
-    const refreshData = () => setRefreshTrigger(prev => prev + 1);
+    const clearDatePicker = () => {
+        setFilterDate({
+            ...filterDate, value: null, format: ""
+        });
+    }
+
     return (
-        <div className={`container-fluid`}>
-            <div className={`row`}>
-                <h1 className={`d-flex justify-content-center text-light`}>Export Request</h1>
-            </div>
-            <div className={`row`}>
-                <div className="col-12 d-flex justify-content-end align-items-center gap-2">
-                    <label className={`text-light`}>RequestDate : </label>
-                    <input type="date"
-                           className="form-control w-auto"
-                           onChange={handleDateChange}
-                           value={filterDate}/>
-                    <button className="btn btn-outline-light"
-                            onClick={handleFilter}>
-                        <BsFilter size={20}/>
-                    </button>
-                    <button className="btn btn-info"
-                            onClick={() => window.location.reload()}>
-                        <IoReload size={20}/>
-                    </button>
+
+        <div className="container-fluid">
+            <div className="row">
+                <div className="col-12 d-flex justify-content-end align-items-center mb-4 gap-2">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker slotProps={{field: {clearable: true, onClear: clearDatePicker}}}
+                                    format={"YYYY-MM-DD"} timezone={"system"}
+                                    onChange={handleDateChange}
+                                    value={filterDate.value}
+                                    label="Request Date"/>
+                    </LocalizationProvider>
                 </div>
             </div>
-            <div className={`row`}>
-                <div className={`${style.exportTable}`}>
-                    {
-                        errorMessage ? (
-                            <div className="alert alert-danger text-center">{errorMessage}</div>
-                        ) : (
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Request Date</th>
-                                    <th>Delivery Date</th>
-                                    <th>Last Modified</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {
-                                    requestList.map((request, index) => (
-                                        <tr key={index}>
-                                            <td>{request.code}</td>
-                                            <td>{request.requestDate}</td>
-                                            <td>{request.deliveryDate}</td>
-                                            <td>{request.lastModifiedDate}</td>
-                                            <td>{request.status}</td>
-                                            <td><Button>View Detail</Button></td>
-                                        </tr>
+            <Paper sx={{overflowY: "hidden"}}>
+                <TableContainer sx={{height: "23vh"}}>
+                    <Table size="small" stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Code</TableCell>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Request
+                                    Date</TableCell>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Last
+                                    Modified</TableCell>
+                                <TableCell align={"center"}
+                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}> Partner</TableCell>
+
+                                <TableCell align={"center"} sx={{
+                                    fontWeight: "bold",
+                                    border: 1,
+                                    borderColor: "inherit"
+                                }}>Action</TableCell>
+                            </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                            {requestList.length > 0 ? (
+                                requestList
+                                    .filter((item) => item.requestDate.includes(filterDate.format))
+                                    .reverse()
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((item, index) => (
+                                        <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                                            <TableCell>{item.code}</TableCell>
+                                            <TableCell>{item.requestDate}</TableCell>
+                                            <TableCell>{item.lastModifiedDate}</TableCell>
+                                            <TableCell>{item.partnerNames ? item.partnerNames.join(", ") : "N/A"}</TableCell>
+                                            <TableCell align="center">
+                                                <IconButton color="primary" onClick={() => handleViewDetail(item.code)}>
+                                                    <Visibility/>
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
                                     ))
-                                }
-                                </tbody>
-                            </table>
-                        )
-                    }
-                </div>
-            </div>
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center">No Data Available</TableCell>
+                                </TableRow>
+                            )}
+
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <TablePagination
+                    rowsPerPageOptions={[5, 25, 100]}
+                    component="div"
+                    count={requestList.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
         </div>
-    )
+    );
 }
 
 export default ExportRequest;

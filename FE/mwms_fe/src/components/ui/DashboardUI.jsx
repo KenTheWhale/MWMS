@@ -7,7 +7,6 @@ import PropTypes from "prop-types";
 import {ReactRouterAppProvider} from "@toolpad/core/react-router";
 import {enqueueSnackbar} from "notistack";
 import Cookies from 'js-cookie'
-import {Logout} from "@mui/icons-material";
 
 DashboardUI.proTypes = {
     navigate: PropTypes.array.isRequired,
@@ -88,6 +87,7 @@ export function DashboardUI({navigate, homeUrl}) {
             authentication={auth}
         >
             <DashboardLayout
+                defaultSidebarCollapsed
                 slots={{
                     sidebarFooter: SidebarFooter,
                     toolbarAccount: ToolbarAccount

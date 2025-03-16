@@ -42,4 +42,8 @@ public class Batch {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<BatchItem> batchItems;
+
+    int length;
+
+    int width;
 }

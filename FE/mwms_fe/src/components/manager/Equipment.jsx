@@ -183,7 +183,7 @@
 //
 // export default Equipment;
 
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Box, Button, IconButton, Typography} from "@mui/material";
 import {DataGrid} from "@mui/x-data-grid";
 import EquipmentPopup from "../popup/EquipmentPopup.jsx";

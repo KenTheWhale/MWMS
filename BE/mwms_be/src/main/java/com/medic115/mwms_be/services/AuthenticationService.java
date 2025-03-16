@@ -1,13 +1,12 @@
 package com.medic115.mwms_be.services;
 
-import com.medic115.mwms_be.dto.requests.EditAccountRequest;
-import com.medic115.mwms_be.dto.requests.RefreshTokenRequest;
-import com.medic115.mwms_be.dto.requests.SignInRequest;
-import com.medic115.mwms_be.dto.requests.SignUpRequest;
-import com.medic115.mwms_be.dto.response.JwtAuthenticationResponse;
-import com.medic115.mwms_be.dto.response.ResponseObject;
+import com.medic115.mwms_be.requests.EditAccountRequest;
+import com.medic115.mwms_be.requests.SignInRequest;
+import com.medic115.mwms_be.requests.SignUpRequest;
+import com.medic115.mwms_be.response.ResponseObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthenticationService {
@@ -18,7 +17,7 @@ public interface AuthenticationService {
 
     ResponseEntity<ResponseObject> refresh(HttpServletRequest request, HttpServletResponse response);
 
-    ResponseEntity<String> signUp(SignUpRequest request);
+    ResponseEntity<String> signUp(SignUpRequest request) throws BadRequestException;
 
     ResponseEntity<String> deleteUser(Integer id);
 
