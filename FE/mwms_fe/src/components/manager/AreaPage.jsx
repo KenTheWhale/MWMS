@@ -24,29 +24,47 @@ const AreaPage = () => {
     id: "",
     name: "",
     square: 0,
+    eqId: null
   });
   const [updateErrors, setUpdateErrors] = useState({});
+  const [equipments, setEquipments] = useState([]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
     square: 0,
+    eqId: null
   });
   const [createErrors, setCreateErrors] = useState({});
   const [showDelete, setShowDelete] = useState(false);
   const [selectedDeleteArea, setSelectedDeleteArea] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
+  const handleOpenModal = async () => {
+    setShowCreate(true);
+    await handleFetchEquipment();
+  };
+
+  const handleFetchEquipment = async () => {
+    try {
+      const response = await axiosClient.get("/manager/equipment");
+      setEquipments(response.data.data || []);
+    } catch (error) {
+      enqueueSnackbar(error.response?.data?.message || "Failed to fetch equipment", { variant: "error" });
+    }
+  };
+
   const fetchData = async () => {
     try {
       const response = await axiosClient.get("/manager/area");
+      // console.log(r)
       if (response.data) setData(response.data);
     } catch (error) {
       setError(error);
     }
   };
 
-  // Validation cho form tạo mới
+  // Validation for create form
   const validateCreateForm = () => {
     let tempErrors = {};
     if (!createForm.name) tempErrors.name = "Name is required";
@@ -56,11 +74,13 @@ const AreaPage = () => {
     else if (createForm.square <= 0 || createForm.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
 
+    if (!createForm.eqId) tempErrors.eqId = "Equipment selection is required";
+
     setCreateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
 
-  // Validation cho form cập nhật
+  // Validation for update form
   const validateUpdateForm = () => {
     let tempErrors = {};
     if (!form.name) tempErrors.name = "Name is required";
@@ -69,6 +89,8 @@ const AreaPage = () => {
     if (!form.square) tempErrors.square = "Square is required";
     else if (form.square <= 0 || form.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
+
+    if (!form.eqId) tempErrors.eqId = "Equipment selection is required";
 
     setUpdateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -86,22 +108,28 @@ const AreaPage = () => {
     try {
       const response = await axiosClient.get(`/manager/area/${areaId}`);
       if (response.data) {
-        setForm(response.data);
+        setForm({...form,
+          id: response.data.id,
+          name: response.data.name,
+          square: response.data.square,
+          eqId: response.data.equipment.id
+        });
         setSelectedArea(areaId);
         setShowUpdate(true);
+        await handleFetchEquipment();
       }
     } catch (error) {
-      console.error("Error fetching area data:", error);
+      enqueueSnackbar(error.response?.data?.message || "Error fetching area data", { variant: "error" });
     }
   };
 
   const handleChange = (e, formType = "update") => {
     const { name, value } = e.target;
     if (formType === "update") {
-      setForm({ ...form, [name]: name === "square" ? Number(value) : value });
+      setForm({ ...form, [name]: name === "square" || name === "eqId" ? Number(value) : value });
       setUpdateErrors({ ...updateErrors, [name]: "" });
     } else {
-      setCreateForm({ ...createForm, [name]: name === "square" ? Number(value) : value });
+      setCreateForm({ ...createForm, [name]: name === "square" || name === "eqId" ? Number(value) : value });
       setCreateErrors({ ...createErrors, [name]: "" });
     }
   };
@@ -111,24 +139,24 @@ const AreaPage = () => {
       try {
         const response = await axiosClient.put(`/manager/area/${selectedArea}`, form);
         setShowUpdate(false);
+        setForm({ id: "", name: "", square: 0, eqId: null }); // Reset form
         fetchData();
-        enqueueSnackbar(response.data, { variant: "success" });
+        enqueueSnackbar(response.data?.message || "Area updated successfully", { variant: "success" });
       } catch (error) {
-        enqueueSnackbar(error.response.data, { variant: "error" });
+        enqueueSnackbar(error.response?.data?.message || "Failed to update area", { variant: "error" });
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
-  
 
   const handleToggleDelete = async (area) => {
     try {
       const response = await axiosClient.patch(`/manager/area/delete/${area.id}`);
       fetchData();
-      enqueueSnackbar(response.data, {variant: "success"});
+      enqueueSnackbar(response.data?.message || "Area deleted successfully", { variant: "success" });
     } catch (error) {
-      enqueueSnackbar(error.response.data, {variant: "error"});
+      enqueueSnackbar(error.response?.data?.message || "Failed to delete area", { variant: "error" });
     }
   };
 
@@ -136,9 +164,9 @@ const AreaPage = () => {
     try {
       const response = await axiosClient.patch(`/manager/area/restore/${area.id}`);
       fetchData();
-      enqueueSnackbar(response.data, {variant: "success"});
+      enqueueSnackbar(response.data?.message || "Area restored successfully", { variant: "success" });
     } catch (error) {
-      enqueueSnackbar(error.response.data, {variant: "error"});
+      enqueueSnackbar(error.response?.data?.message || "Failed to restore area", { variant: "error" });
     }
   };
 
@@ -147,17 +175,16 @@ const AreaPage = () => {
       try {
         const response = await axiosClient.post("/manager/area", createForm);
         setShowCreate(false);
-        setCreateForm({ name: "", square: 0 });
+        setCreateForm({ name: "", square: 0, eqId: null }); // Reset form
         fetchData();
-        enqueueSnackbar(response.data, { variant: "success" });
+        enqueueSnackbar(response.data?.message || "Area created successfully", { variant: "success" });
       } catch (error) {
-        enqueueSnackbar(error.response.data, { variant: "error" });
+        enqueueSnackbar(error.response?.data?.message || "Failed to create area", { variant: "error" });
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
-  
 
   const openDeleteModal = (area) => {
     setSelectedDeleteArea(area);
@@ -186,7 +213,7 @@ const AreaPage = () => {
   return (
     <>
       <div style={{ margin: "20px 10px" }}>
-        <Button variant="success" onClick={() => setShowCreate(true)}>
+        <Button variant="success" onClick={() => handleOpenModal()}>
           <MdAddCircleOutline style={{ fontSize: "20px", marginRight: "5px" }} />
           Create New Area
         </Button>
@@ -199,6 +226,7 @@ const AreaPage = () => {
             <th>Name</th>
             <th>Status</th>
             <th>Square</th>
+            <th>Equipment</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -210,6 +238,7 @@ const AreaPage = () => {
                 <td>{area.name}</td>
                 <td>{area.status}</td>
                 <td>{area.square}m²</td>
+                <td>{area.equipment.name}</td>
                 <td>
                   <MdModeEditOutline
                     onClick={area.status !== "deleted" ? () => handleOpen(area.id) : null}
@@ -306,6 +335,23 @@ const AreaPage = () => {
               />
               <Form.Control.Feedback type="invalid">{updateErrors.square}</Form.Control.Feedback>
             </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Equipment</Form.Label>
+              <Form.Control
+                as="select"
+                name="eqId"
+                value={form.eqId || ""}
+                onChange={(e) => handleChange(e, "update")}
+                isInvalid={!!updateErrors.eqId}
+              ><option value="">Select Equipment</option>
+                {equipments.map(item => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">{updateErrors.eqId}</Form.Control.Feedback>
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
@@ -351,6 +397,24 @@ const AreaPage = () => {
                 isInvalid={!!createErrors.square}
               />
               <Form.Control.Feedback type="invalid">{createErrors.square}</Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Equipment</Form.Label>
+              <Form.Control
+                as="select"
+                name="eqId"
+                value={createForm.eqId || ""}
+                onChange={(e) => handleChange(e, "create")}
+                isInvalid={!!createErrors.eqId}
+              >
+                <option value="">Select Equipment</option>
+                {equipments.map(item => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">{createErrors.eqId}</Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
