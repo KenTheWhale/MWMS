@@ -8,14 +8,14 @@ export const getUnassignedGroups = async () => {
 
 //-----------------------------------------CATEGORY-----------------------------------------//
 export const getCategoryList = async () => {
-        const response = await axiosClient.get("/manager/category")
-        return response.data;
+    const response = await axiosClient.get("/manager/category")
+    return response.data;
 }
 
 //-----------------------------------------EQUIPMENT-----------------------------------------//
 export const getEquipmentList = async () => {
     const response = await axiosClient.get("/manager/equipment")
-        return response.data;
+    return response.data;
 }
 
 export const addEquipment = async (code, name, description, categoryId, unit) => {
@@ -26,7 +26,7 @@ export const addEquipment = async (code, name, description, categoryId, unit) =>
         categoryId: categoryId,
         unit: unit
     })
-        return response.data;
+    return response.data;
 }
 
 export const updateEquipment = async (code, name, description, category, unit) => {
@@ -41,8 +41,9 @@ export const updateEquipment = async (code, name, description, category, unit) =
 }
 
 export const deleteEquipment = async (code) => {
-    const response = await axiosClient.delete("/equipment", {data : {code: code}})
-        return response.data;
+    const response = await axiosClient.delete(`manager/equipment/${code}`)
+    console.log(response.data)
+    return response.data;
 }
 
 //-----------------------------------------STAFF-----------------------------------------//
@@ -127,17 +128,24 @@ export const createRequestApplication = async (requestItems) => {
 }
 
 export const getSupplierRequestList = async (username) => {
-    const response = await axiosClient.post("/supplier/request/list", { username: username });
+    const response = await axiosClient.post("/supplier/request/list", {username: username});
     return response && response.status === 200 ? response.data : null;
 }
 
 export const approveRequest = async (code, status, username, deliveryDetail, rejectionReason) => {
-    const response = await axiosClient.put("/supplier/request/status", { code: code, status: status, username: username,
-        deliveryDate: deliveryDetail.deliveryDate, carrierName: deliveryDetail.carrierName, carrierPhone: deliveryDetail.carrierPhone , rejectionReason: rejectionReason});
+    const response = await axiosClient.put("/supplier/request/status", {
+        code: code,
+        status: status,
+        username: username,
+        deliveryDate: deliveryDetail.deliveryDate,
+        carrierName: deliveryDetail.carrierName,
+        carrierPhone: deliveryDetail.carrierPhone,
+        rejectionReason: rejectionReason
+    });
     return response && response.status === 200 ? response.data.data : null;
 }
 
-export const updateRequestApplication = async (requestItemId,equipmentId,quantity) => {
+export const updateRequestApplication = async (requestItemId, equipmentId, quantity) => {
     const body = {
         requestItemId,
         equipmentId,

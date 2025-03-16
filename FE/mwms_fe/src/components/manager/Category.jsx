@@ -18,14 +18,11 @@ function Category() {
         if (response.success){
             setCategories(response.data) ;
         }
-        enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
     }
 
     useEffect(() => {
         FetchData();
     }, []);
-
-    console.log("3", categories)
 
     const handleRowClick = (cate) => {
         setSelectedCategory(cate);

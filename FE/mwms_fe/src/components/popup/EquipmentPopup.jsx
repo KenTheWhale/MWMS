@@ -31,16 +31,18 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
             setEditedEquipment({...equipment});
         } else if (actionType === 'add') {
             setEditedEquipment({id: '', name: '', code: '', category: '', unit: '', description: ''});
+        } else if (actionType === 'delete') {
+            setEditedEquipment({...equipment});
         }
     }, [equipment, actionType]);
 
     useEffect(() => {
-        async function fetchCategories() {
-            const data = await getCategoryList();
-            setCategories(data);
+        async function FetchCategories() {
+            const response = await getCategoryList();
+            setCategories(response.data);
         }
 
-        fetchCategories();
+        FetchCategories();
     }, []);
 
     const validateForm = () => {
@@ -63,25 +65,28 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
         if (!validateForm()) return;
         console.log(editedEquipment);
         if (actionType === 'add') {
-            await addEquipment(
+            const response = await addEquipment(
                 editedEquipment.code,
                 editedEquipment.name,
                 editedEquipment.description,
                 editedEquipment.category,
                 editedEquipment.unit
             );
+            enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
+            if (response.success) {
+                onFetch();
+                handleClose();
+            }
+        }
+    };
+
+    const handleDelete = async (code) => {
+        const response = await deleteEquipment(code);
+        if (response.success) {
+            enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
         }
         onFetch();
         handleClose();
-    };
-
-    const handleDelete = (code) => {
-        const response = deleteEquipment(code);
-        if (response.success) {
-            onFetch();
-            handleClose();
-        }
-        enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
     };
 
     return (
@@ -89,7 +94,7 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
             <div className={`d-flex justify-content-center`}>
                 <DialogTitle component={'div'}>
                     <Typography variant="h4"
-                                color={'textPrimary'}> {actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : 'Equipment Detail'} </Typography>
+                                color={'textPrimary'}> {actionType === 'edit' ? 'Edit Equipment' : actionType === 'add' ? 'Add Equipment' : actionType === 'delete' ? 'Warning' : 'Equipment Detail'} </Typography>
                 </DialogTitle>
             </div>
             <DialogContent>
@@ -98,7 +103,7 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
                         <Card sx={{maxWidth: 500, mx: "auto", p: 3, boxShadow: 3, borderRadius: 2}}>
                             <CardContent>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1" fontWeight="bold">Name:</Typography>
                                     </Grid>
                                     <Grid item xs={6}>
@@ -178,7 +183,7 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
                     <Button onClick={handleAdd} color="primary">Save</Button>
                 )}
                 {actionType === 'delete' && (
-                    <Button onClick={() => handleDelete(1)} color="error">Delete</Button>
+                    <Button onClick={() => handleDelete(editedEquipment.code)} color="error">Delete</Button>
                 )}
             </DialogActions>
         </Dialog>

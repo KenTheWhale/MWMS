@@ -301,7 +301,7 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> deleteEquipment(String code) {
 //        String error = DeleteCategoryValidation.validate(request, categoryRepo);
 //        if (error != null) {
 //            return ResponseEntity.ok().body(
@@ -310,9 +310,12 @@ public class ManagerServiceImpl implements ManagerService {
 //                            .build()
 //            );
 //        }
-        equipmentRepo.findByCode(request.getCode()).setStatus(Status.EQUIPMENT_DELETED.getValue());
+        Equipment equipment = equipmentRepo.findByCode(code);
+        equipment.setStatus(Status.EQUIPMENT_DELETED.getValue());
+        equipmentRepo.save(equipment);
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
+                        .success(true)
                         .message("Delete equipment successfully")
                         .build()
         );
@@ -329,7 +332,6 @@ public class ManagerServiceImpl implements ManagerService {
                             item.put("description", equipment.getDescription());
                             item.put("quantity", getEquipmentQuantity(equipment.getId()));
                             item.put("unit", equipment.getUnit());
-                            item.put("threshold", equipment.getThreshold());
                             item.put("category", equipment.getCategory().getName());
                             item.put("status", equipment.getStatus());
                             return item;

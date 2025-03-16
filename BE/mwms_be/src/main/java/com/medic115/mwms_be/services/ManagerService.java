@@ -83,7 +83,7 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> updateEquipment(UpdateEquipmentRequest request);
 
-    ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request);
+    ResponseEntity<ResponseObject> deleteEquipment(String code);
 
 
 
