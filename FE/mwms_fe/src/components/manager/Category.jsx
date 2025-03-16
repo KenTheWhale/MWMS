@@ -4,87 +4,28 @@ import {useEffect, useState} from "react";
 import CategoryPopup from "../popup/CategoryPopup.jsx";
 import {FaEdit, FaTrash} from "react-icons/fa";
 import {getCategoryList} from "../../services/ManagerService.jsx";
+import {enqueueSnackbar} from "notistack";
 
 
 function Category() {
-
-    // const [categories, setCategories] = useState([
-    //         {
-    //             id: 1,
-    //             name: 'Diagnostic Equipment',
-    //             code: 'DE',
-    //             description: 'Equipment used to diagnose disease includes ultrasound, ECG, X-ray machines.'
-    //         },
-    //         {
-    //             id: 2,
-    //             name: 'Surgical Equipment',
-    //             code: 'DE',
-    //             description: 'Surgical instruments include scalpels, surgical forceps, cutting instruments.'
-    //         },
-    //         {
-    //             id: 3,
-    //             name: 'Monitoring Equipment',
-    //             code: 'DE',
-    //             description: 'Patient monitoring equipment, including cardiac monitors, blood pressure monitors, patient monitors.'
-    //         },
-    //         {
-    //             id: 4,
-    //             name: 'Anesthesia Equipment',
-    //             code: 'DE',
-    //             description: 'Equipment used in anesthesia and patient support during surgery, including anesthesia machines and syringe pumps.'
-    //         },
-    //         {
-    //             id: 5,
-    //             name: 'Therapeutic Equipment',
-    //             code: 'DE',
-    //             description: 'Therapeutic support equipment, including electrotherapy machines, electropulse machines, and heat therapy machines.'
-    //         },
-    //         {
-    //             id: 6,
-    //             name: 'Rehabilitation Equipment',
-    //             code: 'DE',
-    //             description: 'Rehabilitation equipment, including massage chairs, walking aids, rehabilitation machines.'
-    //         },
-    //         {
-    //             id: 7,
-    //             name: 'Imaging Equipment',
-    //             code: 'DE',
-    //             description: 'Imaging equipment, including MRI machines, CT scanners, X-ray machines.'
-    //         },
-    //         {
-    //             id: 8,
-    //             name: 'Infusion Equipment',
-    //             code: 'DE',
-    //             description: 'Devices used for infusing fluids and drugs, including electronic syringe pumps and infusion pumps.'
-    //         },
-    //         {
-    //             id: 9,
-    //             name: 'Respiratory Equipment',
-    //             code: 'DE',
-    //             description: 'Respiratory support equipment, including ventilators, suction machines, and oxygen therapy.'
-    //         },
-    //         {
-    //             id: 10,
-    //             name: 'Laboratory Equipment',
-    //             code: 'DE',
-    //             description: 'Laboratory equipment, including blood analyzers, urinalysis machines, and biochemistry analyzers.'
-    //         }
-    //     ]
-    // );
-
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [actionType, setActionType] = useState('');
 
-    useEffect(() => {
-        async function fetchData() {
-            return await getCategoryList();
+    async function FetchData() {
+        const response = await getCategoryList();
+        if (response.success){
+            setCategories(response.data) ;
         }
-        fetchData().then((data) => {
-            setCategories(data);
-        });
+        enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
+    }
+
+    useEffect(() => {
+        FetchData();
     }, []);
+
+    console.log("3", categories)
 
     const handleRowClick = (cate) => {
         setSelectedCategory(cate);
@@ -127,15 +68,6 @@ function Category() {
         setCategories(updatedCategories);
         setShowModal(false);
     };
-
-    useEffect(() => {
-        async function fetchData() {
-            return await getCategoryList();
-        }
-        fetchData().then((data) => {
-            setCategories(data);
-        });
-    }, []);
 
     return (
         <div className={style.main}>
