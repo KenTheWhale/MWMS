@@ -6,7 +6,6 @@ import java.util.List;
 @Builder
 public record SignUpRequest(
         String username,
-        String password,
         String roleName,
         String name,
         String email,

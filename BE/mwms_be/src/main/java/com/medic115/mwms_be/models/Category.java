@@ -25,6 +25,8 @@ public class Category {
 
     private String description;
 
+    private String status;
+
     @OneToMany(mappedBy = "category")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

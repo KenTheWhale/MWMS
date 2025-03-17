@@ -91,6 +91,7 @@ public class ManagerServiceImpl implements ManagerService {
 
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
+                        .success(true)
                         .message("Get category successfully")
                         .data(MapToCategory(categories))
                         .build()
@@ -101,10 +102,10 @@ public class ManagerServiceImpl implements ManagerService {
     public ResponseEntity<ResponseObject> addCategory(AddCategoryRequest request) {
         String error = CategoryValidation.validateCategory(request, categoryRepo);
         if (error != null) {
-            return ResponseEntity.badRequest().body(
-                    ResponseObject.builder()
-                            .message(error)
-                            .build()
+            return ResponseEntity.ok().body(ResponseObject.builder()
+                    .success(false)
+                    .message(error)
+                    .build()
             );
         }
         categoryRepo.save(
@@ -114,10 +115,10 @@ public class ManagerServiceImpl implements ManagerService {
                         .description(request.getDescription())
                         .build()
         );
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("Add category successfully")
-                        .build()
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .success(true)
+                .message("Add category successfully")
+                .build()
         );
     }
 
@@ -125,10 +126,10 @@ public class ManagerServiceImpl implements ManagerService {
     public ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request) {
         String error = UpdateCategoryValidation.validate(request, categoryRepo);
         if (error != null) {
-            return ResponseEntity.badRequest().body(
-                    ResponseObject.builder()
-                            .message(error)
-                            .build()
+            return ResponseEntity.ok().body(ResponseObject.builder()
+                    .success(false)
+                    .message(error)
+                    .build()
             );
         }
         Category category = categoryRepo.findByCode(request.getCode());
@@ -136,10 +137,10 @@ public class ManagerServiceImpl implements ManagerService {
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         categoryRepo.save(category);
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("Update category successfully")
-                        .build()
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .success(true)
+                .message("Update category successfully")
+                .build()
         );
     }
 
@@ -147,17 +148,17 @@ public class ManagerServiceImpl implements ManagerService {
     public ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request) {
         String error = DeleteCategoryValidation.validate(request, categoryRepo);
         if (error != null) {
-            return ResponseEntity.badRequest().body(
-                    ResponseObject.builder()
-                            .message(error)
-                            .build()
+            return ResponseEntity.ok().body(ResponseObject.builder()
+                    .success(false)
+                    .message(error)
+                    .build()
             );
         }
-        categoryRepo.deleteByCode(request.getCateCode());
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("Delete category successfully")
-                        .build()
+        categoryRepo.findByCode(request.getCateCode()).setStatus(Status.CATEGORY_DELETED.getValue());
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .success(true)
+                .message("Delete category successfully")
+                .build()
         );
     }
 
@@ -182,11 +183,11 @@ public class ManagerServiceImpl implements ManagerService {
         List<Equipment> equipments = equipmentRepo.findAll().stream()
                 .filter(equipment -> equipment.getStatus().equals(Status.EQUIPMENT_ACTIVE.getValue()))
                 .toList();
-        return ResponseEntity.ok().body(
-                ResponseObject.builder()
-                        .message("Get equipment successfully")
-                        .data(MapToEquipment(equipments))
-                        .build()
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .success(true)
+                .message("Get equipment successfully")
+                .data(MapToEquipment(equipments))
+                .build()
         );
     }
 
@@ -200,14 +201,14 @@ public class ManagerServiceImpl implements ManagerService {
                 .toList();
 
         if (result.isEmpty()) {
-            return ResponseEntity.ok(ResponseObject.builder()
+            return ResponseEntity.ok().body(ResponseObject.builder()
                     .message("No supplier found for this equipment")
                     .success(false)
                     .data(null)
                     .build());
         }
 
-        return ResponseEntity.ok(ResponseObject.builder()
+        return ResponseEntity.ok().body(ResponseObject.builder()
                 .message("Supplier equipment retrieved successfully")
                 .success(true)
                 .data(result.stream()
@@ -233,13 +234,14 @@ public class ManagerServiceImpl implements ManagerService {
                 .toList();
 
         if (equipmentList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ResponseObject.builder()
-                            .message("No equipment found for this supplier")
-                            .build());
+            return ResponseEntity.ok().body(ResponseObject.builder()
+                    .success(false)
+                    .message("No equipment found for this supplier")
+                    .build());
         }
 
-        return ResponseEntity.ok(ResponseObject.builder()
+        return ResponseEntity.ok().body(ResponseObject.builder()
+                .success(true)
                 .message("Supplier equipment retrieved successfully")
                 .data(MapToEquipment(equipmentList))
                 .build());
@@ -250,7 +252,7 @@ public class ManagerServiceImpl implements ManagerService {
         Category category = categoryRepo.findById(request.getCategoryId()).orElse(null);
 //        String error = CategoryValidation.validateCategory(request, equipmentRepo);
 //        if (error != null) {
-//            return ResponseEntity.badRequest().body(
+//            return ResponseEntity.ok().body(
 //                    ResponseObject.builder()
 //                            .message(error)
 //                            .build()
@@ -269,6 +271,7 @@ public class ManagerServiceImpl implements ManagerService {
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Add equipment successfully")
+                        .success(true)
                         .build()
         );
     }
@@ -278,7 +281,7 @@ public class ManagerServiceImpl implements ManagerService {
         Category category = categoryRepo.findByName(request.getCategory());
         String error = UpdateEquipmentValidation.validate(request, equipmentRepo);
         if (error != null) {
-            return ResponseEntity.badRequest().body(
+            return ResponseEntity.ok().body(
                     ResponseObject.builder()
                             .message(error)
                             .build()
@@ -298,18 +301,21 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> deleteEquipment(DeleteEquipmentRequest request) {
+    public ResponseEntity<ResponseObject> deleteEquipment(String code) {
 //        String error = DeleteCategoryValidation.validate(request, categoryRepo);
 //        if (error != null) {
-//            return ResponseEntity.badRequest().body(
+//            return ResponseEntity.ok().body(
 //                    ResponseObject.builder()
 //                            .message(error)
 //                            .build()
 //            );
 //        }
-        equipmentRepo.findByCode(request.getCode()).setStatus(Status.EQUIPMENT_DELETED.getValue());
+        Equipment equipment = equipmentRepo.findByCode(code);
+        equipment.setStatus(Status.EQUIPMENT_DELETED.getValue());
+        equipmentRepo.save(equipment);
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
+                        .success(true)
                         .message("Delete equipment successfully")
                         .build()
         );
@@ -470,7 +476,7 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> getTaskByCode(GetTaskByCodeRequest request) {
         Task task = taskRepo.findByCode(request.getCode()).orElse(null);
-        if(task == null){
+        if (task == null) {
             return ResponseEntity.ok().body(
                     ResponseObject.builder()
                             .message("Task not found")
@@ -628,33 +634,40 @@ public class ManagerServiceImpl implements ManagerService {
     public ResponseEntity<ResponseObject> getAllRequestExport() {
         List<Map<String, Object>> data = requestApplicationRepo.findAll().stream()
                 .filter(requestApplication -> "export".equals(requestApplication.getType()))
-                .map(
-                        requestExport -> {
-                            Map<String, Object> request = new HashMap<>();
-                            request.put("code", requestExport.getCode());
-                            request.put("requestDate", requestExport.getRequestDate());
-                            request.put("lastModifiedDate", requestExport.getLastModifiedDate());
-                            return request;
-                        }
-                ).toList();
-        if (!data.isEmpty()) {
-            return ResponseEntity.ok().body(
-                    ResponseObject
-                            .builder()
-                            .message("Get All Export Request successfully")
-                            .data(data)
-                            .build()
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-                    ResponseObject
-                            .builder()
-                            .message("List Export Request Empty")
-                            .data("")
-                            .build()
-            );
-        }
+                .map(requestExport -> {
+                    Map<String, Object> request = new HashMap<>();
+                    request.put("code", requestExport.getCode());
+                    request.put("requestDate", requestExport.getRequestDate());
+                    request.put("lastModifiedDate", requestExport.getLastModifiedDate());
+
+                    List<String> partnerNames = requestExport.getItemGroups().stream()
+                            .flatMap(group -> group.getRequestItems().stream())
+                            .map(item -> item.getPartner().getUser().getName())
+                            .distinct()
+                            .toList();
+
+                    request.put("partnerNames", partnerNames);
+                    return request;
+                })
+                .toList();
+
+        return data.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ResponseObject.builder()
+                        .message("List Export Request Empty")
+                        .success(false)
+                        .data("")
+                        .build()
+        )
+                : ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .message("Get All Export Request successfully")
+                        .success(true)
+                        .data(data)
+                        .build()
+        );
     }
+
 
     @Override
     public ResponseEntity<ResponseObject> filterRequestByRequestDate(FilterRequestApplicationRequest request) {

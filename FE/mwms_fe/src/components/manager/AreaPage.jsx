@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../../config/api";
-import { Button, Form, Modal, Table, Pagination } from "react-bootstrap";
+import {
+  Button,
+  Form,
+  Modal,
+  Table,
+  Pagination,
+  Dropdown,
+} from "react-bootstrap";
 import {
   MdModeEditOutline,
   MdDeleteOutline,
@@ -11,12 +18,19 @@ import { TbScanPosition } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
 
 const AreaPage = () => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [cmdSort, setCmdSort] = useState(false);
+
+  // Search states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("name");
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
@@ -24,61 +38,115 @@ const AreaPage = () => {
     id: "",
     name: "",
     square: 0,
+    eqId: null,
   });
   const [updateErrors, setUpdateErrors] = useState({});
+  const [equipments, setEquipments] = useState([]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: "",
     square: 0,
+    eqId: null,
   });
   const [createErrors, setCreateErrors] = useState({});
   const [showDelete, setShowDelete] = useState(false);
   const [selectedDeleteArea, setSelectedDeleteArea] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
+  const handleOpenModal = async () => {
+    setShowCreate(true);
+    await handleFetchEquipment();
+  };
+
+  const handleSortByCmd = () => {
+    if (cmdSort === false) {
+      setCmdSort(true);
+      setFilteredData([...filteredData].sort((a, b) => a.id - b.id)); // Tăng dần
+    } else {
+      setCmdSort(false);
+      setFilteredData([...filteredData].sort((a, b) => b.id - a.id)); // Giảm dần
+    }
+    setCurrentPage(1);
+  };
+
+  const handleFetchEquipment = async () => {
+    try {
+      const response = await axiosClient.get("/manager/equipment");
+      setEquipments(response.data.data || []);
+    } catch (error) {
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to fetch equipment",
+        { variant: "error" }
+      );
+    }
+  };
+
   const fetchData = async () => {
     try {
       const response = await axiosClient.get("/manager/area");
-      if (response.data) setData(response.data);
+      if (response.data) {
+        setData(response.data);
+        setFilteredData(response.data);
+      }
     } catch (error) {
       setError(error);
     }
   };
 
-  // Validation cho form tạo mới
   const validateCreateForm = () => {
     let tempErrors = {};
     if (!createForm.name) tempErrors.name = "Name is required";
-    else if (createForm.name.length < 2) tempErrors.name = "Name must be at least 2 characters";
+    else if (createForm.name.length < 2)
+      tempErrors.name = "Name must be at least 2 characters";
 
     if (!createForm.square) tempErrors.square = "Square is required";
     else if (createForm.square <= 0 || createForm.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
 
+    if (!createForm.eqId) tempErrors.eqId = "Equipment selection is required";
+
     setCreateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
 
-  // Validation cho form cập nhật
   const validateUpdateForm = () => {
     let tempErrors = {};
     if (!form.name) tempErrors.name = "Name is required";
-    else if (form.name.length < 2) tempErrors.name = "Name must be at least 2 characters";
+    else if (form.name.length < 2)
+      tempErrors.name = "Name must be at least 2 characters";
 
     if (!form.square) tempErrors.square = "Square is required";
     else if (form.square <= 0 || form.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
 
+    if (!form.eqId) tempErrors.eqId = "Equipment selection is required";
+
     setUpdateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
 
-  // Pagination calculations
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    const filtered = data.filter((area) => {
+      if (selectedFilter === "name") {
+        return area.name.toLowerCase().includes(value.toLowerCase());
+      } else if (selectedFilter === "equipment") {
+        return area.equipment.name.toLowerCase().includes(value.toLowerCase());
+      }
+      return true;
+    });
+
+    setFilteredData(filtered);
+    setCurrentPage(1);
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -86,22 +154,37 @@ const AreaPage = () => {
     try {
       const response = await axiosClient.get(`/manager/area/${areaId}`);
       if (response.data) {
-        setForm(response.data);
+        setForm({
+          id: response.data.id,
+          name: response.data.name,
+          square: response.data.square,
+          eqId: response.data.equipment.id,
+        });
         setSelectedArea(areaId);
         setShowUpdate(true);
+        await handleFetchEquipment();
       }
     } catch (error) {
-      console.error("Error fetching area data:", error);
+      enqueueSnackbar(
+        error.response?.data?.message || "Error fetching area data",
+        { variant: "error" }
+      );
     }
   };
 
   const handleChange = (e, formType = "update") => {
     const { name, value } = e.target;
     if (formType === "update") {
-      setForm({ ...form, [name]: name === "square" ? Number(value) : value });
+      setForm({
+        ...form,
+        [name]: name === "square" || name === "eqId" ? Number(value) : value,
+      });
       setUpdateErrors({ ...updateErrors, [name]: "" });
     } else {
-      setCreateForm({ ...createForm, [name]: name === "square" ? Number(value) : value });
+      setCreateForm({
+        ...createForm,
+        [name]: name === "square" || name === "eqId" ? Number(value) : value,
+      });
       setCreateErrors({ ...createErrors, [name]: "" });
     }
   };
@@ -109,36 +192,58 @@ const AreaPage = () => {
   const handleUpdate = async () => {
     if (validateUpdateForm()) {
       try {
-        const response = await axiosClient.put(`/manager/area/${selectedArea}`, form);
+        const response = await axiosClient.put(
+          `/manager/area/${selectedArea}`,
+          form
+        );
         setShowUpdate(false);
+        setForm({ id: "", name: "", square: 0, eqId: null });
         fetchData();
-        enqueueSnackbar(response.data, { variant: "success" });
+        enqueueSnackbar(response.data?.message || "Area updated successfully", {
+          variant: "success",
+        });
       } catch (error) {
-        enqueueSnackbar(error.response.data, { variant: "error" });
+        enqueueSnackbar(
+          error.response?.data?.message || "Failed to update area",
+          { variant: "error" }
+        );
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
-  
 
   const handleToggleDelete = async (area) => {
     try {
-      const response = await axiosClient.patch(`/manager/area/delete/${area.id}`);
+      const response = await axiosClient.patch(
+        `/manager/area/delete/${area.id}`
+      );
       fetchData();
-      enqueueSnackbar(response.data, {variant: "success"});
+      enqueueSnackbar(response.data?.message || "Area deleted successfully", {
+        variant: "success",
+      });
     } catch (error) {
-      enqueueSnackbar(error.response.data, {variant: "error"});
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to delete area",
+        { variant: "error" }
+      );
     }
   };
 
   const handleToggleRestore = async (area) => {
     try {
-      const response = await axiosClient.patch(`/manager/area/restore/${area.id}`);
+      const response = await axiosClient.patch(
+        `/manager/area/restore/${area.id}`
+      );
       fetchData();
-      enqueueSnackbar(response.data, {variant: "success"});
+      enqueueSnackbar(response.data?.message || "Area restored successfully", {
+        variant: "success",
+      });
     } catch (error) {
-      enqueueSnackbar(error.response.data, {variant: "error"});
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to restore area",
+        { variant: "error" }
+      );
     }
   };
 
@@ -147,17 +252,21 @@ const AreaPage = () => {
       try {
         const response = await axiosClient.post("/manager/area", createForm);
         setShowCreate(false);
-        setCreateForm({ name: "", square: 0 });
+        setCreateForm({ name: "", square: 0, eqId: null });
         fetchData();
-        enqueueSnackbar(response.data, { variant: "success" });
+        enqueueSnackbar(response.data?.message || "Area created successfully", {
+          variant: "success",
+        });
       } catch (error) {
-        enqueueSnackbar(error.response.data, { variant: "error" });
+        enqueueSnackbar(
+          error.response?.data?.message || "Failed to create area",
+          { variant: "error" }
+        );
       }
     } else {
       toast.error("Please fix the errors in the form");
     }
   };
-  
 
   const openDeleteModal = (area) => {
     setSelectedDeleteArea(area);
@@ -185,78 +294,182 @@ const AreaPage = () => {
 
   return (
     <>
-      <div style={{ margin: "20px 10px" }}>
-        <Button variant="success" onClick={() => setShowCreate(true)}>
-          <MdAddCircleOutline style={{ fontSize: "20px", marginRight: "5px" }} />
+      <div
+        style={{
+          margin: "20px 10px",
+          display: "flex",
+          gap: "10px",
+          alignItems: "center",
+        }}
+      >
+        <Button variant="success" onClick={() => handleOpenModal()}>
+          <MdAddCircleOutline
+            style={{ fontSize: "20px", marginRight: "5px" }}
+          />
           Create New Area
         </Button>
+
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <Dropdown>
+            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+              Filter: {selectedFilter}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => setSelectedFilter("name")}>
+                Name
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => setSelectedFilter("equipment")}>
+                Equipment
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+
+          <Form.Control
+            type="text"
+            placeholder={`Search by ${selectedFilter}...`}
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ width: "200px" }}
+          />
+        </div>
+
+        {/* Icon sắp xếp */}
+        {cmdSort ? (
+          <FaSortAmountDown
+            style={{ cursor: "pointer", fontSize: "20px" }}
+            onClick={handleSortByCmd}
+          />
+        ) : (
+          <FaSortAmountUp
+            style={{ cursor: "pointer", fontSize: "20px" }}
+            onClick={handleSortByCmd}
+          />
+        )}
       </div>
 
-      <Table className="text-center" style={{ marginLeft: "10px", marginTop: "50px" }}>
+      <div className="text-danger fw-bold" style={{marginLeft: "10px"}}> Status of area will be updated in every minute</div>
+      <Table
+        className="text-center"
+        style={{ marginLeft: "10px", marginTop: "50px"}}
+      >
         <thead>
           <tr className="table-success">
-            <th>ID</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Square</th>
-            <th>Actions</th>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Square</th>
+            <th scope="col">Equipment</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
           {currentItems.length > 0 ? (
             currentItems.map((area) => (
-              <tr key={area.id} style={{ opacity: area.status === "deleted" ? 0.5 : 1 }}>
+              <tr
+                key={area.id}
+                className={area.status === "deleted" ? "table-secondary" : ""}
+                style={{ opacity: area.status === "deleted" ? 0.5 : 1 }}
+              >
                 <td>{area.id}</td>
                 <td>{area.name}</td>
-                <td>{area.status}</td>
-                <td>{area.square}m²</td>
                 <td>
-                  <MdModeEditOutline
-                    onClick={area.status !== "deleted" ? () => handleOpen(area.id) : null}
-                    style={{
-                      cursor: area.status === "deleted" ? "not-allowed" : "pointer",
-                      fontSize: "30px",
-                      marginRight: "10px",
-                      color: area.status === "deleted" ? "#ccc" : "black",
-                    }}
-                  />
-                  {area.status === "deleted" ? (
-                    <MdRestore
-                      onClick={() => handleToggleRestore(area)}
-                      style={{ cursor: "pointer", fontSize: "30px", color: "green" }}
-                    />
-                  ) : (
-                    <MdDeleteOutline
-                      onClick={() => openDeleteModal(area)}
-                      style={{ cursor: "pointer", fontSize: "30px", color: "red" }}
-                    />
-                  )}
-                  <Link to={area.status === "deleted" ? "" : `/manager/position/${area.id}`}>
-                    <TbScanPosition
+                  <span
+                    className={`badge ${
+                      area.status === "deleted" ? "bg-danger" : area.status === "full"
+                          ? "bg-warning"
+                          : "bg-success"
+                    }`}
+                  >
+                    {area.status}
+                  </span>
+                </td>
+                <td>{area.square}m²</td>
+                <td>{area.equipment.name}</td>
+                <td>
+                  <div className="d-flex justify-content-center gap-3">
+                    <MdModeEditOutline
+                      onClick={
+                        area.status !== "deleted"
+                          ? () => handleOpen(area.id)
+                          : null
+                      }
+                      className={`text-${
+                        area.status === "deleted" ? "muted" : "primary"
+                      }`}
                       style={{
-                        fontSize: "30px",
-                        marginLeft: "10px",
-                        color: "blue",
-                        cursor: area.status === "deleted" ? "not-allowed" : "pointer",
+                        cursor:
+                          area.status === "deleted" ? "not-allowed" : "pointer",
+                        fontSize: "25px",
                       }}
+                      title="Edit"
                     />
-                  </Link>
+                    {area.status === "deleted" ? (
+                      <MdRestore
+                        onClick={() => handleToggleRestore(area)}
+                        className="text-success"
+                        style={{ cursor: "pointer", fontSize: "25px" }}
+                        title="Restore"
+                      />
+                    ) : (
+                      <MdDeleteOutline
+                        onClick={() => openDeleteModal(area)}
+                        className="text-danger"
+                        style={{ cursor: "pointer", fontSize: "25px" }}
+                        title="Delete"
+                      />
+                    )}
+                    <Link
+                      to={
+                        area.status === "deleted"
+                          ? ""
+                          : `/manager/position/${area.id}`
+                      }
+                    >
+                      <TbScanPosition
+                        className={`text-${
+                          area.status === "deleted" ? "muted" : "info"
+                        }`}
+                        style={{
+                          cursor:
+                            area.status === "deleted"
+                              ? "not-allowed"
+                              : "pointer",
+                          fontSize: "25px",
+                        }}
+                        title="View Positions"
+                      />
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={5}>Data is loading.....</td>
+              <td colSpan={6} className="text-muted py-4">
+                No data found...
+              </td>
             </tr>
           )}
         </tbody>
       </Table>
 
-      {data.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+      {filteredData.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
           <Pagination>
-            <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
-            <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+            <Pagination.First
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
             {Array.from({ length: totalPages }, (_, index) => (
               <Pagination.Item
                 key={index + 1}
@@ -266,20 +479,34 @@ const AreaPage = () => {
                 {index + 1}
               </Pagination.Item>
             ))}
-            <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
-            <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
           </Pagination>
         </div>
       )}
 
-      <Modal show={showUpdate} onHide={() => setShowUpdate(false)} size="sm" centered style={{ color: "black" }}>
+      <Modal
+        show={showUpdate}
+        onHide={() => setShowUpdate(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
         <Modal.Header closeButton style={{ padding: "10px 15px" }}>
           <Modal.Title style={{ fontSize: "16px" }}>Update Area</Modal.Title>
         </Modal.Header>
         <Modal.Body style={modalBodyStyle}>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Name</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Name
+              </Form.Label>
               <Form.Control
                 size="sm"
                 type="text"
@@ -289,10 +516,14 @@ const AreaPage = () => {
                 onChange={(e) => handleChange(e, "update")}
                 isInvalid={!!updateErrors.name}
               />
-              <Form.Control.Feedback type="invalid">{updateErrors.name}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {updateErrors.name}
+              </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square (m²)</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Square (m²)
+              </Form.Label>
               <Form.Control
                 size="sm"
                 type="number"
@@ -304,12 +535,40 @@ const AreaPage = () => {
                 onChange={(e) => handleChange(e, "update")}
                 isInvalid={!!updateErrors.square}
               />
-              <Form.Control.Feedback type="invalid">{updateErrors.square}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {updateErrors.square}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Equipment
+              </Form.Label>
+              <Form.Control
+                as="select"
+                name="eqId"
+                value={form.eqId || ""}
+                onChange={(e) => handleChange(e, "update")}
+                isInvalid={!!updateErrors.eqId}
+              >
+                <option value="">Select Equipment</option>
+                {equipments.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">
+                {updateErrors.eqId}
+              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
-          <Button size="sm" variant="secondary" onClick={() => setShowUpdate(false)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowUpdate(false)}
+          >
             Close
           </Button>
           <Button size="sm" variant="primary" onClick={handleUpdate}>
@@ -318,14 +577,24 @@ const AreaPage = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} size="sm" centered style={{ color: "black" }}>
+      <Modal
+        show={showCreate}
+        onHide={() => setShowCreate(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
         <Modal.Header closeButton style={{ padding: "10px 15px" }}>
-          <Modal.Title style={{ fontSize: "16px" }}>Create New Area</Modal.Title>
+          <Modal.Title style={{ fontSize: "16px" }}>
+            Create New Area
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body style={modalBodyStyle}>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Name</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Name
+              </Form.Label>
               <Form.Control
                 size="sm"
                 type="text"
@@ -335,10 +604,14 @@ const AreaPage = () => {
                 onChange={(e) => handleChange(e, "create")}
                 isInvalid={!!createErrors.name}
               />
-              <Form.Control.Feedback type="invalid">{createErrors.name}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {createErrors.name}
+              </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>Square (m²)</Form.Label>
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Square (m²)
+              </Form.Label>
               <Form.Control
                 size="sm"
                 type="number"
@@ -350,12 +623,40 @@ const AreaPage = () => {
                 onChange={(e) => handleChange(e, "create")}
                 isInvalid={!!createErrors.square}
               />
-              <Form.Control.Feedback type="invalid">{createErrors.square}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {createErrors.square}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
+                Equipment
+              </Form.Label>
+              <Form.Control
+                as="select"
+                name="eqId"
+                value={createForm.eqId || ""}
+                onChange={(e) => handleChange(e, "create")}
+                isInvalid={!!createErrors.eqId}
+              >
+                <option value="">Select Equipment</option>
+                {equipments.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">
+                {createErrors.eqId}
+              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
-          <Button size="sm" variant="secondary" onClick={() => setShowCreate(false)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+          >
             Close
           </Button>
           <Button size="sm" variant="primary" onClick={handleCreate}>
@@ -364,18 +665,29 @@ const AreaPage = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showDelete} onHide={() => setShowDelete(false)} size="sm" centered style={{ color: "black" }}>
+      <Modal
+        show={showDelete}
+        onHide={() => setShowDelete(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
         <Modal.Header closeButton style={{ padding: "10px 15px" }}>
           <Modal.Title style={{ fontSize: "16px" }}>Confirm Delete</Modal.Title>
         </Modal.Header>
         <Modal.Body style={modalBodyStyle}>
           <p style={{ fontSize: "14px", marginBottom: "10px" }}>
             Are you sure you want to{" "}
-            {selectedDeleteArea?.status === "deleted" ? "restore" : "delete"} area "{selectedDeleteArea?.name}"?
+            {selectedDeleteArea?.status === "deleted" ? "restore" : "delete"}{" "}
+            area "{selectedDeleteArea?.name}"?
           </p>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
-          <Button size="sm" variant="secondary" onClick={() => setShowDelete(false)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowDelete(false)}
+          >
             Cancel
           </Button>
           <Button size="sm" variant="danger" onClick={handleDeleteConfirm}>

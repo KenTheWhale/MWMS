@@ -31,8 +31,6 @@ public class Equipment {
 
     String status;
 
-    int threshHold;
-
     @OneToMany(mappedBy = "equipment")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
