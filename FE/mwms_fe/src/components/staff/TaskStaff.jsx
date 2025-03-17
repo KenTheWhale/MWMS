@@ -68,7 +68,6 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatch
                         <TableRow>
                             <TableCell align={"center"}>No</TableCell>
                             <TableCell align={"center"}>Code</TableCell>
-                            <TableCell>Description</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell align={"center"}>Detail</TableCell>
                             <TableCell align={"center"}>Create Batch</TableCell>
@@ -79,11 +78,11 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatch
 
                             tasks
                                 .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
+                                .sort((t1, t2) => t2.id - t1.id)
                                 .map((task, index) => (
                                     <TableRow key={index} hover>
                                         <TableCell align={"center"}>{index + 1}</TableCell>
                                         <TableCell align={"center"}>{task.code}</TableCell>
-                                        <TableCell>{task.description}</TableCell>
                                         <TableCell>{task.status}</TableCell>
                                         <TableCell align={"center"}>
                                             <IconButton color={"info"} onClick={() => handleSelectedTask(task)}>
@@ -517,6 +516,10 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                 <Button
                                     variant={"contained"}
                                     color={"success"}
+                                    disabled={
+                                        batchItems.find(i => i.id === item.id).area === 0 ||
+                                        batchItems.find(i => i.id === item.id).position === 0
+                                    }
                                     onClick={
                                         () => createNewBatch(
                                             batchItems.find(i => i.id === item.id).quantity,

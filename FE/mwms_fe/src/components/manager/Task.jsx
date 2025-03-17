@@ -86,6 +86,7 @@ function RenderTable({tasks, SetActionFunc}) {
                     <TableBody>
                         {tasks
                             .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
+                            .sort((t1, t2) => t2.id - t1.id)
                             .map((task, index) => (
                                 <TableRow key={index} hover>
                                     <TableCell>{index + 1}</TableCell>
@@ -218,11 +219,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         {/*Quantity*/}
-                                                        <RenderInfoTextField label={"Quantity"} data={item.quantity}
-                                                                             isCapital={false}/>
-
-                                                        {/*Unit price*/}
-                                                        <RenderInfoTextField label={"Price"} data={"$" + item.unitPrice}
+                                                        <RenderInfoTextField label={`Quantity (${item.unit})`} data={item.quantity}
                                                                              isCapital={false}/>
                                                     </AccordionDetails>
                                                 </Accordion>

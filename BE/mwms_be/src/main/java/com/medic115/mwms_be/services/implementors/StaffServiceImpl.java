@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,5 +204,17 @@ public class StaffServiceImpl implements StaffService {
                             .build()
             );
         }
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getBatchList() {
+        List<Map<String, Object>> data = batchRepo.findAll().stream().map(
+                batch -> {
+                    Map<String, Object> dataItem = new HashMap<>();
+                    return dataItem;
+                }
+        ).toList();
+
+        return null;
     }
 }
