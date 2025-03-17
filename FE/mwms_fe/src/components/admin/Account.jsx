@@ -7,19 +7,72 @@ import {
   Pagination,
   Modal,
   Form,
+  Container,
 } from "react-bootstrap";
 import { MdDelete } from "react-icons/md";
 import avatar1 from "../../assets/images/user/avatar-1.jpg";
 import { FaUserPlus } from "react-icons/fa6";
 import { FaPowerOff } from "react-icons/fa";
-import style from "../../styles/Admin.module.css";
 import { useEffect, useState } from "react";
 import axiosClient from "../../config/api";
 import { toast } from "react-toastify";
 import { MdModeEdit } from "react-icons/md";
 import { BiSolidUserDetail } from "react-icons/bi";
-import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { useSnackbar } from "notistack";
+
+// Component Header riêng
+const AdminHeader = ({ 
+  searchTerm, 
+  sortOrder, 
+  onSearchChange, 
+  onSortToggle, 
+  onCreateClick, 
+  totalUsers 
+}) => {
+  return (
+    <header className="text-white shadow-sm" style={{background: "linear-gradient(135deg, #4e73df 0%, #224abe 100%)", borderRadius: "10px"}}>
+    <Container fluid className="py-3">
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        {/* Phần tiêu đề */}
+        <div className="d-flex flex-column">
+          <h5 className="mb-1 d-flex align-items-center fw-bold">
+            <span className="me-2" style={{color:"wheat"}}>👤 User Management</span> 
+          </h5>
+          <small className="fw-bold" style={{color:"wheat"}}>
+            Total Users: {totalUsers}
+          </small>
+        </div>
+
+        {/* Phần controls */}
+        <div className="d-flex align-items-center gap-3 flex-wrap">
+          <Form.Control
+            type="text"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={onSearchChange}
+            className="w-auto shadow-sm"
+            style={{ minWidth: "200px" }}
+          />
+          <Button
+            onClick={onSortToggle}
+            size="sm"
+            className="fw-bold"
+          >
+            Sort {sortOrder === 'asc' ? '↑' : '↓'}
+          </Button>
+          <Button
+            variant="info"
+            onClick={onCreateClick}
+            className="d-flex align-items-center fw-bold gap-2 shadow-sm"
+          >
+            <FaUserPlus /> New User
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </header>
+  );
+};
 
 const Admin = () => {
   const [dashData, setDashData] = useState([]);
@@ -28,10 +81,11 @@ const Admin = () => {
   const [idEdit, setIdEdit] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
+  
   const [formData, setFormData] = useState({
     username: "",
-    password: "",
     roleName: "",
     name: "",
     phone: "",
@@ -41,15 +95,12 @@ const Admin = () => {
 
   const [formEdit, setFormEdit] = useState({
     username: "",
-    password: "",
-    roleName: "",
     name: "",
     phone: "",
     email: "",
   });
 
   const [equipment, setEquipment] = useState([]);
-
   const [errors, setErrors] = useState({});
   const [editErrors, setEditErrors] = useState({});
   const [show, setShow] = useState(false);
@@ -66,7 +117,7 @@ const Admin = () => {
       const response = await axiosClient.get("/user");
       setDashData(response.data);
     } catch (error) {
-      toast.error("Something Wrong....", error);
+      enqueueSnackbar("Failed to fetch users: " + error.message, { variant: "error" });
     }
   };
 
@@ -74,35 +125,27 @@ const Admin = () => {
     fetchData();
   }, []);
 
-  const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  const nameRegex = /^[a-zA-Z0-9_ ]+$/; // Cho phép khoảng trắng trong tên
+  const usernameRegex = /^[a-zA-Z0-9]{1,10}$/;
+  const nameRegex = /^[a-zA-Z ]+$/;
 
   const validateForm = () => {
     let tempErrors = {};
-
     if (!formData.username) tempErrors.username = "Username is required";
-    else if (formData.username.length < 3)
-      tempErrors.username = "Username must be at least 3 characters";
-    else if (!usernameRegex.test(formData.username))
-      tempErrors.username = "Username cannot contain special characters";
+    else if (formData.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+    else if (formData.username.length > 10) tempErrors.username = "Username cannot exceed 10 characters";
+    else if (!usernameRegex.test(formData.username)) tempErrors.username = "Username can only contain letters and numbers";
 
     if (!formData.name) tempErrors.name = "Full Name is required";
-    else if (!nameRegex.test(formData.name))
-      tempErrors.name = "Full Name cannot contain special characters";
-
-    if (!formData.password) tempErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      tempErrors.password = "Password must be at least 6 characters";
+    else if (!nameRegex.test(formData.name)) tempErrors.name = "Full Name can only contain letters and spaces";
 
     if (!formData.roleName) tempErrors.roleName = "Role is required";
 
     if (!formData.email) tempErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      tempErrors.email = "Email is invalid";
+    else if (!formData.email.endsWith("@gmail.com")) tempErrors.email = "Email must end with @gmail.com";
+    else if (!/\S+@gmail\.com$/.test(formData.email)) tempErrors.email = "Email must be a valid Gmail address";
 
     if (!formData.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(formData.phone))
-      tempErrors.phone = "Phone number must be 10 digits";
+    else if (!/^[0]\d{9}$/.test(formData.phone)) tempErrors.phone = "Phone number must be 10 digits and start with 0";
 
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -110,30 +153,20 @@ const Admin = () => {
 
   const validateEditForm = () => {
     let tempErrors = {};
-
     if (!formEdit.username) tempErrors.username = "Username is required";
-    else if (formEdit.username.length < 3)
-      tempErrors.username = "Username must be at least 3 characters";
-    else if (!usernameRegex.test(formEdit.username))
-      tempErrors.username = "Username cannot contain special characters";
+    else if (formEdit.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
+    else if (formEdit.username.length > 10) tempErrors.username = "Username cannot exceed 10 characters";
+    else if (!usernameRegex.test(formEdit.username)) tempErrors.username = "Username can only contain letters and numbers";
 
     if (!formEdit.name) tempErrors.name = "Full Name is required";
-    else if (!nameRegex.test(formEdit.name))
-      tempErrors.name = "Full Name cannot contain special characters";
-
-    if (!formEdit.password) tempErrors.password = "Password is required";
-    else if (formEdit.password.length < 6)
-      tempErrors.password = "Password must be at least 6 characters";
-
-    if (!formEdit.roleName) tempErrors.roleName = "Role is required";
+    else if (!nameRegex.test(formEdit.name)) tempErrors.name = "Full Name can only contain letters and spaces";
 
     if (!formEdit.email) tempErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formEdit.email))
-      tempErrors.email = "Email is invalid";
+    else if (!formEdit.email.endsWith("@gmail.com")) tempErrors.email = "Email must end with @gmail.com";
+    else if (!/\S+@gmail\.com$/.test(formEdit.email)) tempErrors.email = "Email must be a valid Gmail address";
 
     if (!formEdit.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(formEdit.phone))
-      tempErrors.phone = "Phone number must be 10 digits";
+    else if (!/^[0]\d{9}$/.test(formEdit.phone)) tempErrors.phone = "Phone number must be 10 digits and start with 0";
 
     setEditErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -141,10 +174,9 @@ const Admin = () => {
 
   const handleClose = () => {
     setShow(false);
-    setShowEquipment(false)
+    setShowEquipment(false);
     setFormData({
       username: "",
-      password: "",
       roleName: "",
       name: "",
       phone: "",
@@ -158,8 +190,6 @@ const Admin = () => {
     setShowEdit(false);
     setFormEdit({
       username: "",
-      password: "",
-      roleName: "",
       name: "",
       phone: "",
       email: "",
@@ -173,10 +203,6 @@ const Admin = () => {
   };
 
   const handleOpen = () => {
-    if (formData != null) {
-      setShow(true);
-      setShowEquipment(false);
-    }
     setShow(true);
   };
 
@@ -196,14 +222,12 @@ const Admin = () => {
     if (validateForm()) {
       try {
         const response = await axiosClient.post("/user/register", formData);
-        enqueueSnackbar(response.data, {variant: "success"});
+        enqueueSnackbar(response.data, { variant: "success" });
         fetchData();
         handleClose();
       } catch (error) {
-        enqueueSnackbar(error.response.data, {variant: "error"});
+        enqueueSnackbar(error.response?.data || "Failed to create user", { variant: "error" });
       }
-    } else {
-      toast.error("Please fix the errors in the form");
     }
   };
 
@@ -226,7 +250,7 @@ const Admin = () => {
     if (validateEditForm()) {
       try {
         const response = await axiosClient.put(`/user/${idEdit}`, formEdit);
-        toast.success(response.data);
+        enqueueSnackbar(response.data, { variant: "success" });
         fetchData();
         handleCloseEdit();
       } catch (error) {
@@ -242,8 +266,6 @@ const Admin = () => {
     setIdEdit(item.id);
     setFormEdit({
       username: item.username,
-      password: item.password,
-      roleName: item.role.toLowerCase(),
       name: item.userResponse.fullName,
       phone: item.userResponse.phone,
       email: item.userResponse.email,
@@ -252,21 +274,21 @@ const Admin = () => {
 
   const handleToggleUserStatus = async (user) => {
     try {
-      await axiosClient.patch(`/user/delete/${user.id}`);
+      const response = await axiosClient.patch(`/user/delete/${user.id}`);
       fetchData();
-      toast.info(`User Deactivated successfully!`);
+      enqueueSnackbar(response.data, { variant: "success" });
     } catch (error) {
-      toast.error("Something Wrong....", error);
+      enqueueSnackbar(error.response.data, { variant: "error" });
     }
   };
 
   const handleToggleActivate = async (user) => {
     try {
-      await axiosClient.patch(`/user/activate/${user.id}`);
+      const response = await axiosClient.patch(`/user/activate/${user.id}`);
       fetchData();
-      toast.info(`User activated successfully!`);
+      enqueueSnackbar(response.data, { variant: "success" });
     } catch (error) {
-      toast.error("Something Wrong....", error);
+      enqueueSnackbar(error.response.data, { variant: "error" });
     }
   };
 
@@ -279,32 +301,50 @@ const Admin = () => {
     setShowUserDetail(true);
   };
 
-  const PasswordField = ({ password }) => {
-    const [showPassword, setShowPassword] = useState(false);
-    return (
-      <td>
-        <h5 className="text-muted">
-          {showPassword ? password : "••••••••"}
-          {showPassword ? (
-            <IoIosEye
-              style={{ color: "black", cursor: "pointer", marginLeft: "10px" }}
-              onClick={() => setShowPassword(false)}
-            />
-          ) : (
-            <IoIosEyeOff
-              style={{ color: "black", cursor: "pointer", marginLeft: "10px" }}
-              onClick={() => setShowPassword(true)}
-            />
-          )}
-        </h5>
-      </td>
-    );
+  const handleCheckboxChange = (id) => {
+    setFormData((prevData) => {
+      const isChecked = prevData.eqIds.includes(id);
+      return {
+        ...prevData,
+        eqIds: isChecked
+          ? prevData.eqIds.filter((eqId) => eqId !== id)
+          : [...prevData.eqIds, id],
+      };
+    });
   };
 
+  const getFilteredAndSortedData = () => {
+    let filteredData = [...dashData];
+    if (searchTerm) {
+      filteredData = filteredData.filter(item =>
+        item.username.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    filteredData.sort((a, b) => {
+      const usernameA = a.id;
+      const usernameB = b.id;
+      return sortOrder === 'asc' 
+        ? usernameA - (usernameB)
+        : usernameB - (usernameA);
+    });
+    return filteredData;
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleSortToggle = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    setCurrentPage(1);
+  };
+
+  const filteredAndSortedData = getFilteredAndSortedData();
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = dashData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(dashData.length / itemsPerPage);
+  const currentItems = filteredAndSortedData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -324,451 +364,197 @@ const Admin = () => {
     return items;
   };
 
-  const handleCheckboxChange = (id) => {
-    setFormData((prevData) => {
-      const isChecked = prevData.eqIds.includes(id);
-
-      return {
-        ...prevData,
-        eqIds: isChecked
-          ? prevData.eqIds.filter((eqId) => eqId !== id) 
-          : [...prevData.eqIds, id], 
-      };
-    });
-  };
-
   return (
     <>
-      <Row
-        className={style.screen}
-        style={{
-          overflowY: "scroll",
-          height: "100vh",
-          marginLeft: "0.5px",
-          marginRight: "0.5px",
-        }}
-      >
-        <Col md={6} xl={12}>
-          <Card className="Recent-Users widget-focus-lg">
-            <Card.Header>
-              <Card.Title as="h5">
-                All Users -
-                <FaUserPlus
-                  style={{
-                    marginLeft: "4px",
-                    fontSize: "25px",
-                    cursor: "pointer",
-                  }}
-                  onClick={handleOpen}
-                />
-              </Card.Title>
-            </Card.Header>
-            <Card.Body className="px-0 py-2">
-              <Table responsive hover className="recent-users">
-                <tbody>
-                  {currentItems.length > 0 ? (
-                    currentItems.map((item) => (
-                      <tr
-                        key={item.id}
-                        style={{ opacity: item.status === "deleted" ? 0.3 : 1 }}
-                      >
-                        <td>
-                          <img
-                            className="rounded-circle"
-                            style={{ width: "40px" }}
-                            src={avatar1}
-                            alt="activity-user"
-                          />
-                        </td>
-                        <td>
-                          <p className="m-0">ID: {item.id}</p>
-                        </td>
-                        <td>
-                          <h5 className="text-muted">{item.username}</h5>
-                        </td>
-                        <PasswordField password={item.password} />
-                        <td>
-                          <h6 className="text-muted">{item.role}</h6>
-                        </td>
-                        <td>
-                          <h6 className="text-muted">
-                            <i
-                              className={`fa fa-circle ${item.status === "active" ? "text-c-green" : "text-c-gray"} f-10 m-r-15`}
-                            />
-                            {item.status}
-                          </h6>
-                        </td>
-                        <td>
-                          {item.status === "active" ? (
-                            <MdDelete
-                              onClick={() => handleToggleUserStatus(item)}
-                              style={{
-                                fontSize: "30px",
-                                color: "red",
-                                cursor: "pointer",
-                                marginRight: "30px",
-                              }}
-                            />
-                          ) : (
-                            <FaPowerOff
-                              onClick={() => handleToggleActivate(item)}
-                              style={{
-                                color: "green",
-                                fontSize: "25px",
-                                marginRight: "30px",
-                                cursor: "pointer",
-                              }}
-                            />
-                          )}
-                          <MdModeEdit
-                            style={{
-                              fontSize: "25px",
-                              cursor:
-                                item.status === "active"
-                                  ? "pointer"
-                                  : "not-allowed",
-                              marginRight: "30px",
-                            }}
-                            onClick={() =>
-                              item.status === "active" &&
-                              handleOpenEditForm(item)
-                            }
-                          />
-                          <BiSolidUserDetail
-                            style={{
-                              fontSize: "25px",
-                              color: "blue",
-                              cursor:
-                                item.status === "active"
-                                  ? "pointer"
-                                  : "not-allowed",
-                            }}
-                            onClick={() =>
-                              item.status === "active" &&
-                              handleOpenUserDetail(item.userResponse)
-                            }
-                          />
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
+      <AdminHeader
+        searchTerm={searchTerm}
+        sortOrder={sortOrder}
+        onSearchChange={handleSearchChange}
+        onSortToggle={handleSortToggle}
+        onCreateClick={handleOpen}
+        totalUsers={filteredAndSortedData.length}
+      />
+      <div className="container-fluid mt-5 pt-3" >
+        <Row>
+          <Col>
+            <Card className="shadow-sm" style={{borderRadius: "10px"}}>
+              <Card.Body>
+                <Table responsive hover className="table-striped">
+                  <thead className="bg-light text-center" >
                     <tr>
-                      <td colSpan="7" className="text-center">
-                        No users found
-                      </td>
+                      <th>ID</th>
+                      <th>Username</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
                     </tr>
-                  )}
-                </tbody>
-              </Table>
-              {dashData.length > 0 && (
-                <div className="d-flex justify-content-center mt-3">
-                  <Pagination>
-                    <Pagination.First
-                      onClick={() => handlePageChange(1)}
-                      disabled={currentPage === 1}
-                    />
-                    <Pagination.Prev
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    />
-                    {renderPaginationItems()}
-                    <Pagination.Next
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    />
-                    <Pagination.Last
-                      onClick={() => handlePageChange(totalPages)}
-                      disabled={currentPage === totalPages}
-                    />
-                  </Pagination>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                  </thead>
+                  <tbody>
+                    {currentItems.length > 0 ? (
+                      currentItems.map((item) => (
+                        <tr key={item.id} style={{ opacity: item.status === "deleted" ? 0.3 : 1 }}>
+                          <td>{item.id}</td>
+                          <td>{item.username}</td>
+                          <td>{item.role.toUpperCase()}</td>
+                          <td>
+                            <i className={`fa fa-circle ${item.status === "active" ? "text-success" : "text-secondary"} me-2`} />
+                            {item.status}
+                          </td>
+                          <td>
+                            {item.status === "active" ? (
+                              <MdDelete
+                                onClick={() => handleToggleUserStatus(item)}
+                                className="text-danger me-3"
+                                style={{ fontSize: "20px", cursor: "pointer" }}
+                              />
+                            ) : (
+                              <FaPowerOff
+                                onClick={() => handleToggleActivate(item)}
+                                className="text-success me-3"
+                                style={{ fontSize: "20px", cursor: "pointer" }}
+                              />
+                            )}
+                            <MdModeEdit
+                              className="text-dark me-3"
+                              style={{ fontSize: "20px", cursor: item.status === "active" ? "pointer" : "not-allowed" }}
+                              onClick={() => item.status === "active" && handleOpenEditForm(item)}
+                            />
+                            <BiSolidUserDetail
+                              className="text-primary"
+                              style={{ fontSize: "20px", cursor: item.status === "active" ? "pointer" : "not-allowed" }}
+                              onClick={() => item.status === "active" && handleOpenUserDetail(item.userResponse)}
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">No users found</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+                {filteredAndSortedData.length > 0 && (
+                  <div className="d-flex justify-content-center mt-3">
+                    <Pagination>
+                      <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                      <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                      {renderPaginationItems()}
+                      <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                      <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                    </Pagination>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </div>
 
-      <Modal
-        show={show}
-        style={{ color: "black" }}
-        centered
-        size="md"
-        onHide={handleClose}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Create New User</Modal.Title>
-        </Modal.Header>
+      {/* Các Modal components */}
+      <Modal show={show} style={{ color: "black" }} centered size="md" onHide={handleClose}>
+        <Modal.Header closeButton><Modal.Title>Create New User</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                isInvalid={!!errors.username}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.username}
-              </Form.Control.Feedback>
+              <Form.Control type="text" placeholder="Enter username" name="username" value={formData.username} onChange={handleChange} isInvalid={!!errors.username} />
+              <Form.Control.Feedback type="invalid">{errors.username}</Form.Control.Feedback>
             </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Enter password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                isInvalid={!!errors.password}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.password}
-              </Form.Control.Feedback>
-            </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Role</Form.Label>
-              <Form.Control
-                as="select"
-                name="roleName"
-                value={formData.roleName}
-                onChange={handleChange}
-                isInvalid={!!errors.roleName}
-              >
+              <Form.Control as="select" name="roleName" value={formData.roleName} onChange={handleChange} isInvalid={!!errors.roleName}>
                 <option value="">Select Role</option>
                 <option value="staff">staff</option>
                 <option value="supplier">supplier</option>
                 <option value="requester">requester</option>
               </Form.Control>
-              <Form.Control.Feedback type="invalid">
-                {errors.roleName}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{errors.roleName}</Form.Control.Feedback>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Full Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter full name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                isInvalid={!!errors.name}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.name}
-              </Form.Control.Feedback>
+              <Form.Control type="text" placeholder="Enter full name" name="name" value={formData.name} onChange={handleChange} isInvalid={!!errors.name} />
+              <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email address"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                isInvalid={!!errors.email}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.email}
-              </Form.Control.Feedback>
+              <Form.Control type="email" placeholder="Enter email address" name="email" value={formData.email} onChange={handleChange} isInvalid={!!errors.email} />
+              <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter phone number"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                isInvalid={!!errors.phone}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.phone}
-              </Form.Control.Feedback>
+              <Form.Control type="text" placeholder="Enter phone number" name="phone" value={formData.phone} onChange={handleChange} isInvalid={!!errors.phone} />
+              <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          {formData.roleName != "supplier" ? (
-            <Button variant="primary" onClick={handleCreateUser}>
-              Create
-            </Button>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+          {formData.roleName !== "supplier" ? (
+            <Button variant="primary" onClick={handleCreateUser}>Create</Button>
           ) : (
-            <Button variant="primary" onClick={handleOpenEquipment}>
-              Next
-            </Button>
+            <Button variant="primary" onClick={handleOpenEquipment}>Next</Button>
           )}
         </Modal.Footer>
       </Modal>
 
-      <Modal
-        show={showEdit}
-        style={{ color: "black" }}
-        centered
-        onHide={handleCloseEdit}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Information</Modal.Title>
-        </Modal.Header>
+      <Modal show={showEdit} style={{ color: "black" }} centered onHide={handleCloseEdit}>
+        <Modal.Header closeButton><Modal.Title>Edit Information</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="text"
-                name="username"
-                value={formEdit.username}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.username}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.username}
-              </Form.Control.Feedback>
+              <Form.Control type="text" name="username" value={formEdit.username} onChange={handleEditChange} isInvalid={!!editErrors.username} />
+              <Form.Control.Feedback type="invalid">{editErrors.username}</Form.Control.Feedback>
             </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={formEdit.password}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.password}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.password}
-              </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Role Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="roleName"
-                readOnly
-                style={{ opacity: 0.5, cursor: "not-allowed" }}
-                value={formEdit.roleName}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.roleName}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.roleName}
-              </Form.Control.Feedback>
-            </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={formEdit.name}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.name}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.name}
-              </Form.Control.Feedback>
+              <Form.Control type="text" name="name" value={formEdit.name} onChange={handleEditChange} isInvalid={!!editErrors.name} />
+              <Form.Control.Feedback type="invalid">{editErrors.name}</Form.Control.Feedback>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Phone</Form.Label>
-              <Form.Control
-                type="text"
-                name="phone"
-                value={formEdit.phone}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.phone}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.phone}
-              </Form.Control.Feedback>
+              <Form.Control type="text" name="phone" value={formEdit.phone} onChange={handleEditChange} isInvalid={!!editErrors.phone} />
+              <Form.Control.Feedback type="invalid">{editErrors.phone}</Form.Control.Feedback>
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formEdit.email}
-                onChange={handleEditChange}
-                isInvalid={!!editErrors.email}
-              />
-              <Form.Control.Feedback type="invalid">
-                {editErrors.email}
-              </Form.Control.Feedback>
+              <Form.Control type="email" name="email" value={formEdit.email} onChange={handleEditChange} isInvalid={!!editErrors.email} />
+              <Form.Control.Feedback type="invalid">{editErrors.email}</Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseEdit}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSubmitEdit}>
-            Edit
-          </Button>
+          <Button variant="secondary" onClick={handleCloseEdit}>Close</Button>
+          <Button variant="primary" onClick={handleSubmitEdit}>Edit</Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal
-        show={showUserDetail}
-        onHide={handleCloseUserDetail}
-        centered
-        style={{ color: "black" }}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>User Detail</Modal.Title>
-        </Modal.Header>
+      <Modal show={showUserDetail} onHide={handleCloseUserDetail} centered style={{ color: "black" }}>
+        <Modal.Header closeButton><Modal.Title>User Detail</Modal.Title></Modal.Header>
         <Modal.Body>
           <Card>
             <Card.Body>
               <div className="d-flex justify-content-center mb-4">
-                <img
-                  className="rounded-circle"
-                  style={{ width: "100px", height: "100px" }}
-                  src={avatar1}
-                  alt="user-avatar"
-                />
+                <img className="rounded-circle" style={{ width: "100px", height: "100px" }} src={avatar1} alt="user-avatar" />
               </div>
               <Table bordered responsive>
                 <tbody>
-                  <tr>
-                    <td className="fw-bold">Full Name</td>
-                    <td>{userDetail.fullName || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="fw-bold">Email</td>
-                    <td>{userDetail.email || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="fw-bold">Phone</td>
-                    <td>{userDetail.phone || "N/A"}</td>
-                  </tr>
+                  <tr><td className="fw-bold">Full Name</td><td>{userDetail.fullName || "N/A"}</td></tr>
+                  <tr><td className="fw-bold">Email</td><td>{userDetail.email || "N/A"}</td></tr>
+                  <tr><td className="fw-bold">Phone</td><td>{userDetail.phone || "N/A"}</td></tr>
                 </tbody>
               </Table>
             </Card.Body>
           </Card>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseUserDetail}>
-            Close
-          </Button>
+          <Button variant="secondary" onClick={handleCloseUserDetail}>Close</Button>
         </Modal.Footer>
       </Modal>
 
       <Modal show={showEquipment} className="text-black">
-        <Modal.Header>
-          <Modal.Title>Equipment</Modal.Title>
-        </Modal.Header>
+        <Modal.Header><Modal.Title>Equipment</Modal.Title></Modal.Header>
         <Modal.Body>
           {equipment.map((item, index) => (
             <div className="form-check" key={index}>
@@ -779,10 +565,7 @@ const Admin = () => {
                 checked={formData.eqIds.includes(item.id)}
                 onChange={() => handleCheckboxChange(item.id)}
               />
-              <label
-                className="form-check-label"
-                htmlFor={`equipment-${item.id}`}
-              >
+              <label className="form-check-label" htmlFor={`equipment-${item.id}`}>
                 {item.name}
               </label>
             </div>
@@ -790,9 +573,7 @@ const Admin = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={handleOpen}>Previous</Button>
-          <Button variant="primary" onClick={handleCreateUser}>
-              Create
-            </Button>
+          <Button variant="primary" onClick={handleCreateUser}>Create</Button>
         </Modal.Footer>
       </Modal>
     </>

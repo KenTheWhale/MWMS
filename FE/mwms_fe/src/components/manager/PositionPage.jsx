@@ -32,6 +32,8 @@ const PositionPage = () => {
     areaId: null,
   });
 
+  const [area, setArea] = useState(null);
+
   const { enqueueSnackbar } = useSnackbar();
   const [formErrors, setFormErrors] = useState({});
 
@@ -56,10 +58,10 @@ const PositionPage = () => {
       setLoading(true);
       const response = await axiosClient.get(`/manager/position/${id}`);
       setPositions(response.data || []);
-      setError(null);
+      const responseArea = await axiosClient.get(`/manager/area/${id}`);
+      setArea(responseArea.data);
     } catch (error) {
-      console.log(error);
-      setError("Không thể tải dữ liệu vị trí. Vui lòng thử lại sau.");
+      enqueueSnackbar("Can not loading data", { varriant: "error" });
     } finally {
       setLoading(false);
     }
@@ -76,10 +78,13 @@ const PositionPage = () => {
   const validateForm = () => {
     let tempErrors = {};
     if (!form.name) tempErrors.name = "Position name is required";
-    else if (form.name.length < 2) tempErrors.name = "Position name must be at least 2 characters";
-    else if (form.name.length > 50) tempErrors.name = "Position name must not exceed 50 characters";
+    else if (form.name.length < 2)
+      tempErrors.name = "Position name must be at least 2 characters";
+    else if (form.name.length > 50)
+      tempErrors.name = "Position name must not exceed 50 characters";
 
-    if (!form.square || form.square <= 0) tempErrors.square = "Square must be greater than 0";
+    if (!form.square || form.square <= 0)
+      tempErrors.square = "Square must be greater than 0";
 
     setFormErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -93,12 +98,18 @@ const PositionPage = () => {
         setForm({ name: "", square: 0, areaId: null });
         setFormErrors({});
         fetchData();
-        enqueueSnackbar("Position created successfully!", { variant: "success" });
+        enqueueSnackbar("Position created successfully!", {
+          variant: "success",
+        });
       } catch (error) {
-        enqueueSnackbar(error.response?.data || "Something went wrong!", { variant: "error" });
+        enqueueSnackbar(error.response?.data || "Something went wrong!", {
+          variant: "error",
+        });
       }
     } else {
-      enqueueSnackbar("Please fix the errors in the form", { variant: "error" });
+      enqueueSnackbar("Please fix the errors in the form", {
+        variant: "error",
+      });
     }
   };
 
@@ -111,14 +122,16 @@ const PositionPage = () => {
     const { name, value } = e.target;
     setForm((prevForm) => ({
       ...prevForm,
-      [name]: name === "square" ? parseInt(value) || 0 : value, 
+      [name]: name === "square" ? parseInt(value) || 0 : value,
     }));
   };
 
   const handleOpenEditForm = async () => {
     setShowEdit(true);
     try {
-      const response = await axiosClient.get(`/manager/position/individual/${chosePositionId}`);
+      const response = await axiosClient.get(
+        `/manager/position/individual/${chosePositionId}`
+      );
       setForm({
         name: response.data.name,
         square: response.data.square,
@@ -133,7 +146,10 @@ const PositionPage = () => {
   const handleEditPosition = async () => {
     if (validateForm()) {
       try {
-        const response = await axiosClient.put(`/manager/position/${chosePositionId}`, form);
+        const response = await axiosClient.put(
+          `/manager/position/${chosePositionId}`,
+          form
+        );
         setShowEdit(false);
         setShowPosition(false);
         setForm({ name: "", square: 0, areaId: null });
@@ -141,10 +157,14 @@ const PositionPage = () => {
         fetchData();
         enqueueSnackbar(response.data, { variant: "success" });
       } catch (error) {
-        enqueueSnackbar(error.response?.data || "Something went wrong!", { variant: "error" });
+        enqueueSnackbar(error.response?.data || "Something went wrong!", {
+          variant: "error",
+        });
       }
     } else {
-      enqueueSnackbar("Please fix the errors in the form", { variant: "error" });
+      enqueueSnackbar("Please fix the errors in the form", {
+        variant: "error",
+      });
     }
   };
 
@@ -158,7 +178,9 @@ const PositionPage = () => {
     try {
       setShowPosition(true);
       setChosePositionId(positionId);
-      const response = await axiosClient.get(`/manager/position/individual/${positionId}`);
+      const response = await axiosClient.get(
+        `/manager/position/individual/${positionId}`
+      );
       setBatch(response.data.batches || []);
     } catch (error) {
       toast.error("Something Wrong .....", error);
@@ -187,7 +209,9 @@ const PositionPage = () => {
 
   const handleDeletePosition = async () => {
     try {
-      const response = await axiosClient.delete(`/manager/position/${chosePositionId}`);
+      const response = await axiosClient.delete(
+        `/manager/position/${chosePositionId}`
+      );
       toast.success(response.data);
       setShowDelete(false);
       setShowPosition(false);
@@ -206,68 +230,103 @@ const PositionPage = () => {
     <>
       <Container className="py-4">
         <Button variant="success" onClick={handleOpen}>
-          <MdAddCircleOutline style={{ fontSize: "20px", marginRight: "5px" }} />
+          <MdAddCircleOutline
+            style={{ fontSize: "20px", marginRight: "5px" }}
+          />
           Create New Position
         </Button>
 
-        <Card>
-          <Card.Header>
-            <Card.Title className="text-center">Area Management in Position {id}</Card.Title>
-          </Card.Header>
-          <Card.Body>
-            {positions.length === 0 ? (
-              <div className="text-center">No have any position in this area</div>
-            ) : (
-              <div
-                className="position-grid center"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(5, 1fr)",
-                  gap: "10px",
-                }}
-              >
-                {positions.map((position) => (
-                  <div
-                    key={position.id}
-                    className={`border rounded d-flex flex-column align-items-center justify-content-center p-2 bg-${getPositionColor(
-                      position
-                    )} position-relative`}
-                    style={{ width: "180px", height: "80px", cursor: "pointer" }}
-                    onClick={() => handleShowPosition(position.id)}
-                  >
-                    <span
-                      className="position-absolute bg-danger text-white rounded-circle d-flex justify-content-center align-items-center"
-                      style={{
-                        top: "5px",
-                        right: "5px",
-                        width: "20px",
-                        height: "20px",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        zIndex: 10,
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenDeleteModal(position.id);
-                      }}
-                    >
-                      x
-                    </span>
-                    <span className="fs-6">{position.name}</span>
-                    <br />
-                    <span className="fs-6">{position.square}m²</span>
-                  </div>
-                ))}
+        <Card className="shadow-sm">
+      <Card.Header className="bg-secondary">
+        <Card.Title className="d-flex justify-content-between align-items-start" style={{color: "white"}}>
+          {area != null ? (
+            <>
+              <div className="flex-grow-1 me-3">
+                <div className="fw-bold">Area ID: {area.id}</div>
+                <div>Area Name: {area.name}</div>
+                <div>Area Status: {area.status}</div>
+                <div>Area Square: {area.square}m²</div>
               </div>
-            )}
-          </Card.Body>
-        </Card>
+              <div className="flex-grow-1">
+                <div className="fw-bold">Equipment Name: {area.equipment.name}</div>
+                <div>Equipment Code: {area.equipment.code}</div>
+                <div>Equipment Status: {area.equipment.status}</div>
+              </div>
+            </>
+          ) : (
+            <div className="w-100 text-center">Loading...</div>
+          )}
+        </Card.Title>
+      </Card.Header>
+      <Card.Body>
+        {positions.length === 0 ? (
+          <div className="text-center text-muted py-4">
+            No positions available in this area
+          </div>
+        ) : (
+          <div
+            className="position-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              gap: "15px",
+            }}
+          >
+            {positions.map((position) => (
+              <div
+                key={position.id}
+                className={`border rounded d-flex flex-column align-items-center justify-content-center p-3 bg-${getPositionColor(
+                  position
+                )} position-relative shadow-sm`}
+                style={{
+                  width: "100%",
+                  height: "100px",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
+                }}
+                onClick={() => handleShowPosition(position.id)}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              >
+                <span
+                  className="position-absolute bg-danger text-white rounded-circle d-flex justify-content-center align-items-center"
+                  style={{
+                    top: "5px",
+                    right: "5px",
+                    width: "25px",
+                    height: "25px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    zIndex: 10,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenDeleteModal(position.id);
+                  }}
+                >
+                  ×
+                </span>
+                <span className="fw-semibold fs-6">{position.name}</span>
+                <span className="fs-6">{position.square}m²</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card.Body>
+    </Card>
       </Container>
 
-      <Modal show={showPosition} onHide={handlePositionClose} centered style={{ color: "black",padding: "10px",
-    filter: showEdit ? "blur(5px)" : "none", // Làm mờ khi mở Edit
-    transition: "0.3s ease-in-out", // Hiệu ứng mượt
-}}>
+      <Modal
+        show={showPosition}
+        onHide={handlePositionClose}
+        centered
+        style={{
+          color: "black",
+          padding: "10px",
+          filter: showEdit ? "blur(5px)" : "none", // Làm mờ khi mở Edit
+          transition: "0.3s ease-in-out", // Hiệu ứng mượt
+        }}
+      >
         <Modal.Header closeButton style={modalHeaderStyle}>
           <Modal.Title style={{ fontSize: "16px" }}>
             Detail Batch -{" "}
@@ -277,7 +336,9 @@ const PositionPage = () => {
             />
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ padding: "10px", maxHeight: "300px", overflowY: "auto" }}>
+        <Modal.Body
+          style={{ padding: "10px", maxHeight: "300px", overflowY: "auto" }}
+        >
           <Accordion
             defaultActiveKey="0"
             onSelect={(selectedKey) => {
@@ -287,7 +348,10 @@ const PositionPage = () => {
             {batch.map((item) => (
               <Accordion.Item eventKey={item.id.toString()} key={item.id}>
                 <Accordion.Header style={{ padding: "5px" }}>
-                  <div className="d-flex justify-content-between w-100" style={{ fontSize: "12px" }}>
+                  <div
+                    className="d-flex justify-content-between w-100"
+                    style={{ fontSize: "12px" }}
+                  >
                     <span>{item.id}</span>
                     <span>{item.code}</span>
                     <span style={{ fontSize: "11px" }}>{item.createdDate}</span>
@@ -307,7 +371,13 @@ const PositionPage = () => {
                             </span>
                           </div>
                         ) : (
-                          <Table striped bordered hover size="sm" style={{ fontSize: "12px" }}>
+                          <Table
+                            striped
+                            bordered
+                            hover
+                            size="sm"
+                            style={{ fontSize: "12px" }}
+                          >
                             <thead>
                               <tr>
                                 <th>ID</th>
@@ -320,7 +390,9 @@ const PositionPage = () => {
                                 <tr key={item.id}>
                                   <td>{item.id}</td>
                                   <td>{item.serialNumber}</td>
-                                  <td style={{ fontSize: "11px" }}>{item.importedDate}</td>
+                                  <td style={{ fontSize: "11px" }}>
+                                    {item.importedDate}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -329,7 +401,9 @@ const PositionPage = () => {
                       </>
                     ) : (
                       <div className="text-center">
-                        <span style={{ fontSize: "12px" }}>No details available</span>
+                        <span style={{ fontSize: "12px" }}>
+                          No details available
+                        </span>
                       </div>
                     )}
                   </div>
@@ -372,7 +446,9 @@ const PositionPage = () => {
                 onChange={handleChange}
                 isInvalid={!!formErrors.name}
               />
-              <Form.Control.Feedback type="invalid">{formErrors.name}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {formErrors.name}
+              </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
               <Form.Label>Square</Form.Label>
@@ -384,12 +460,18 @@ const PositionPage = () => {
                 onChange={handleChange}
                 isInvalid={!!formErrors.square}
               />
-              <Form.Control.Feedback type="invalid">{formErrors.square}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {formErrors.square}
+              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
-          <Button size="sm" variant="secondary" onClick={() => setShowCreate(false)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+          >
             Close
           </Button>
           <Button size="sm" variant="primary" onClick={handleCreate}>
@@ -415,8 +497,14 @@ const PositionPage = () => {
             Do you really want to delete this?
           </p>
         </Modal.Body>
-        <Modal.Footer style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-          <Button size="sm" variant="secondary" onClick={() => setShowDelete(false)}>
+        <Modal.Footer
+          style={{ display: "flex", justifyContent: "center", gap: "10px" }}
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowDelete(false)}
+          >
             Cancel
           </Button>
           <Button size="sm" variant="danger" onClick={handleDeletePosition}>
@@ -452,7 +540,9 @@ const PositionPage = () => {
                 onChange={handleChange}
                 isInvalid={!!formErrors.name}
               />
-              <Form.Control.Feedback type="invalid">{formErrors.name}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {formErrors.name}
+              </Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-2">
               <Form.Label>Square</Form.Label>
@@ -464,12 +554,18 @@ const PositionPage = () => {
                 onChange={handleChange}
                 isInvalid={!!formErrors.square}
               />
-              <Form.Control.Feedback type="invalid">{formErrors.square}</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">
+                {formErrors.square}
+              </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
-          <Button variant="secondary" size="sm" onClick={() => setShowEdit(false)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowEdit(false)}
+          >
             Close
           </Button>
           <Button variant="primary" size="sm" onClick={handleEditPosition}>
