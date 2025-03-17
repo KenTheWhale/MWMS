@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EditAccountRequest {
     String username;
-    String password;
-    String roleName;
     String name;
     String phone;
     String email;
