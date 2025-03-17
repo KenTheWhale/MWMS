@@ -447,14 +447,14 @@ public class ManagerServiceImpl implements ManagerService {
                 flag = true;
             }
         }
-        Task task = tasks.get(tasks.size() - 1);
-        String[] code = task.getCode().split("-");
+
+        int newCodeValue = tasks.isEmpty() ? 1 : Integer.parseInt(tasks.get(tasks.size() - 1).getCode().split("-")[1]) + 1;
 
         if (!flag) {
             taskRepo.save(
                     Task.builder()
                             .assignedDate(group.getDeliveryDate())
-                            .code(CodeFormat.TASK.getValue() + (Integer.parseInt(code[1]) + 1))
+                            .code(CodeFormat.TASK.getValue() + newCodeValue)
                             .itemGroup(group)
                             .user(staff)
                             .description(request.getDescription())

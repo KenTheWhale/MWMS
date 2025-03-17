@@ -57,4 +57,10 @@ public class StaffController {
     public ResponseEntity<ResponseObject> createBatch(@RequestBody CreateBatchRequest request){
         return staffService.createBatch(request);
     }
+
+    @GetMapping("batch")
+    @PreAuthorize("hasRole('staff')")
+    public ResponseEntity<ResponseObject> getBatchList(){
+        return staffService.getBatchList();
+    }
 }
