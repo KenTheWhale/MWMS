@@ -442,11 +442,13 @@ public class ManagerServiceImpl implements ManagerService {
             }
         }
         Task task = tasks.get(tasks.size() - 1);
+        String[] code = task.getCode().split("-");
+
         if (!flag) {
             taskRepo.save(
                     Task.builder()
                             .assignedDate(group.getDeliveryDate())
-                            .code(CodeFormat.TASK.getValue() + (task.getId() + 1))
+                            .code(CodeFormat.TASK.getValue() + (Integer.parseInt(code[1]) + 1))
                             .itemGroup(group)
                             .user(staff)
                             .description(request.getDescription())
@@ -581,7 +583,6 @@ public class ManagerServiceImpl implements ManagerService {
                             dataItem.put("category", item.getEquipment().getCategory().getName());
                             dataItem.put("partner", item.getPartner().getUser().getName());
                             dataItem.put("quantity", item.getQuantity());
-                            dataItem.put("unitPrice", df.format(item.getUnitPrice()));
                             return dataItem;
                         }
                 ).toList();
@@ -731,7 +732,6 @@ public class ManagerServiceImpl implements ManagerService {
 
             RequestItem requestItem = RequestItem.builder()
                     .quantity(item.getQuantity())
-                    .unitPrice(0)
                     .equipment(equipmentRepo.findById(item.getEquipmentId()).orElse(null))
                     .partner(partnerRepo.findById(item.getPartnerId()).orElse(null))
                     .itemGroup(currentGroup)

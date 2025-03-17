@@ -21,5 +21,5 @@ public interface AreaService {
 
     ResponseEntity<?> restoreArea(Integer id);
 
-    ResponseEntity<?> getAllForStaff();
+//    ResponseEntity<?> getAllForStaff();
 }
