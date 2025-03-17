@@ -36,9 +36,8 @@ public class UserServiceImpl implements UserService {
         return AccountResponse.builder()
                 .id(account.getId())
                 .username(account.getUsername())
-                .password(account.getPassword())
                 .status(account.getStatus())
-                .role(account.getRole().name())
+                .role(account.getRole().name().equals("PARTNER") ? account.getUser().getPartner().getType() : account.getRole().name()  )
                 .userResponse(mapToDtoUser(account.getUser()))
                 .build();
     }
