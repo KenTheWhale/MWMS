@@ -96,19 +96,8 @@ public class AreaServiceImpl implements AreaService {
             return ResponseEntity.badRequest().body("Area is still have positions");
         }
 
-        if(request.eqId() == null){
-            return ResponseEntity.badRequest().body("Area id cannot be null");
-        }
-
-        Equipment equipment = equipmentRepo.findById(request.eqId()).orElse(null);
-
-        if (equipment == null) {
-            return ResponseEntity.badRequest().body("Equipment not found");
-        }
-
         area.setName(request.name());
         area.setSquare(request.square());
-        area.setEquipment(equipment);
         areaRepo.save(area);
 
         return ResponseEntity.ok("Update successfully !");
