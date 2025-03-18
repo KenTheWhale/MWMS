@@ -15,6 +15,4 @@ public interface StaffService {
     //-------------------------------------------BATCH-------------------------------------------//
 
     ResponseEntity<ResponseObject> createBatch(CreateBatchRequest request);
-
-    ResponseEntity<ResponseObject> getBatchList();
 }
