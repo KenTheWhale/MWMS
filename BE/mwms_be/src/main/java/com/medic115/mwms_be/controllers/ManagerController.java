@@ -219,6 +219,11 @@ public class ManagerController {
     }
 
 
+    @GetMapping("/request/history")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getImportHistory() {
+        return managerService.viewImportHistory();
+    }
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")
