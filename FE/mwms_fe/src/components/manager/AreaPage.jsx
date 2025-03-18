@@ -6,7 +6,6 @@ import {
   Modal,
   Table,
   Pagination,
-  Dropdown,
 } from "react-bootstrap";
 import {
   MdModeEditOutline,
@@ -14,11 +13,11 @@ import {
   MdRestore,
   MdAddCircleOutline,
 } from "react-icons/md";
-import { TbScanPosition } from "react-icons/tb";
+import { TbScanPosition } from "react-icons/tb"
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import { FaSortAmountDown, FaSortAmountUp, FaFilter } from "react-icons/fa";
 
 const AreaPage = () => {
   const [data, setData] = useState([]);
@@ -30,7 +29,10 @@ const AreaPage = () => {
 
   // Search states
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("name");
+
+  // Equipment filter states
+  const [showEquipmentFilter, setShowEquipmentFilter] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
 
   const [showUpdate, setShowUpdate] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
@@ -62,10 +64,10 @@ const AreaPage = () => {
   const handleSortByCmd = () => {
     if (cmdSort === false) {
       setCmdSort(true);
-      setFilteredData([...filteredData].sort((a, b) => a.id - b.id)); // Tăng dần
+      setFilteredData([...filteredData].sort((a, b) => a.id - b.id));
     } else {
       setCmdSort(false);
-      setFilteredData([...filteredData].sort((a, b) => b.id - a.id)); // Giảm dần
+      setFilteredData([...filteredData].sort((a, b) => b.id - a.id));
     }
     setCurrentPage(1);
   };
@@ -119,9 +121,7 @@ const AreaPage = () => {
     if (!form.square) tempErrors.square = "Square is required";
     else if (form.square <= 0 || form.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
-
-    if (!form.eqId) tempErrors.eqId = "Equipment selection is required";
-
+    
     setUpdateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -130,17 +130,47 @@ const AreaPage = () => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    const filtered = data.filter((area) => {
-      if (selectedFilter === "name") {
-        return area.name.toLowerCase().includes(value.toLowerCase());
-      } else if (selectedFilter === "equipment") {
-        return area.equipment.name.toLowerCase().includes(value.toLowerCase());
-      }
-      return true;
-    });
+    let filtered = data;
+    if (value) {
+      filtered = data.filter((area) =>
+        area.name.toLowerCase().includes(value.toLowerCase())
+      );
+    }
+
+    if (selectedEquipment) {
+      filtered = filtered.filter(
+        (area) => area.equipment.id === selectedEquipment.id
+      );
+    }
 
     setFilteredData(filtered);
     setCurrentPage(1);
+  };
+
+  const handleEquipmentFilter = (equipment) => {
+    setSelectedEquipment(equipment);
+    setShowEquipmentFilter(false);
+
+    let filtered = data;
+    if (equipment) {
+      filtered = data.filter((area) => area.equipment.id === equipment.id);
+    }
+    if (searchTerm) {
+      filtered = filtered.filter((area) =>
+        area.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredData(filtered);
+    setCurrentPage(1);
+  };
+
+  const clearEquipmentFilter = () => {
+    setSelectedEquipment(null);
+    fetchData(); // Lấy lại toàn bộ danh sách
+    if (searchTerm) {
+      handleSearch({ target: { value: searchTerm } }); // Áp dụng lại tìm kiếm tên nếu có
+    }
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -158,7 +188,6 @@ const AreaPage = () => {
           id: response.data.id,
           name: response.data.name,
           square: response.data.square,
-          eqId: response.data.equipment.id,
         });
         setSelectedArea(areaId);
         setShowUpdate(true);
@@ -281,7 +310,10 @@ const AreaPage = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const fetchInitialData = async () => {
+      await Promise.all([fetchData(), handleFetchEquipment()]);
+    };
+    fetchInitialData();
   }, []);
 
   const modalBodyStyle = { padding: "15px" };
@@ -310,30 +342,28 @@ const AreaPage = () => {
         </Button>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              Filter: {selectedFilter}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => setSelectedFilter("name")}>
-                Name
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setSelectedFilter("equipment")}>
-                Equipment
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-
           <Form.Control
             type="text"
-            placeholder={`Search by ${selectedFilter}...`}
+            placeholder="Search by name..."
             value={searchTerm}
             onChange={handleSearch}
             style={{ width: "200px" }}
           />
+          <Button
+            variant="secondary"
+            onClick={() => setShowEquipmentFilter(true)}
+            title="Filter by Equipment"
+          >
+            <FaFilter style={{ marginRight: "5px" }} />
+            {selectedEquipment ? selectedEquipment.name : "Filter Equipment"}
+          </Button>
+          {selectedEquipment && (
+            <Button variant="outline-danger" onClick={clearEquipmentFilter}>
+              Clear Filter
+            </Button>
+          )}
         </div>
 
-        {/* Icon sắp xếp */}
         {cmdSort ? (
           <FaSortAmountDown
             style={{ cursor: "pointer", fontSize: "20px" }}
@@ -347,10 +377,12 @@ const AreaPage = () => {
         )}
       </div>
 
-      <div className="text-danger fw-bold" style={{marginLeft: "10px"}}> Status of area will be updated in every minute</div>
+      <div className="text-danger fw-bold" style={{ marginLeft: "10px" }}>
+        Status of area will be updated in every minute
+      </div>
       <Table
         className="text-center"
-        style={{ marginLeft: "10px", marginTop: "50px"}}
+        style={{ marginLeft: "10px", marginTop: "50px" }}
       >
         <thead>
           <tr className="table-success">
@@ -375,9 +407,11 @@ const AreaPage = () => {
                 <td>
                   <span
                     className={`badge ${
-                      area.status === "deleted" ? "bg-danger" : area.status === "full"
-                          ? "bg-warning"
-                          : "bg-success"
+                      area.status === "deleted"
+                        ? "bg-danger"
+                        : area.status === "full"
+                        ? "bg-warning"
+                        : "bg-success"
                     }`}
                   >
                     {area.status}
@@ -539,28 +573,7 @@ const AreaPage = () => {
                 {updateErrors.square}
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label style={{ fontSize: "14px", marginBottom: "2px" }}>
-                Equipment
-              </Form.Label>
-              <Form.Control
-                as="select"
-                name="eqId"
-                value={form.eqId || ""}
-                onChange={(e) => handleChange(e, "update")}
-                isInvalid={!!updateErrors.eqId}
-              >
-                <option value="">Select Equipment</option>
-                {equipments.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </Form.Control>
-              <Form.Control.Feedback type="invalid">
-                {updateErrors.eqId}
-              </Form.Control.Feedback>
-            </Form.Group>
+           
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
@@ -692,6 +705,51 @@ const AreaPage = () => {
           </Button>
           <Button size="sm" variant="danger" onClick={handleDeleteConfirm}>
             Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showEquipmentFilter}
+        onHide={() => setShowEquipmentFilter(false)}
+        size="sm"
+        centered
+        style={{ color: "black" }}
+      >
+        <Modal.Header closeButton style={{ padding: "10px 15px" }}>
+          <Modal.Title style={{ fontSize: "16px" }}>
+            Filter by Equipment
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={modalBodyStyle}>
+          <Form>
+            <Form.Group>
+              <Form.Control
+                as="select"
+                onChange={(e) => {
+                  const eqId = e.target.value;
+                  const selected = equipments.find(
+                    (eq) => eq.id === Number(eqId)
+                  );
+                  handleEquipmentFilter(selected);
+                }}
+              >
+                {equipments.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer style={modalFooterStyle}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setShowEquipmentFilter(false)}
+          >
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

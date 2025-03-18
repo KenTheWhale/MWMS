@@ -242,15 +242,12 @@ const PositionPage = () => {
           {area != null ? (
             <>
               <div className="flex-grow-1 me-3">
-                <div className="fw-bold">Area ID: {area.id}</div>
                 <div>Area Name: {area.name}</div>
                 <div>Area Status: {area.status}</div>
                 <div>Area Square: {area.square}m²</div>
               </div>
               <div className="flex-grow-1">
                 <div className="fw-bold">Equipment Name: {area.equipment.name}</div>
-                <div>Equipment Code: {area.equipment.code}</div>
-                <div>Equipment Status: {area.equipment.status}</div>
               </div>
             </>
           ) : (
