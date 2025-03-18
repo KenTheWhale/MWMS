@@ -58,7 +58,6 @@ function ImportRequest() {
     const [equipmentForUpdate, setEquipmentForUpdate] = useState([]);
     const [showConfirmCancel, setShowConfirmCancel] = useState(false);
     const [selectedGroupId, setSelectedGroupId] = useState(null);
-    const [isUpdate, setIsUpdate] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedEqId, setSelectedEqId] = useState([]);
@@ -648,7 +647,7 @@ function ImportRequest() {
                                                         </Table>
                                                     </TableContainer>
 
-                                                    {group.status !== "canceled" && (
+                                                    {group.status === "pending" && (
                                                         <div style={{ textAlign: "right", marginTop: 16 }}>
                                                             <Button variant="contained" color="warning" onClick={() => handleCancelClick(group.groupId)}>
                                                                 Cancel

@@ -288,14 +288,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.badRequest().body("Email is already existed !");
         }
 
+        check = userRepo.existsByPhone(request.phone());
 
+        if(check){
+            return ResponseEntity.badRequest().body("Phone is already existed !");
+        }
 
         if(!request.roleName().equals("staff") && !request.roleName().equals("supplier") && !request.roleName().equals("requester")) {
             throw new IllegalArgumentException("Invalid role");
         } else {
             Account acc = Account.builder()
                     .username(request.username())
-                    .password(request.password())
+                    .password("1")
                     .status(Status.ACCOUNT_ACTIVE.getValue())
                     .role(request.roleName().equals("staff") ? Role.STAFF : Role.PARTNER)
                     .build();
@@ -393,10 +397,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Email is already existed !");
         }
 
+        checked = userRepo.existsByPhoneAndNotId(request.getPhone(), acc.getUser().getId());
+
+        if(checked){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Phone is already existed !");
+        }
 
         acc.setUsername(request.getUsername());
-        acc.setPassword(request.getPassword());
-        acc.setRole(Role.valueOf(request.getRoleName().toUpperCase()));
         acc.getUser().setEmail(request.getEmail());
         acc.getUser().setName(request.getName());
         acc.getUser().setPhone(request.getPhone());

@@ -20,6 +20,4 @@ public class EquipmentResponse {
     String unit;
 
     String status;
-
-    int threshold;
 }

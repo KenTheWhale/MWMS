@@ -8,7 +8,6 @@ import java.time.LocalDate;
 public record BatchResponse(
         Integer id,
         String code,
-        int equipmentQty,
         LocalDate createdDate
 ) {
 }

@@ -8,6 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ApproveImportRequest {
-    String code;
+public class CreateBatchRequest {
+    int quantity;
+    int requestItemId;
+    int length;
+    int width;
+    int positionId;
 }

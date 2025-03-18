@@ -12,5 +12,5 @@ public class AreaForStaffResponse {
     String areaName;
     String areaStatus;
     Integer equipmentId;
-    List<PositionResponse> positions;
+    List<PositionResponse> positionList;
 }

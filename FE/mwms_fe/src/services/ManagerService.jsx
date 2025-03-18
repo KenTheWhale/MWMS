@@ -165,3 +165,8 @@ export const cancelRequest = async (groupId) => {
     const response = await axiosClient.put("/manager/request/requestItem", groupId)
     return response && response.status === 200 ? response.data : null;
 }
+
+export const getHistoryImportList = async () => {
+    const response = await axiosClient.get("/manager/request/history");
+    return response ? response.data : null;
+}

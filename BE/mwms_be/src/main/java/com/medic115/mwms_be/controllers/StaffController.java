@@ -1,6 +1,7 @@
 package com.medic115.mwms_be.controllers;
 
 import com.medic115.mwms_be.requests.AssignBatchRequest;
+import com.medic115.mwms_be.requests.CreateBatchRequest;
 import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.AreaService;
 import com.medic115.mwms_be.services.BatchService;
@@ -28,12 +29,20 @@ public class StaffController {
         return staffService.getTaskList(id);
     }
 
+    //-------------------------------------------BATCH-------------------------------------------//
+
 
     //-------------------------------------------Area-------------------------------------------//
+//    @GetMapping("/area")
+//    @PreAuthorize("hasRole('staff')")
+//    public ResponseEntity<?> getAreaList() {
+//        return areaService.getAllForStaff();
+//    }
+
     @GetMapping("/area")
     @PreAuthorize("hasRole('staff')")
-    public ResponseEntity<?> getAreaList() {
-        return areaService.getAllForStaff();
+    public ResponseEntity<ResponseObject> getAreaList() {
+        return staffService.getAreaList();
     }
 
     //-------------------------------------------Batch-------------------------------------------//
@@ -41,5 +50,11 @@ public class StaffController {
     @PreAuthorize("hasRole('staff')")
     public ResponseEntity<?> assignBatchToPosition(@RequestBody AssignBatchRequest request){
         return batchService.assignBatchToPosition(request);
+    }
+
+    @PostMapping("/batch")
+    @PreAuthorize("hasRole('staff')")
+    public ResponseEntity<ResponseObject> createBatch(@RequestBody CreateBatchRequest request){
+        return staffService.createBatch(request);
     }
 }
