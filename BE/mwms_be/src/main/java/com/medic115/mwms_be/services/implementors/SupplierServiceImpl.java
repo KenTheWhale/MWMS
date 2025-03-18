@@ -55,6 +55,7 @@ public class SupplierServiceImpl implements SupplierService {
                 .toList();
 
         return ResponseEntity.ok(ResponseObject.builder()
+                .success(true)
                 .message("Get request list success")
                 .data(data)
                 .build());
@@ -86,6 +87,7 @@ public class SupplierServiceImpl implements SupplierService {
         if (requestApplication.getItemGroups().stream()
                 .allMatch(itemGroup -> Status.REQUEST_CANCELLED.getValue().equals(itemGroup.getStatus()))) {
             return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .success(false)
                     .message("Can not change status of a cancelled request")
                     .build());
         }
@@ -93,6 +95,7 @@ public class SupplierServiceImpl implements SupplierService {
         Partner supplier = partnerRepo.findByUser_Name(request.getUsername()).orElse(null);
         if (supplier == null) {
             return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .success(false)
                     .message("Supplier not found")
                     .build());
         }
@@ -118,10 +121,12 @@ public class SupplierServiceImpl implements SupplierService {
 
         if (Status.REQUEST_ACCEPTED.getValue().equals(request.getStatus())) {
             return ResponseEntity.ok(ResponseObject.builder()
+                    .success(true)
                     .message("Request is accepted")
                     .build());
         } else {
             return ResponseEntity.ok(ResponseObject.builder()
+                    .success(true)
                     .message("Request is rejected")
                     .build());
         }
