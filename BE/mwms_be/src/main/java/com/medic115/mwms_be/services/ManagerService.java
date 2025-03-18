@@ -70,7 +70,7 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> updateCategory(UpdateCategoryRequest request);
 
-    ResponseEntity<ResponseObject> deleteCategory(DeleteCategoryRequest request);
+    ResponseEntity<ResponseObject> deleteCategory(String code);
 
     //----------------------------Equipment----------------------------//
     ResponseEntity<ResponseObject> viewEquipment();

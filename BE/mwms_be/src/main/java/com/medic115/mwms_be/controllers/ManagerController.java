@@ -8,8 +8,6 @@ import com.medic115.mwms_be.requests.AreaRequest;
 import com.medic115.mwms_be.requests.CancelImportRequest;
 import com.medic115.mwms_be.requests.CreateImportRequest;
 import com.medic115.mwms_be.requests.CreateTaskRequest;
-import com.medic115.mwms_be.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
 import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
 import com.medic115.mwms_be.requests.GetRequestDetailRequest;
 import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -76,10 +73,10 @@ public class ManagerController {
         return managerService.updateCategory(request);
     }
 
-    @DeleteMapping("/category")
+    @DeleteMapping("/category/{code}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> deleteCategory(@RequestBody DeleteCategoryRequest request) {
-        return managerService.deleteCategory(request);
+    public ResponseEntity<ResponseObject> deleteCategory(@PathVariable String code) {
+        return managerService.deleteCategory(code);
     }
 
     //-------------------------------------------------Equipment-------------------------------------------------//

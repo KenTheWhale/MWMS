@@ -18,7 +18,7 @@ public class UpdateEquipmentRequest {
 
     String description;
 
-    String category;
+    int categoryId;
 
     String unit;
 

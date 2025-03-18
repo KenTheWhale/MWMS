@@ -184,7 +184,6 @@ public class AreaServiceImpl implements AreaService {
                 .price(equipment.getPrice())
                 .unit(equipment.getUnit())
                 .status(equipment.getStatus())
-                .threshold(equipment.getThreshold())
                 .build();
     }
 
