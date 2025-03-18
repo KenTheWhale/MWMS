@@ -21,6 +21,7 @@ public enum Status {
     TASK_PROCESSING("processing"),
     TASK_ASSIGNED("assigned"),
     TASK_COMPLETED("completed"),
+    TASK_DELETE("deleted"),
     EQUIPMENT_ACTIVE("active"),
     EQUIPMENT_DELETED("deleted"),
     CATEGORY_ACTIVE("active"),
@@ -29,8 +30,7 @@ public enum Status {
     GROUP_REJECTED("rejected"),
     GROUP_ACCEPTED("accepted"),
     GROUP_PROCESSING("processing"),
-    GROUP_COMPLETED("completed"),
-    GROUP_CANCELLED("canceled"),
-    TASK_DELETE("deleted"),;
+    GROUP_STORED("stored"),
+    GROUP_CANCELLED("canceled");
     private final String value;
 }

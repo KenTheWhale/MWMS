@@ -235,7 +235,7 @@ function RenderTaskDetailModal({task, modal, CloseDetailModal}) {
     )
 }
 
-function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFunc, TestFunc, refresh}) {
+function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData}) {
 
     const [expand, setExpand] = useState(0);
 
@@ -348,13 +348,11 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
         const response = await createBatch(quantity, requestItemId, length, width, positionId)
         if (response.success) {
             enqueueSnackbar(response.message, {variant: "success"});
+            updateData()
         } else {
             enqueueSnackbar(response.message, {variant: "error"});
         }
-        RefreshFunc()
     }
-
-    console.log(batchItems)
 
     return (
         <Dialog
@@ -364,7 +362,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
             maxWidth={"md"}
             fullWidth
         >
-            <DialogTitle color={"textPrimary"}>{`Create batch (Refresh: ${refresh})`}</DialogTitle>
+            <DialogTitle color={"textPrimary"}>{`Create batch`}</DialogTitle>
             <DialogContent dividers>
                 <RenderInfoTextField
                     label={"Request code"}
@@ -399,10 +397,10 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                         expand !== index &&
                                         <Button
                                             variant={"contained"}
-                                            color={"primary"}
+                                            color={item.batch ? "secondary" : "primary"}
                                             onClick={() => handleExpand(index)}
                                         >
-                                            Create batch
+                                            {item.batch ? "View batch" : "Create batch"}
                                         </Button>
                                     }
 
@@ -416,7 +414,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                             type={"number"}
                                             variant={"standard"}
                                             name={"quantity"}
-                                            value={batchItems.find(i => i.id === item.id).quantity}
+                                            value={item.batch ? item.batch.items.length : batchItems.find(i => i.id === item.id).quantity}
                                             onChange={(e) => handleInputChange(item.id, e)}
                                             slotProps={{
                                                 htmlInput: {
@@ -427,6 +425,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                                     shrink: true
                                                 }
                                             }}
+                                            disabled={item.batch}
                                         />
                                     </FormControl>
 
@@ -436,7 +435,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                             type={"number"}
                                             variant={"standard"}
                                             name={"length"}
-                                            value={batchItems.find(i => i.id === item.id).length}
+                                            value={item.batch ? item.batch.length : batchItems.find(i => i.id === item.id).length}
                                             onChange={(e) => handleInputChange(item.id, e)}
                                             slotProps={{
                                                 htmlInput: {
@@ -447,6 +446,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                                     shrink: true
                                                 }
                                             }}
+                                            disabled={item.batch}
                                         />
                                     </FormControl>
 
@@ -456,7 +456,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                             type={"number"}
                                             variant={"standard"}
                                             name={"width"}
-                                            value={batchItems.find(i => i.id === item.id).width}
+                                            value={item.batch ? item.batch.width : batchItems.find(i => i.id === item.id).width}
                                             onChange={(e) => handleInputChange(item.id, e)}
                                             slotProps={{
                                                 htmlInput: {
@@ -467,6 +467,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                                     shrink: true
                                                 }
                                             }}
+                                            disabled={item.batch}
                                         />
                                     </FormControl>
 
@@ -475,8 +476,9 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                         <Select
                                             label={"Area"}
                                             name={"area"}
-                                            value={getAreaValue(item.id, item.eqId)}
+                                            value={item.batch ? item.batch.location.areaId : getAreaValue(item.id, item.eqId)}
                                             onChange={(e) => handleAreaChange(item.id, e)}
+                                            disabled={item.batch}
                                         >
                                             <MenuItem value={0} disabled>{"N/A"}</MenuItem>
                                             {
@@ -496,8 +498,8 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                         <Select
                                             label={"Position"}
                                             name={"position"}
-                                            disabled={batchItems.find(i => i.id === item.id).area === 0}
-                                            value={getPositionValue(item.id, areas.find(area => area.id === batchItems.find(i => i.id === item.id).area))}
+                                            disabled={batchItems.find(i => i.id === item.id).area === 0 || item.batch}
+                                            value={item.batch ? -1 : getPositionValue(item.id, areas.find(area => area.id === batchItems.find(i => i.id === item.id).area))}
                                             onChange={(e) => handlePositionChange(item.id, e)}
                                         >
                                             <MenuItem value={0} disabled>{"N/A"}</MenuItem>
@@ -508,30 +510,36 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
                                                         <MenuItem key={index} value={p.id}>{p.name}</MenuItem>
                                                     ))
                                             }
+                                            {
+                                                item.batch && <MenuItem value={-1}>{item.batch.location.positionName}</MenuItem>
+                                            }
                                         </Select>
                                     </FormControl>
                                 </Box>
                             </AccordionDetails>
-                            <div className={'d-flex justify-content-end me-2 mb-2'}>
-                                <Button
-                                    variant={"contained"}
-                                    color={"success"}
-                                    disabled={
-                                        batchItems.find(i => i.id === item.id).area === 0 ||
-                                        batchItems.find(i => i.id === item.id).position === 0
-                                    }
-                                    onClick={
-                                        () => createNewBatch(
-                                            batchItems.find(i => i.id === item.id).quantity,
-                                            batchItems.find(i => i.id === item.id).id,
-                                            batchItems.find(i => i.id === item.id).length,
-                                            batchItems.find(i => i.id === item.id).width,
-                                            batchItems.find(i => i.id === item.id).position)
-                                    }
-                                >
-                                    Create
-                                </Button>
-                            </div>
+                            {
+                                item.batch ? "" :
+                                <div className={'d-flex justify-content-end me-2 mb-2'}>
+                                    <Button
+                                        variant={"contained"}
+                                        color={"success"}
+                                        disabled={
+                                            batchItems.find(i => i.id === item.id).area === 0 ||
+                                            batchItems.find(i => i.id === item.id).position === 0
+                                        }
+                                        onClick={
+                                            () => createNewBatch(
+                                                batchItems.find(i => i.id === item.id).quantity,
+                                                batchItems.find(i => i.id === item.id).id,
+                                                batchItems.find(i => i.id === item.id).length,
+                                                batchItems.find(i => i.id === item.id).width,
+                                                batchItems.find(i => i.id === item.id).position)
+                                        }
+                                    >
+                                        Create
+                                    </Button>
+                                </div>
+                            }
 
                         </Accordion>
                     ))
@@ -543,14 +551,15 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, RefreshFun
 
 export function TaskStaff() {
     const [tasks, setTasks] = useState([]);
-    const [action, setAction] = useState(false)
-    const [selectedTask, setSelectedTask] = useState(null)
+    const [selectedTask, setSelectedTask] = useState({
+        id: 0,
+        task: null
+    })
     const [modal, setModal] = useState({
         visible: false,
         type: ""
     })
     const [areas, setAreas] = useState([])
-    const [refresh, setRefresh] = useState(0)
 
     useEffect(() => {
         async function getTasks() {
@@ -563,15 +572,27 @@ export function TaskStaff() {
         }
 
         getTasks()
-    }, [action]);
+    }, []);
+
+    const updateData = async () => {
+        const taskResponse = await getAllTasks()
+        const areaResponse = await getAllArea()
+        if (taskResponse.success && areaResponse) {
+            setTasks(taskResponse.data)
+            setAreas(areaResponse.data)
+            if(selectedTask.id !== 0 && selectedTask.task !== null) {
+                setSelectedTask({...selectedTask, task: taskResponse.data.find(t => t.id === selectedTask.id)})
+            }
+        }
+    }
 
     function HandleOpenModal(open, type) {
-        setAction(!action)
+        updateData()
         setModal({...modal, visible: open, type: open ? type : ""})
     }
 
     function HandleGetSelectedTask(task) {
-        setSelectedTask(task)
+        setSelectedTask({id: task.id, task: task})
     }
 
     return (
@@ -590,7 +611,7 @@ export function TaskStaff() {
                 <RenderTaskDetailModal
                     modal={modal}
                     CloseDetailModal={() => HandleOpenModal(false, "detail")}
-                    task={selectedTask}
+                    task={selectedTask.task}
                 />
             }
             {
@@ -598,11 +619,9 @@ export function TaskStaff() {
                 <RenderCreateBatchModal
                     modal={modal}
                     CloseBatchModal={() => HandleOpenModal(false, "batch")}
-                    task={selectedTask}
+                    task={selectedTask.task}
                     areas={areas}
-                    RefreshFunc={() => setAction(!action)}
-                    TestFunc={() => setRefresh(refresh + 1)}
-                    refresh={refresh}
+                    updateData={() => updateData()}
                 />
             }
         </>
