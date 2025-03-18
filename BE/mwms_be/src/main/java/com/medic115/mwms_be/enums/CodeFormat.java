@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CodeFormat {
-    TASK("TSK-");
+    TASK("TSK-"),
+    BATCH("BAT-"),
+    BATCH_ITEM("BATI-");
 
     private final String value;
 }

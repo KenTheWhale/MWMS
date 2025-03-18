@@ -22,9 +22,6 @@ public class Batch {
 
     String code;
 
-    @Column(name = "`equipment_quantity`")
-    int equipmentQty;
-
     @Column(name = "`created_date`")
     LocalDate createdDate;
 

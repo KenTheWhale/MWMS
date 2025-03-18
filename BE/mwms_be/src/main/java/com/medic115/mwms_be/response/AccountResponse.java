@@ -14,6 +14,5 @@ public class AccountResponse {
     private String role;
     private String status;
     private String username;
-    private String password;
     private UserResponse userResponse;
 }

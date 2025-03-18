@@ -185,7 +185,6 @@ public class PositionServiceImpl implements PositionService {
         return BatchResponse.builder()
                 .id(batch.getId())
                 .code(batch.getCode())
-                .equipmentQty(batch.getEquipmentQty())
                 .createdDate(batch.getCreatedDate())
                 .build();
     }

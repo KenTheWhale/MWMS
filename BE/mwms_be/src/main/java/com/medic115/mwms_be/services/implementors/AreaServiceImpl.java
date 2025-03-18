@@ -96,19 +96,8 @@ public class AreaServiceImpl implements AreaService {
             return ResponseEntity.badRequest().body("Area is still have positions");
         }
 
-        if(request.eqId() == null){
-            return ResponseEntity.badRequest().body("Area id cannot be null");
-        }
-
-        Equipment equipment = equipmentRepo.findById(request.eqId()).orElse(null);
-
-        if (equipment == null) {
-            return ResponseEntity.badRequest().body("Equipment not found");
-        }
-
         area.setName(request.name());
         area.setSquare(request.square());
-        area.setEquipment(equipment);
         areaRepo.save(area);
 
         return ResponseEntity.ok("Update successfully !");
@@ -136,33 +125,33 @@ public class AreaServiceImpl implements AreaService {
         return ResponseEntity.ok("Area has been restored !");
     }
 
-    @Override
-    public ResponseEntity<?> getAllForStaff() {
-        List<Area> areas = areaRepo.findAll();
+//    @Override
+//    public ResponseEntity<?> getAllForStaff() {
+//        List<Area> areas = areaRepo.findAll();
+//
+//        List<AreaForStaffResponse> responses = areas.stream().map(this::mapToDto2).toList();
+//
+//        return ResponseEntity.ok(responses);
+//    }
 
-        List<AreaForStaffResponse> responses = areas.stream().map(this::mapToDto2).toList();
+//    private AreaForStaffResponse mapToDto2(Area area) {
+//        return AreaForStaffResponse.builder()
+//                .areaId(area.getId())
+//                .areaName(area.getName())
+//                .areaStatus(area.getStatus())
+//                .squareArea(area.getSquare())
+//                .equipmentId(area.getEquipment().getId())
+//                .positionList(area.getPositions().stream().map(this::mapToDto3).toList())
+//                .build();
+//    }
 
-        return ResponseEntity.ok(responses);
-    }
-
-    private AreaForStaffResponse mapToDto2(Area area) {
-        return AreaForStaffResponse.builder()
-                .areaId(area.getId())
-                .areaName(area.getName())
-                .areaStatus(area.getStatus())
-                .squareArea(area.getSquare())
-                .equipmentId(area.getEquipment().getId())
-                .positions(area.getPositions().stream().map(this::mapToDto3).toList())
-                .build();
-    }
-
-    private PositionResponse mapToDto3(Position position) {
-        return PositionResponse.builder()
-                .id(position.getId())
-                .name(position.getName())
-                .square(position.getSquare())
-                .build();
-    }
+//    private PositionResponse mapToDto3(Position position) {
+//        return PositionResponse.builder()
+//                .id(position.getId())
+//                .name(position.getName())
+//                .square(position.getSquare())
+//                .build();
+//    }
 
 
     private AreaResponse mapToDto(Area area) {

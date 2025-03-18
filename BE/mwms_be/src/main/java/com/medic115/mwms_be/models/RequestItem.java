@@ -19,9 +19,6 @@ public class RequestItem {
 
     int quantity;
 
-    @Column(name = "`unit_price`")
-    double unitPrice;
-
     @ManyToOne
     @JoinColumn(name = "`equipment_id`")
     Equipment equipment;
