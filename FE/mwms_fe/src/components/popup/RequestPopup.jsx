@@ -18,7 +18,8 @@ import {
     Paper,
     Typography, TextareaAutosize, Divider, CardContent
 } from "@mui/material";
-import {approveRequest} from "../../services/ManagerService.jsx";
+import {approveRequest} from "../../services/SupplierService.jsx";
+import {enqueueSnackbar} from "notistack";
 
 
 const RequestPopup = ({request, show, handleClose, onFetch}) => {
@@ -29,6 +30,9 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
     const [errors, setErrors] = useState({});
     const [showConfirm, setShowConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split("T")[0];
 
     const isDeliveryDisabled = request?.status !== "pending";
 
@@ -37,6 +41,7 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
         if (!deliveryDate) errors.deliveryDate = "Delivery date is required";
         if (!carrierName) errors.carrierName = "Carrier name is required";
         if (carrierPhone.length < 10) errors.carrierPhone = "Phone must be 10 digits";
+        if (!/^0(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/.test(carrierPhone)) {errors.carrierPhone = "Invalid phone number (Vietnamese format required)";}
 
         setErrors(errors);
         return Object.keys(errors).length === 0;
@@ -47,11 +52,12 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
             setShowConfirm(false);
             return;
         }
-        await approveRequest(request.code, "accepted", JSON.parse(localStorage.getItem("user")).name, {
+        const response = await approveRequest(request.code, "accepted", JSON.parse(localStorage.getItem("user")).name, {
             deliveryDate,
             carrierName,
             carrierPhone
         }, null);
+        enqueueSnackbar(response.message, {variant: response.success ? "success" : "error"});
         setShowConfirm(false);
         handleClose();
         onFetch();
@@ -145,11 +151,14 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
                         <div className={`d-flex justify-content-center`}>
                             <Typography variant="h6" color={'textPrimary'} className={`mb-3 mt-3`}>Delivery Information</Typography>
                         </div>
-                        <TextField label="Delivery Date" type="date" fullWidth margin="normal"
-                                   InputLabelProps={{shrink: true}}
-                                   value={!request.deliveryDate ? deliveryDate : request.deliveryDate} onChange={e => setDeliveryDate(e.target.value)}
-                                   error={!!errors.deliveryDate} helperText={errors.deliveryDate}
-                                   disabled={isDeliveryDisabled}/>
+                        <TextField
+                            label="Delivery Date" type="date" fullWidth margin="normal" InputLabelProps={{ shrink: true }}
+                            value={!request.deliveryDate ? deliveryDate : request.deliveryDate}
+                            onChange={e => setDeliveryDate(e.target.value)}
+                            error={!!errors.deliveryDate} helperText={errors.deliveryDate}
+                            disabled={isDeliveryDisabled}
+                            inputProps={{ min: minDate }}
+                        />
                         <TextField label="Carrier Name" fullWidth margin="normal" value={!request.carrierName ? carrierName : request.carrierName}
                                    onChange={e => setCarrierName(e.target.value)} error={!!errors.carrierName}
                                    helperText={errors.carrierName} disabled={isDeliveryDisabled}/>

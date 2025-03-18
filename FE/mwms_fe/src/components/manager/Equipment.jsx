@@ -15,6 +15,7 @@ function Equipment() {
     const [actionType, setActionType] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [isDisabled, setIsDisabled] = useState(false);
     const [searchValue, setSearchValue] = useState({
         keyword: "",
         name: false,
@@ -48,8 +49,8 @@ function Equipment() {
         });
     }
 
-
     const handleClose = () => {
+        setIsDisabled(false)
         setShowModal(false);
         setSelectedEquipment(null);
     }
@@ -70,6 +71,7 @@ function Equipment() {
     };
 
     const handleEditClick = (equipment) => {
+        setIsDisabled(true)
         setSelectedEquipment(equipment);
         setActionType('edit');
         setShowModal(true);
@@ -171,6 +173,7 @@ function Equipment() {
                 handleClose={handleClose}
                 actionType={actionType}
                 onFetch={FetchData}
+                isDisabled={isDisabled}
             />
         </Box>
     );
