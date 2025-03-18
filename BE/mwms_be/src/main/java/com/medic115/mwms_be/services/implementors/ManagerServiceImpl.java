@@ -587,6 +587,7 @@ public class ManagerServiceImpl implements ManagerService {
                             dataItem.put("id", item.getId());
                             dataItem.put("equipment", item.getEquipment().getName());
                             dataItem.put("category", item.getEquipment().getCategory().getName());
+                            dataItem.put("unit", item.getEquipment().getUnit());
                             dataItem.put("partner", item.getPartner().getUser().getName());
                             dataItem.put("quantity", item.getQuantity());
                             return dataItem;

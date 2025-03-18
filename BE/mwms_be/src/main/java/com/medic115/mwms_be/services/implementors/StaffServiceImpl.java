@@ -1,10 +1,10 @@
 package com.medic115.mwms_be.services.implementors;
 
 import com.medic115.mwms_be.enums.CodeFormat;
+import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.models.*;
 import com.medic115.mwms_be.repositories.*;
 import com.medic115.mwms_be.requests.CreateBatchRequest;
-import com.medic115.mwms_be.requests.GetRawBatchRequest;
 import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.StaffService;
 import com.medic115.mwms_be.utils.ResponseUtil;
@@ -13,9 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,9 +94,45 @@ public class StaffServiceImpl implements StaffService {
                     data.put("partner", partner);
                     data.put("quantity", item.getQuantity());
                     data.put("unit", item.getEquipment().getUnit());
+                    if (item.getBatch() != null) {
+                        data.put("batch", buildBatchFromRequestItem(item));
+                    }
                     return data;
                 })
                 .toList();
+    }
+
+    private Map<String, Object> buildBatchFromRequestItem(RequestItem item) {
+        Batch batch = item.getBatch();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", batch.getId());
+        data.put("code", batch.getCode());
+        data.put("createdDate", batch.getCreatedDate());
+        data.put("length", batch.getLength());
+        data.put("width", batch.getWidth());
+        data.put("location", buildLocationFromBatch(batch));
+        data.put("items", buildBatchItemListFromBatch(batch));
+        return data;
+    }
+
+    private List<Map<String, Object>> buildBatchItemListFromBatch(Batch batch) {
+        return batch.getBatchItems().stream().map(
+                item -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("id", item.getId());
+                    data.put("serialNumber", item.getSerialNumber());
+                    return data;
+                }
+        ).toList();
+    }
+
+    private Map<String, Object> buildLocationFromBatch(Batch batch) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("positionId", batch.getPosition().getId());
+        data.put("positionName", batch.getPosition().getName());
+        data.put("areaId", batch.getPosition().getArea().getId());
+        data.put("areaName", batch.getPosition().getArea().getName());
+        return data;
     }
 
     //-------------------------------------------AREA-------------------------------------------//
@@ -169,6 +203,20 @@ public class StaffServiceImpl implements StaffService {
 
         int newCodeValue = batches.isEmpty() ? 1 : Integer.parseInt(batches.get(batches.size() - 1).getCode().split("-")[1]) + 1;
 
+        ItemGroup group = item.getItemGroup();
+        boolean allDone = true;
+        for (RequestItem requestItem: group.getRequestItems()) {
+            if(requestItem.getId() != request.getRequestItemId() && requestItem.getBatch() == null){
+                allDone = false;
+                break;
+            }
+        }
+
+        if(allDone){
+            item.getItemGroup().getTask().setStatus(Status.TASK_COMPLETED.getValue());
+            item.getItemGroup().setStatus(Status.GROUP_STORED.getValue());
+        }
+
         Batch batch = batchRepo.save(
                 Batch.builder()
                         .length(request.getLength())
@@ -204,17 +252,5 @@ public class StaffServiceImpl implements StaffService {
                             .build()
             );
         }
-    }
-
-    @Override
-    public ResponseEntity<ResponseObject> getBatchList() {
-        List<Map<String, Object>> data = batchRepo.findAll().stream().map(
-                batch -> {
-                    Map<String, Object> dataItem = new HashMap<>();
-                    return dataItem;
-                }
-        ).toList();
-
-        return null;
     }
 }
