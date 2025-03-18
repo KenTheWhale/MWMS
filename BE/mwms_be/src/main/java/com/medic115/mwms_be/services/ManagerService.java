@@ -3,6 +3,7 @@ package com.medic115.mwms_be.services;
 import com.medic115.mwms_be.requests.AddCategoryRequest;
 import com.medic115.mwms_be.requests.AddEquipmentRequest;
 import com.medic115.mwms_be.requests.AddForUpdateRequest;
+import com.medic115.mwms_be.requests.ApproveExportRequest;
 import com.medic115.mwms_be.requests.CancelImportRequest;
 import com.medic115.mwms_be.requests.CreateImportRequest;
 import com.medic115.mwms_be.requests.CreateTaskRequest;
@@ -51,11 +52,13 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request);
 
-//    ResponseEntity<ResponseObject> approveImportRequest(ApproveImportRequest request);
+    ResponseEntity<ResponseObject> approveExportRequest(ApproveExportRequest request);
 
     ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request);
 
   ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
+
+  ResponseEntity<ResponseObject> viewImportHistory();
 
   ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request);
 

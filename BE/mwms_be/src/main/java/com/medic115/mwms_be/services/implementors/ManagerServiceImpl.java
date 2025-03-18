@@ -25,6 +25,7 @@ import com.medic115.mwms_be.repositories.UserRepo;
 import com.medic115.mwms_be.requests.AddCategoryRequest;
 import com.medic115.mwms_be.requests.AddEquipmentRequest;
 import com.medic115.mwms_be.requests.AddForUpdateRequest;
+import com.medic115.mwms_be.requests.ApproveExportRequest;
 import com.medic115.mwms_be.requests.CancelImportRequest;
 import com.medic115.mwms_be.requests.CreateImportRequest;
 import com.medic115.mwms_be.requests.CreateTaskRequest;
@@ -774,7 +775,6 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
-
     @Override
     public ResponseEntity<ResponseObject> getRequestDetailByCode(GetRequestDetailRequest request) {
         RequestApplication requestApplication = requestApplicationRepo.findAll().stream()
@@ -834,6 +834,23 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
+    public ResponseEntity<ResponseObject> approveExportRequest(ApproveExportRequest request) {
+
+        RequestApplication requestExport = requestApplicationRepo.findByCode(request.getCode());
+        if (requestExport == null) {
+            return ResponseEntity.ok().body(
+                    ResponseObject
+                            .builder()
+                            .message("Dont have request application with code " + request.getCode())
+                            .build()
+            );
+        }
+
+
+        return null;
+    }
+
+    @Override
     public ResponseEntity<ResponseObject> cancelImportRequest(CancelImportRequest request) {
         ItemGroup itemGroup = itemGroupRepo.findById(request.getGroupId()).orElse(null);
 
@@ -884,6 +901,68 @@ public class ManagerServiceImpl implements ManagerService {
                         .message("200 OK Updated item successfully")
                         .success(true)
                         .data(null)
+                        .build()
+        );
+    }
+
+    public ResponseEntity<ResponseObject> viewImportHistory() {
+        List<Map<String, Object>> requestItems = requestItemRepo.findAll().stream()
+                .filter(item -> item.getItemGroup().getStatus().equalsIgnoreCase(Status.GROUP_STORED.getValue()))
+                .filter(item -> item.getItemGroup().getRequestApplication().getType().equalsIgnoreCase(Type.REQUEST_IMPORT.getValue()))
+                .map(item -> {
+                            Map<String, Object> requestItemsDetail = new HashMap<>();
+                            requestItemsDetail.put("code", item.getItemGroup().getRequestApplication().getCode());
+                            requestItemsDetail.put("partner", item.getPartner().getUser().getName());
+                            requestItemsDetail.put("requestDate", item.getItemGroup().getRequestApplication().getRequestDate());
+                            requestItemsDetail.put("deliveryDate", item.getItemGroup().getDeliveryDate());
+                            requestItemsDetail.put("equipment", item.getEquipment().getName());
+                            requestItemsDetail.put("requestQty", item.getQuantity());
+                            requestItemsDetail.put("batchQty", item.getBatch().getBatchItems().size());
+                            requestItemsDetail.put("position", item.getBatch().getPosition().getName());
+                            requestItemsDetail.put("area", item.getBatch().getPosition().getArea().getName());
+
+                            Map<String, Object> historyDetail = new HashMap<>();
+
+
+                            Map<String, Object> batch = new HashMap<>();
+                            if (item.getBatch() != null) {
+                                batch.put("code", item.getBatch().getCode());
+                                batch.put("position", item.getBatch().getPosition().getName());
+                                batch.put("area", item.getBatch().getPosition().getArea().getName());
+                                List<Map<String, Object>> batchItems = item.getBatch().getBatchItems().stream().map(
+                                        batchItem -> {
+                                            Map<String, Object> batchItemDetail = new HashMap<>();
+                                            batchItemDetail.put("serial", batchItem.getSerialNumber());
+                                            return batchItemDetail;
+                                        }
+                                ).toList();
+                                batch.put("items", batchItems);
+                                historyDetail.put("batch", batch);
+                            }
+
+                            Map<String, Object> itemDetail = new HashMap<>();
+                            itemDetail.put("equipment", item.getEquipment().getName());
+                            itemDetail.put("quantity", item.getQuantity());
+                            itemDetail.put("partner", item.getPartner().getUser().getName());
+                            historyDetail.put("requestItems", itemDetail);
+
+                            Map<String, Object> task = new HashMap<>();
+                            task.put("code", item.getItemGroup().getTask().getCode());
+                            task.put("staff", item.getItemGroup().getTask().getUser().getName());
+                            task.put("assigned", item.getItemGroup().getTask().getAssignedDate());
+
+                            historyDetail.put("task", task);
+                            requestItemsDetail.put("historyDetail", historyDetail);
+
+                            return requestItemsDetail;
+                        }
+                ).toList();
+        return ResponseEntity.ok().body(
+                ResponseObject
+                        .builder()
+                        .message(" Viewing history successfully")
+                        .success(true)
+                        .data(requestItems)
                         .build()
         );
     }

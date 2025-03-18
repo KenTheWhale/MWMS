@@ -5,7 +5,7 @@ import {
     AutoAwesomeMosaic,
     InsertDriveFile,
     Inventory2,
-    MedicalServices,
+    MedicalServices, Schedule,
     Unarchive
 } from "@mui/icons-material";
 import {DashboardUI} from "../components/ui/DashboardUI.jsx";
@@ -52,6 +52,11 @@ const navigation = [
         segment: 'manager/area',
         title: 'Area',
         icon: <Apps/>,
+    },
+    {
+        segment: 'manager/history',
+        title: 'History',
+        icon: <Schedule />,
     }
 ]
 
