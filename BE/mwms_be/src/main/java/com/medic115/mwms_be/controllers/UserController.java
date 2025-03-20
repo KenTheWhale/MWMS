@@ -50,4 +50,16 @@ public class UserController {
     public ResponseEntity<String> updateAccount(@PathVariable Integer userId,@RequestBody EditAccountRequest request) {
         return authenticationService.updateUser(userId, request);
     }
+
+    @GetMapping("/get-active")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<?> getAllActiveUsers() {
+        return userService.countAccountActive();
+    }
+
+    @GetMapping("/get-deleted")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<?> getAllDeletedUsers() {
+        return userService.countAccountDeleted();
+    }
 }
