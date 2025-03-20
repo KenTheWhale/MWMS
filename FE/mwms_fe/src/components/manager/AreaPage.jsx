@@ -9,11 +9,10 @@ import {
 } from "react-bootstrap";
 import {
   MdModeEditOutline,
-  MdDeleteOutline,
   MdRestore,
   MdAddCircleOutline,
 } from "react-icons/md";
-import { TbScanPosition } from "react-icons/tb"
+import { TbScanPosition } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { useSnackbar } from "notistack";
@@ -52,8 +51,6 @@ const AreaPage = () => {
     eqId: null,
   });
   const [createErrors, setCreateErrors] = useState({});
-  const [showDelete, setShowDelete] = useState(false);
-  const [selectedDeleteArea, setSelectedDeleteArea] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleOpenModal = async () => {
@@ -78,7 +75,7 @@ const AreaPage = () => {
       setEquipments(response.data.data || []);
     } catch (error) {
       enqueueSnackbar(
-        error.response?.data?.message || "Failed to fetch equipment",
+        error.response?.data || "Failed to fetch equipment",
         { variant: "error" }
       );
     }
@@ -121,7 +118,7 @@ const AreaPage = () => {
     if (!form.square) tempErrors.square = "Square is required";
     else if (form.square <= 0 || form.square > 1000)
       tempErrors.square = "Square must be between 1 and 1000";
-    
+
     setUpdateErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -167,9 +164,9 @@ const AreaPage = () => {
 
   const clearEquipmentFilter = () => {
     setSelectedEquipment(null);
-    fetchData(); // Lấy lại toàn bộ danh sách
+    fetchData();
     if (searchTerm) {
-      handleSearch({ target: { value: searchTerm } }); // Áp dụng lại tìm kiếm tên nếu có
+      handleSearch({ target: { value: searchTerm } });
     }
   };
 
@@ -195,7 +192,7 @@ const AreaPage = () => {
       }
     } catch (error) {
       enqueueSnackbar(
-        error.response?.data?.message || "Error fetching area data",
+        error.response?.data || "Error fetching area data",
         { variant: "error" }
       );
     }
@@ -228,34 +225,17 @@ const AreaPage = () => {
         setShowUpdate(false);
         setForm({ id: "", name: "", square: 0, eqId: null });
         fetchData();
-        enqueueSnackbar(response.data?.message || "Area updated successfully", {
+        enqueueSnackbar(response.data || "Area updated successfully", {
           variant: "success",
         });
       } catch (error) {
         enqueueSnackbar(
-          error.response?.data?.message || "Failed to update area",
+          error.response?.data || "Failed to update area",
           { variant: "error" }
         );
       }
     } else {
       toast.error("Please fix the errors in the form");
-    }
-  };
-
-  const handleToggleDelete = async (area) => {
-    try {
-      const response = await axiosClient.patch(
-        `/manager/area/delete/${area.id}`
-      );
-      fetchData();
-      enqueueSnackbar(response.data?.message || "Area deleted successfully", {
-        variant: "success",
-      });
-    } catch (error) {
-      enqueueSnackbar(
-        error.response?.data?.message || "Failed to delete area",
-        { variant: "error" }
-      );
     }
   };
 
@@ -265,12 +245,12 @@ const AreaPage = () => {
         `/manager/area/restore/${area.id}`
       );
       fetchData();
-      enqueueSnackbar(response.data?.message || "Area restored successfully", {
+      enqueueSnackbar(response.data || "Area restored successfully", {
         variant: "success",
       });
     } catch (error) {
       enqueueSnackbar(
-        error.response?.data?.message || "Failed to restore area",
+        error.response?.data || "Failed to restore area",
         { variant: "error" }
       );
     }
@@ -283,29 +263,17 @@ const AreaPage = () => {
         setShowCreate(false);
         setCreateForm({ name: "", square: 0, eqId: null });
         fetchData();
-        enqueueSnackbar(response.data?.message || "Area created successfully", {
+        enqueueSnackbar(response.data || "Area created successfully", {
           variant: "success",
         });
       } catch (error) {
         enqueueSnackbar(
-          error.response?.data?.message || "Failed to create area",
+          error.response?.data || "Failed to create area",
           { variant: "error" }
         );
       }
     } else {
       toast.error("Please fix the errors in the form");
-    }
-  };
-
-  const openDeleteModal = (area) => {
-    setSelectedDeleteArea(area);
-    setShowDelete(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (selectedDeleteArea) {
-      handleToggleDelete(selectedDeleteArea);
-      setShowDelete(false);
     }
   };
 
@@ -437,19 +405,12 @@ const AreaPage = () => {
                       }}
                       title="Edit"
                     />
-                    {area.status === "deleted" ? (
+                    {area.status === "deleted" && (
                       <MdRestore
                         onClick={() => handleToggleRestore(area)}
                         className="text-success"
                         style={{ cursor: "pointer", fontSize: "25px" }}
                         title="Restore"
-                      />
-                    ) : (
-                      <MdDeleteOutline
-                        onClick={() => openDeleteModal(area)}
-                        className="text-danger"
-                        style={{ cursor: "pointer", fontSize: "25px" }}
-                        title="Delete"
                       />
                     )}
                     <Link
@@ -573,7 +534,6 @@ const AreaPage = () => {
                 {updateErrors.square}
               </Form.Control.Feedback>
             </Form.Group>
-           
           </Form>
         </Modal.Body>
         <Modal.Footer style={modalFooterStyle}>
@@ -674,37 +634,6 @@ const AreaPage = () => {
           </Button>
           <Button size="sm" variant="primary" onClick={handleCreate}>
             Create
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal
-        show={showDelete}
-        onHide={() => setShowDelete(false)}
-        size="sm"
-        centered
-        style={{ color: "black" }}
-      >
-        <Modal.Header closeButton style={{ padding: "10px 15px" }}>
-          <Modal.Title style={{ fontSize: "16px" }}>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={modalBodyStyle}>
-          <p style={{ fontSize: "14px", marginBottom: "10px" }}>
-            Are you sure you want to{" "}
-            {selectedDeleteArea?.status === "deleted" ? "restore" : "delete"}{" "}
-            area "{selectedDeleteArea?.name}"?
-          </p>
-        </Modal.Body>
-        <Modal.Footer style={modalFooterStyle}>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setShowDelete(false)}
-          >
-            Cancel
-          </Button>
-          <Button size="sm" variant="danger" onClick={handleDeleteConfirm}>
-            Confirm
           </Button>
         </Modal.Footer>
       </Modal>

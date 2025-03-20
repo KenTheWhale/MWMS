@@ -23,7 +23,6 @@ const PositionPage = () => {
   const [error, setError] = useState(null);
   const [showPosition, setShowPosition] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [batch, setBatch] = useState([]);
   const [form, setForm] = useState({
@@ -61,7 +60,7 @@ const PositionPage = () => {
       const responseArea = await axiosClient.get(`/manager/area/${id}`);
       setArea(responseArea.data);
     } catch (error) {
-      enqueueSnackbar("Can not loading data", { varriant: "error" });
+      enqueueSnackbar("Can not loading data", { variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -207,110 +206,82 @@ const PositionPage = () => {
     }
   };
 
-  const handleDeletePosition = async () => {
-    try {
-      const response = await axiosClient.delete(
-        `/manager/position/${chosePositionId}`
-      );
-      toast.success(response.data);
-      setShowDelete(false);
-      setShowPosition(false);
-      fetchData();
-    } catch (error) {
-      toast.error("Something Wrong....", error);
-    }
-  };
-
-  const handleOpenDeleteModal = (positionId) => {
-    setShowDelete(true);
-    setChosePositionId(positionId);
-  };
-
   return (
     <>
       <Container className="py-4">
         <Button variant="success" onClick={handleOpen}>
           <MdAddCircleOutline
             style={{ fontSize: "20px", marginRight: "5px" }}
-          />
+          loos/>
           Create New Position
         </Button>
 
         <Card className="shadow-sm">
-      <Card.Header className="bg-secondary">
-        <Card.Title className="d-flex justify-content-between align-items-start" style={{color: "white"}}>
-          {area != null ? (
-            <>
-              <div className="flex-grow-1 me-3">
-                <div>Area Name: {area.name}</div>
-                <div>Area Status: {area.status}</div>
-                <div>Area Square: {area.square}m²</div>
+          <Card.Header className="bg-secondary">
+            <Card.Title
+              className="d-flex justify-content-between align-items-start"
+              style={{ color: "white" }}
+            >
+              {area != null ? (
+                <>
+                  <div className="flex-grow-1 me-3">
+                    <div>Area Name: {area.name}</div>
+                    <div>Area Status: {area.status}</div>
+                    <div>Area Square: {area.square}m²</div>
+                  </div>
+                  <div className="flex-grow-1">
+                    <div className="fw-bold">
+                      Equipment Name: {area.equipment.name}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="w-100 text-center">Loading...</div>
+              )}
+            </Card.Title>
+          </Card.Header>
+          <Card.Body>
+            {positions.length === 0 ? (
+              <div className="text-center text-muted py-4">
+                No positions available in this area
               </div>
-              <div className="flex-grow-1">
-                <div className="fw-bold">Equipment Name: {area.equipment.name}</div>
-              </div>
-            </>
-          ) : (
-            <div className="w-100 text-center">Loading...</div>
-          )}
-        </Card.Title>
-      </Card.Header>
-      <Card.Body>
-        {positions.length === 0 ? (
-          <div className="text-center text-muted py-4">
-            No positions available in this area
-          </div>
-        ) : (
-          <div
-            className="position-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(5, 1fr)",
-              gap: "15px",
-            }}
-          >
-            {positions.map((position) => (
+            ) : (
               <div
-                key={position.id}
-                className={`border rounded d-flex flex-column align-items-center justify-content-center p-3 bg-${getPositionColor(
-                  position
-                )} position-relative shadow-sm`}
+                className="position-grid"
                 style={{
-                  width: "100%",
-                  height: "100px",
-                  cursor: "pointer",
-                  transition: "transform 0.2s",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: "15px",
                 }}
-                onClick={() => handleShowPosition(position.id)}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
-                <span
-                  className="position-absolute bg-danger text-white rounded-circle d-flex justify-content-center align-items-center"
-                  style={{
-                    top: "5px",
-                    right: "5px",
-                    width: "25px",
-                    height: "25px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    zIndex: 10,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenDeleteModal(position.id);
-                  }}
-                >
-                  ×
-                </span>
-                <span className="fw-semibold fs-6">{position.name}</span>
-                <span className="fs-6">{position.square}m²</span>
+                {positions.map((position) => (
+                  <div
+                    key={position.id}
+                    className={`border rounded d-flex flex-column align-items-center justify-content-center p-3 bg-${getPositionColor(
+                      position
+                    )} position-relative shadow-sm`}
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      cursor: "pointer",
+                      transition: "transform 0.2s",
+                    }}
+                    onClick={() => handleShowPosition(position.id)}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.05)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <span className="fw-semibold fs-6">{position.name}</span>
+                    <span className="fs-6">{position.square}m²</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </Card.Body>
-    </Card>
+            )}
+          </Card.Body>
+        </Card>
       </Container>
 
       <Modal
@@ -320,8 +291,8 @@ const PositionPage = () => {
         style={{
           color: "black",
           padding: "10px",
-          filter: showEdit ? "blur(5px)" : "none", // Làm mờ khi mở Edit
-          transition: "0.3s ease-in-out", // Hiệu ứng mượt
+          filter: showEdit ? "blur(5px)" : "none",
+          transition: "0.3s ease-in-out",
         }}
       >
         <Modal.Header closeButton style={modalHeaderStyle}>
@@ -473,39 +444,6 @@ const PositionPage = () => {
           </Button>
           <Button size="sm" variant="primary" onClick={handleCreate}>
             Create
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal
-        show={showDelete}
-        onHide={() => setShowDelete(false)}
-        size="sm"
-        centered
-        style={{ color: "black" }}
-      >
-        <Modal.Header closeButton style={modalHeaderStyle}>
-          <Modal.Title style={{ fontSize: "16px", margin: "0 auto" }}>
-            Confirm Delete
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ ...modalBodyStyle, textAlign: "center" }}>
-          <p style={{ fontSize: "14px", marginBottom: "15px" }}>
-            Do you really want to delete this?
-          </p>
-        </Modal.Body>
-        <Modal.Footer
-          style={{ display: "flex", justifyContent: "center", gap: "10px" }}
-        >
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setShowDelete(false)}
-          >
-            Cancel
-          </Button>
-          <Button size="sm" variant="danger" onClick={handleDeletePosition}>
-            Delete
           </Button>
         </Modal.Footer>
       </Modal>
