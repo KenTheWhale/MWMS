@@ -4,46 +4,14 @@ import com.medic115.mwms_be.enums.CodeFormat;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.Type;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.models.Equipment;
-import com.medic115.mwms_be.models.ItemGroup;
-import com.medic115.mwms_be.models.Partner;
-import com.medic115.mwms_be.models.PartnerEquipment;
-import com.medic115.mwms_be.models.RequestApplication;
-import com.medic115.mwms_be.models.RequestItem;
-import com.medic115.mwms_be.models.Task;
-import com.medic115.mwms_be.models.User;
-import com.medic115.mwms_be.repositories.CategoryRepo;
-import com.medic115.mwms_be.repositories.EquipmentRepo;
-import com.medic115.mwms_be.repositories.ItemGroupRepo;
-import com.medic115.mwms_be.repositories.PartnerEquipmentRepo;
-import com.medic115.mwms_be.repositories.PartnerRepo;
-import com.medic115.mwms_be.repositories.RequestApplicationRepo;
-import com.medic115.mwms_be.repositories.RequestItemRepo;
-import com.medic115.mwms_be.repositories.TaskRepo;
-import com.medic115.mwms_be.repositories.UserRepo;
-import com.medic115.mwms_be.requests.AddCategoryRequest;
-import com.medic115.mwms_be.requests.AddEquipmentRequest;
-import com.medic115.mwms_be.requests.AddForUpdateRequest;
-import com.medic115.mwms_be.requests.ApproveExportRequest;
-import com.medic115.mwms_be.requests.CancelImportRequest;
-import com.medic115.mwms_be.requests.CreateImportRequest;
-import com.medic115.mwms_be.requests.CreateTaskRequest;
-import com.medic115.mwms_be.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
-import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
-import com.medic115.mwms_be.requests.GetRequestDetailRequest;
-import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
-import com.medic115.mwms_be.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
-import com.medic115.mwms_be.requests.UpdateImportRequest;
-import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
-import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
+import com.medic115.mwms_be.models.*;
+import com.medic115.mwms_be.repositories.*;
+import com.medic115.mwms_be.requests.*;
 import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.ManagerService;
 import com.medic115.mwms_be.utils.ResponseUtil;
 import com.medic115.mwms_be.validations.CategoryValidation;
-import com.medic115.mwms_be.validations.DeleteCategoryValidation;
+import com.medic115.mwms_be.validations.DeleteEquipmentValidation;
 import com.medic115.mwms_be.validations.UpdateCategoryValidation;
 import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
 import lombok.AccessLevel;
@@ -58,7 +26,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Service
@@ -1184,8 +1151,7 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     private List<Map<String, Object>> getTopImportedEquipment() {
-        List<Equipment> equipments = equipmentRepo.findAll();
-        List<Map<String, Object>> dataSet = new ArrayList<>();
+        List<Equipment> equipments = equipmentRepo.findAll();List<Map<String, Object>> dataSet = new ArrayList<>();
         for (Equipment equipment : equipments) {
             int count = 0;
             Map<String, Object> data = new HashMap<>();

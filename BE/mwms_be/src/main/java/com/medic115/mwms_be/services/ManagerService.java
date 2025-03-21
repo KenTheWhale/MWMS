@@ -1,22 +1,6 @@
 package com.medic115.mwms_be.services;
 
-import com.medic115.mwms_be.requests.AddCategoryRequest;
-import com.medic115.mwms_be.requests.AddEquipmentRequest;
-import com.medic115.mwms_be.requests.AddForUpdateRequest;
-import com.medic115.mwms_be.requests.ApproveExportRequest;
-import com.medic115.mwms_be.requests.CancelImportRequest;
-import com.medic115.mwms_be.requests.CreateImportRequest;
-import com.medic115.mwms_be.requests.CreateTaskRequest;
-import com.medic115.mwms_be.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
-import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
-import com.medic115.mwms_be.requests.GetRequestDetailRequest;
-import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
-import com.medic115.mwms_be.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
-import com.medic115.mwms_be.requests.UpdateImportRequest;
-import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
-import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
+import com.medic115.mwms_be.requests.*;
 import com.medic115.mwms_be.response.ResponseObject;
 import org.springframework.http.ResponseEntity;
 
@@ -58,10 +42,9 @@ public interface ManagerService {
 
     ResponseEntity<ResponseObject> updateImportRequest(UpdateImportRequest request);
 
-    ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request);
-  ResponseEntity<ResponseObject> viewImportHistory();
+    ResponseEntity<ResponseObject> viewImportHistory();
 
-  ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request);
+    ResponseEntity<ResponseObject> addForUpdateRequest(AddForUpdateRequest request);
 
     //----------------------------Supplier----------------------------//
 
