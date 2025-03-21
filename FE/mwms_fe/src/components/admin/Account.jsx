@@ -125,52 +125,77 @@ const Admin = () => {
     fetchData();
   }, []);
 
-  const usernameRegex = /^[a-zA-Z0-9]{1,10}$/;
-  const nameRegex = /^[a-zA-Z ]+$/;
+  const usernameRegex = /^(?=.*[a-zA-Z])(?=(?:\D*\d\D*){1,2}$)[a-zA-Z0-9]{5,11}$/;
+const nameRegex = /^[a-zA-Z ]+$/;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@medic\.com$/;
+const phoneRegex = /^[0]\d{9}$/;
 
-  const validateForm = () => {
-    let tempErrors = {};
-    if (!formData.username) tempErrors.username = "Username is required";
-    else if (formData.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
-    else if (formData.username.length > 10) tempErrors.username = "Username cannot exceed 10 characters";
-    else if (!usernameRegex.test(formData.username)) tempErrors.username = "Username can only contain letters and numbers";
+const validateForm = () => {
+  let tempErrors = {};
 
-    if (!formData.name) tempErrors.name = "Full Name is required";
-    else if (!nameRegex.test(formData.name)) tempErrors.name = "Full Name can only contain letters and spaces";
+  if (!formData.username) {
+      tempErrors.username = "Username is required";
+  } else if (!usernameRegex.test(formData.username)) {
+      tempErrors.username = "Username must be 5-11 characters, contain at least one letter, and include only 1 or 2 digits";
+  }
 
-    if (!formData.roleName) tempErrors.roleName = "Role is required";
+  if (!formData.name) {
+      tempErrors.name = "Full Name is required";
+  } else if (!nameRegex.test(formData.name)) {
+      tempErrors.name = "Full Name can only contain letters and spaces";
+  }
 
-    if (!formData.email) tempErrors.email = "Email is required";
-    else if (!formData.email.endsWith("@gmail.com")) tempErrors.email = "Email must end with @gmail.com";
-    else if (!/\S+@gmail\.com$/.test(formData.email)) tempErrors.email = "Email must be a valid Gmail address";
+  if (!formData.roleName) {
+      tempErrors.roleName = "Role is required";
+  }
 
-    if (!formData.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^[0]\d{9}$/.test(formData.phone)) tempErrors.phone = "Phone number must be 10 digits and start with 0";
+  if (!formData.email) {
+      tempErrors.email = "Email is required";
+  } else if (!emailRegex.test(formData.email)) {
+      tempErrors.email = "Email must be a valid @medic.com address (e.g., name@medic.com)";
+  }
 
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+  if (!formData.phone) {
+      tempErrors.phone = "Phone number is required";
+  } else if (!phoneRegex.test(formData.phone)) {
+      tempErrors.phone = "Phone number must be 10 digits and start with 0";
+  }
 
-  const validateEditForm = () => {
-    let tempErrors = {};
-    if (!formEdit.username) tempErrors.username = "Username is required";
-    else if (formEdit.username.length < 3) tempErrors.username = "Username must be at least 3 characters";
-    else if (formEdit.username.length > 10) tempErrors.username = "Username cannot exceed 10 characters";
-    else if (!usernameRegex.test(formEdit.username)) tempErrors.username = "Username can only contain letters and numbers";
+  setErrors(tempErrors);
+  return Object.keys(tempErrors).length === 0;
+};
 
-    if (!formEdit.name) tempErrors.name = "Full Name is required";
-    else if (!nameRegex.test(formEdit.name)) tempErrors.name = "Full Name can only contain letters and spaces";
+const validateEditForm = () => {
+  let tempErrors = {};
 
-    if (!formEdit.email) tempErrors.email = "Email is required";
-    else if (!formEdit.email.endsWith("@gmail.com")) tempErrors.email = "Email must end with @gmail.com";
-    else if (!/\S+@gmail\.com$/.test(formEdit.email)) tempErrors.email = "Email must be a valid Gmail address";
+  if (!formEdit.username) {
+      tempErrors.username = "Username is required";
+  } else if (!usernameRegex.test(formEdit.username)) {
+      tempErrors.username = "Username must be 5-11 characters, contain at least one letter, and include only 1 or 2 digits";
+  }
 
-    if (!formEdit.phone) tempErrors.phone = "Phone number is required";
-    else if (!/^[0]\d{9}$/.test(formEdit.phone)) tempErrors.phone = "Phone number must be 10 digits and start with 0";
+  if (!formEdit.name) {
+      tempErrors.name = "Full Name is required";
+  } else if (!nameRegex.test(formEdit.name)) {
+      tempErrors.name = "Full Name can only contain letters and spaces";
+  }
 
-    setEditErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+  if (!formEdit.email) {
+      tempErrors.email = "Email is required";
+  } else if (!emailRegex.test(formEdit.email)) {
+      tempErrors.email = "Email must be a valid @medic.com address (e.g., name@medic.com)";
+  }
+
+  if (!formEdit.phone) {
+      tempErrors.phone = "Phone number is required";
+  } else if (!phoneRegex.test(formEdit.phone)) {
+      tempErrors.phone = "Phone number must be 10 digits and start with 0";
+  }
+
+  setEditErrors(tempErrors);
+  return Object.keys(tempErrors).length === 0;
+};
+
 
   const handleClose = () => {
     setShow(false);
@@ -553,7 +578,7 @@ const Admin = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showEquipment} className="text-black">
+      <Modal show={showEquipment} className="text-black" centered>
         <Modal.Header><Modal.Title>Equipment</Modal.Title></Modal.Header>
         <Modal.Body>
           {equipment.map((item, index) => (

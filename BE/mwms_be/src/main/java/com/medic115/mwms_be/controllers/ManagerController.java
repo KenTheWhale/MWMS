@@ -1,7 +1,22 @@
 package com.medic115.mwms_be.controllers;
 
 
-import com.medic115.mwms_be.requests.*;
+import com.medic115.mwms_be.requests.AddCategoryRequest;
+import com.medic115.mwms_be.requests.AddEquipmentRequest;
+import com.medic115.mwms_be.requests.AddForUpdateRequest;
+import com.medic115.mwms_be.requests.AreaRequest;
+import com.medic115.mwms_be.requests.CancelImportRequest;
+import com.medic115.mwms_be.requests.CreateImportRequest;
+import com.medic115.mwms_be.requests.CreateTaskRequest;
+import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
+import com.medic115.mwms_be.requests.GetRequestDetailRequest;
+import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
+import com.medic115.mwms_be.requests.PositionRequest;
+import com.medic115.mwms_be.requests.UpdateCategoryRequest;
+import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
+import com.medic115.mwms_be.requests.UpdateImportRequest;
+import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
+import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
 import com.medic115.mwms_be.response.AreaResponse;
 import com.medic115.mwms_be.response.BatchItemResponse;
 import com.medic115.mwms_be.response.PositionResponse;
@@ -21,7 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -59,10 +73,10 @@ public class ManagerController {
         return managerService.updateCategory(request);
     }
 
-    @DeleteMapping("/category")
+    @DeleteMapping("/category/{code}")
     @PreAuthorize("hasRole('manager')")
-    public ResponseEntity<ResponseObject> deleteCategory(@RequestBody DeleteCategoryRequest request) {
-        return managerService.deleteCategory(request);
+    public ResponseEntity<ResponseObject> deleteCategory(@PathVariable String code) {
+        return managerService.deleteCategory(code);
     }
 
     //-------------------------------------------------Equipment-------------------------------------------------//
@@ -202,6 +216,11 @@ public class ManagerController {
     }
 
 
+    @GetMapping("/request/history")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getImportHistory() {
+        return managerService.viewImportHistory();
+    }
     //-------------------------------------------------Area-----------------------------------------------------//
     @GetMapping("/area")
     @PreAuthorize("hasRole('manager')")

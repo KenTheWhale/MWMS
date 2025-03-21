@@ -12,6 +12,30 @@ export const getCategoryList = async () => {
     return response.data;
 }
 
+export const addCategory = async (code, name, description) => {
+    const data = {
+        code: code,
+        name: name,
+        description: description
+    }
+    const response = await axiosClient.post("/manager/category", data)
+    return response.data;
+}
+
+export const updateCategory = async (code, name, description) => {
+    const response = await axiosClient.put("/manager/category", {
+        code: code,
+        name: name,
+        description: description
+    })
+    return response.data;
+}
+
+export const deleteCategory = async (code) => {
+    const response = await axiosClient.delete(`/manager/category/${code}`)
+        return response.data;
+}
+
 //-----------------------------------------EQUIPMENT-----------------------------------------//
 export const getEquipmentList = async () => {
     const response = await axiosClient.get("/manager/equipment")
@@ -29,12 +53,12 @@ export const addEquipment = async (code, name, description, categoryId, unit) =>
     return response.data;
 }
 
-export const updateEquipment = async (code, name, description, category, unit) => {
-    const response = await axiosClient.put("/equipment", {
+export const updateEquipment = async (code, name, description, categoryId, unit) => {
+    const response = await axiosClient.put("manager/equipment", {
         code: code,
         name: name,
         description: description,
-        category: category,
+        categoryId: categoryId,
         unit: unit
     })
     return response.data;
@@ -125,24 +149,6 @@ export const createRequestApplication = async (requestItems) => {
     return response && response.status === 200 ? response.data : null;
 }
 
-export const getSupplierRequestList = async (username) => {
-    const response = await axiosClient.post("/supplier/request/list", {username: username});
-    return response && response.status === 200 ? response.data : null;
-}
-
-export const approveRequest = async (code, status, username, deliveryDetail, rejectionReason) => {
-    const response = await axiosClient.put("/supplier/request/status", {
-        code: code,
-        status: status,
-        username: username,
-        deliveryDate: deliveryDetail.deliveryDate,
-        carrierName: deliveryDetail.carrierName,
-        carrierPhone: deliveryDetail.carrierPhone,
-        rejectionReason: rejectionReason
-    });
-    return response && response.status === 200 ? response.data.data : null;
-}
-
 export const updateRequestApplication = async (requestItemId, equipmentId, quantity) => {
     const body = {
         requestItemId,
@@ -156,6 +162,11 @@ export const updateRequestApplication = async (requestItemId, equipmentId, quant
 export const cancelRequest = async (groupId) => {
     const response = await axiosClient.put("/manager/request/requestItem", groupId)
     return response && response.status === 200 ? response.data : null;
+}
+
+export const getHistoryImportList = async () => {
+    const response = await axiosClient.get("/manager/request/history");
+    return response ? response.data : null;
 }
 
 //-----------------------------------------DASHBOARD-----------------------------------------//

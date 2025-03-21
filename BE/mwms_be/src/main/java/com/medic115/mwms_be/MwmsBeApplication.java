@@ -198,6 +198,7 @@ public class MwmsBeApplication{
                         for (int i = 1; i <= 3; i++) {
                             Position position = Position.builder()
                                     .name("Shelf " + index + " in " + area.getName())
+                                    .square(50)
                                     .area(area)
                                     .build();
                             positions.add(position);

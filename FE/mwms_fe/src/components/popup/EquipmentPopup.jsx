@@ -11,10 +11,10 @@ import {
     Typography,
     Card, CardContent, Grid
 } from '@mui/material';
-import {addEquipment, deleteEquipment, getCategoryList} from '../../services/ManagerService.jsx';
+import {addEquipment, deleteEquipment, getCategoryList, updateEquipment} from '../../services/ManagerService.jsx';
 import {enqueueSnackbar} from "notistack";
 
-const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => {
+const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch, isDisabled}) => {
     const [editedEquipment, setEditedEquipment] = useState({
         id: '',
         name: '',
@@ -26,15 +26,20 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
     const [errors, setErrors] = useState({});
     const [categories, setCategories] = useState([]);
 
+
     useEffect(() => {
         if (actionType === 'edit' && equipment) {
-            setEditedEquipment({...equipment});
+            const matchedCategory = categories.find(cate => cate.name === equipment.category);
+            setEditedEquipment({
+                ...equipment,
+                category: matchedCategory ? matchedCategory.id : ''
+            });
         } else if (actionType === 'add') {
             setEditedEquipment({id: '', name: '', code: '', category: '', unit: '', description: ''});
         } else if (actionType === 'delete') {
             setEditedEquipment({...equipment});
         }
-    }, [equipment, actionType]);
+    }, [equipment, actionType, categories]);
 
     useEffect(() => {
         async function FetchCategories() {
@@ -50,7 +55,6 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
         if (!editedEquipment.name.trim()) newErrors.name = 'Name is required';
         if (!editedEquipment.category) newErrors.category = 'Category is required';
         if (!editedEquipment.unit.trim()) newErrors.unit = 'Unit is required';
-        if (!editedEquipment.code.trim()) newErrors.code = 'Code is required';
         if (!editedEquipment.description.trim()) newErrors.description = 'Description is required';
 
         setErrors(newErrors);
@@ -58,12 +62,23 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
     };
 
     const handleChange = (e) => {
-        setEditedEquipment({...editedEquipment, [e.target.name]: e.target.value});
+        const {name, value} = e.target;
+
+        if (name === "category") {
+            setEditedEquipment({
+                ...editedEquipment,
+                category: value
+            });
+        } else {
+            setEditedEquipment({
+                ...editedEquipment,
+                [name]: value
+            });
+        }
     };
 
     const handleAdd = async () => {
         if (!validateForm()) return;
-        console.log(editedEquipment);
         if (actionType === 'add') {
             const response = await addEquipment(
                 editedEquipment.code,
@@ -80,8 +95,24 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
         }
     };
 
-    const handleDelete = async (code) => {
-        const response = await deleteEquipment(code);
+    const handleUpdate = async () => {
+        if (!validateForm()) return;
+        const response = await updateEquipment(
+            editedEquipment.code,
+            editedEquipment.name,
+            editedEquipment.description,
+            editedEquipment.category,
+            editedEquipment.unit
+        );
+        enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
+        if (response.success) {
+            onFetch();
+            handleClose();
+        }
+    }
+
+    const handleDelete = async () => {
+        const response = await deleteEquipment(editedEquipment.code);
         if (response.success) {
             enqueueSnackbar(response.message, {variant: response.success ? 'success' : 'error'});
         }
@@ -102,46 +133,39 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
                     <>
                         <Card sx={{maxWidth: 500, mx: "auto", p: 3, boxShadow: 3, borderRadius: 2}}>
                             <CardContent>
-                                <Grid container spacing={2}>
+                                <Grid container spacing={2} rowSpacing={1}>
                                     <Grid xs={6}>
-                                        <Typography variant="body1" fontWeight="bold">Name:</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="body1">{equipment.name}</Typography>
-                                    </Grid>
-
-                                    <Grid item xs={6}>
                                         <Typography variant="body1" fontWeight="bold">Code:</Typography>
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1">{equipment.code}</Typography>
                                     </Grid>
 
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
+                                        <Typography variant="body1" fontWeight="bold">Name:</Typography>
+                                    </Grid>
+                                    <Grid xs={6}>
+                                        <Typography variant="body1">{equipment.name}</Typography>
+                                    </Grid>
+
+                                    <Grid xs={6}>
                                         <Typography variant="body1" fontWeight="bold">Category:</Typography>
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1">{equipment.category}</Typography>
                                     </Grid>
 
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1" fontWeight="bold">Unit:</Typography>
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1">{equipment.unit}</Typography>
                                     </Grid>
 
-                                    <Grid item xs={6}>
-                                        <Typography variant="body1" fontWeight="bold">Threshold:</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="body1">{equipment.threshold}</Typography>
-                                    </Grid>
-
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1" fontWeight="bold">Description:</Typography>
                                     </Grid>
-                                    <Grid item xs={6}>
+                                    <Grid xs={6}>
                                         <Typography variant="body1">{equipment.description}</Typography>
                                     </Grid>
                                 </Grid>
@@ -151,10 +175,9 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
                 )}
                 {(actionType === 'edit' || actionType === 'add') && (
                     <>
+                        <TextField label="Code" name="code" fullWidth margin="dense" value={editedEquipment.code} onChange={handleChange} disabled={isDisabled}/>
                         <TextField label="Name" name="name" fullWidth margin="dense" value={editedEquipment.name}
                                    onChange={handleChange} error={!!errors.name} helperText={errors.name}/>
-                        <TextField label="Code" name="code" fullWidth margin="dense" value={editedEquipment.code}
-                                   onChange={handleChange} error={!!errors.code} helperText={errors.code}/>
                         <TextField select label="Category" name="category" fullWidth margin="dense"
                                    value={editedEquipment.category} onChange={handleChange} error={!!errors.category}
                                    helperText={errors.category}>
@@ -180,10 +203,10 @@ const EquipmentPopup = ({equipment, show, handleClose, actionType, onFetch}) => 
                     <Button onClick={handleAdd} color="primary">Add</Button>
                 )}
                 {(actionType === 'edit') && (
-                    <Button onClick={handleAdd} color="primary">Save</Button>
+                    <Button onClick={handleUpdate} color="primary">Save</Button>
                 )}
                 {actionType === 'delete' && (
-                    <Button onClick={() => handleDelete(editedEquipment.code)} color="error">Delete</Button>
+                    <Button onClick={handleDelete} color="error">Delete</Button>
                 )}
             </DialogActions>
         </Dialog>
@@ -196,6 +219,7 @@ EquipmentPopup.propTypes = {
     handleClose: PropTypes.func.isRequired,
     actionType: PropTypes.string.isRequired,
     onFetch: PropTypes.func.isRequired,
+    isDisabled: PropTypes.bool.isRequired
 };
 
 export default EquipmentPopup;

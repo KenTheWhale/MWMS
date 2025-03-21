@@ -5,9 +5,9 @@ import com.medic115.mwms_be.models.Category;
 import com.medic115.mwms_be.repositories.CategoryRepo;
 
 public class DeleteCategoryValidation {
-    public static String validate(DeleteCategoryRequest request, CategoryRepo categoryRepo) {
+    public static String validate(String code, CategoryRepo categoryRepo) {
         String error = null;
-        Category category = categoryRepo.findByCode(request.getCateCode());
+        Category category = categoryRepo.findByCode(code);
         if (category == null) {
             error = "Category name has already deleted";
         } else if (!category.getEquipments().isEmpty()) {

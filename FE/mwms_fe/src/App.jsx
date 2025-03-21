@@ -23,6 +23,7 @@ import {SnackbarProvider} from "notistack";
 import Admin from "./components/admin/Account.jsx";
 import {TaskStaff} from "./components/staff/TaskStaff.jsx";
 import {Dashboard} from "./components/manager/Dashboard.jsx";
+import ImportHistory from "./components/manager/ImportHistory.jsx";
 
 
 const router = createBrowserRouter([
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
         path: "category",
         element: <Category />,
       },
+      {
+        path: "history",
+        element: <ImportHistory />,
+      }
     ],
   },
   {
