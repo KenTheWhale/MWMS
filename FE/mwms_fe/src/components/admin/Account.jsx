@@ -404,11 +404,11 @@ const validateEditForm = () => {
           <Col>
             <Card className="shadow-sm" style={{borderRadius: "10px"}}>
               <Card.Body>
-                <Table responsive hover className="table-striped">
-                  <thead className="bg-light text-center" >
+                <Table responsive hover className="table-striped text-center">
+                  <thead className="bg-light" >
                     <tr>
                       <th>ID</th>
-                      <th>Username</th>
+                      <th>Username2</th>
                       <th>Role</th>
                       <th>Status</th>
                       <th>Actions</th>
