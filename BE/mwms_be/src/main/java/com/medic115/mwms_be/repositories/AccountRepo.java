@@ -20,4 +20,6 @@ public interface AccountRepo extends JpaRepository<Account, Integer> {
     @Query("SELECT a FROM Account a WHERE a.role != 'ADMIN'")
     List<Account> findAllUsersExceptAdmin();
 
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.status = :status and a.logged = :logged")
+    Integer countByStatusAndLogged(String status, boolean logged);
 }

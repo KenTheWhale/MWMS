@@ -1,85 +1,81 @@
-import {
-  Card,
-  Col,
-  Row
-} from "react-bootstrap";
-
+import { Card, Col, Row } from "react-bootstrap";
 import style from "../../styles/Admin.module.css";
-import { useState } from "react";
-
+import { useEffect, useState, useCallback } from "react";
+import axiosClient from "../../config/api";
+import { useSnackbar } from "notistack";
 
 const DashDefault = () => {
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [deleteUsers, setDeleteUsers] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [salesData, setSalesData] = useState([
-    {
-      title: "Daily Sales",
-      amount: "$249.95",
-      icon: "icon-arrow-up text-c-green",
-      value: 50,
-      class: "progress-c-theme",
-    },
-    {
-      title: "Monthly Sales",
-      amount: "$2.942.32",
-      icon: "icon-arrow-down text-c-red",
-      value: 36,
-      class: "progress-c-theme2",
-    },
-    {
-      title: "Yearly Sales",
-      amount: "$8.638.32",
-      icon: "icon-arrow-up text-c-green",
-      value: 70,
-      color: "progress-c-theme",
-    },
-  ]);
+  const fetchAPI = useCallback(async () => {
+    try {
+      const [response1, response2] = await Promise.all([
+        axiosClient.get("/user/get-active"),
+        axiosClient.get("/user/get-deleted"),
+      ]);
+
+      setActiveUsers(response1.data);
+      setDeleteUsers(response2.data);
+
+      enqueueSnackbar("Fetch Success!", { variant: "success" });
+    } catch (error) {
+      enqueueSnackbar(error.response?.data || "Something went wrong", { variant: "error" });
+    }
+  }, [enqueueSnackbar]); 
+
+  useEffect(() => {
+    fetchAPI();
+  }, [fetchAPI]);
 
   return (
-    <>
-      <Row
-        className={style.screen}
-        style={{
-          overflowY: "scroll",
-          height: "100vh",
-          marginLeft: "0.5px",
-          marginRight: "0.5px",
-        }}
-      >
-        {salesData.map((data, index) => {
-          return (
-            <Col key={index} xl={6} xxl={4} className="mt-5">
-              <Card>
-                <Card.Body>
-                  <h6 className="mb-4">{data.title}</h6>
-                  <div className="row d-flex align-items-center">
-                    <div className="col-9">
-                      <h3 className="f-w-300 d-flex align-items-center m-b-0">
-                        <i className={`feather ${data.icon} f-30 m-r-5`} />{" "}
-                        {data.amount}
-                      </h3>
-                    </div>
-                    <div className="col-3 text-end">
-                      <p className="m-b-0">{data.value}%</p>
-                    </div>
-                  </div>
-                  <div className="progress m-t-30" style={{ height: "7px" }}>
-                    <div
-                      className={`progress-bar ${data.class}`}
-                      role="progressbar"
-                      style={{ width: `${data.value}%` }}
-                      aria-valuenow={data.value}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    />
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          );
-        })}
+    <Row
+      className={style.screen}
+      style={{
+        overflowY: "scroll",
+        height: "100vh",
+        marginLeft: "0.5px",
+        marginRight: "0.5px",
+      }}
+    >
+      <Col xl={6} xxl={4} className="mt-5">
+        <Card style={{borderRadius: "10px"}}>
+          <Card.Body>
+            <h6 className="mb-4">Active Users</h6>
+            <div className="row d-flex align-items-center">
+              <div className="col-9">
+                <h3 className="f-w-300 d-flex align-items-center m-b-0">
+                  {activeUsers}
+                </h3>
+              </div>
+              <div className="col-3 text-end">
+                <p className="m-b-0">Users</p>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
 
-      </Row>
-    </>
+      <Col xl={6} xxl={4} className="mt-5">
+        <Card style={{borderRadius: "10px"}}>
+          <Card.Body>
+            <h6 className="mb-4">Deleted Users</h6>
+            <div className="row d-flex align-items-center" >
+              <div className="col-9">
+                <h3 className="f-w-300 d-flex align-items-center m-b-0">
+                  {deleteUsers}
+                </h3>
+              </div>
+              <div className="col-3 text-end">
+                <p className="m-b-0">Users</p>
+              </div>
+            </div>
+            
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 
