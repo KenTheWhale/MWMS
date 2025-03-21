@@ -9,6 +9,8 @@ public enum Type {
     TOKEN_ACCESS("access"),
     TOKEN_REFRESH("refresh"),
     REQUEST_IMPORT("import"),
-    REQUEST_EXPORT("export");
+    REQUEST_EXPORT("export"),
+    TASK_IMPORT("import"),
+    TASK_REPLACE("replace");
     private final String value;
 }

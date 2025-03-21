@@ -1,24 +1,7 @@
 package com.medic115.mwms_be.controllers;
 
 
-import com.medic115.mwms_be.requests.AddCategoryRequest;
-import com.medic115.mwms_be.requests.AddEquipmentRequest;
-import com.medic115.mwms_be.requests.AddForUpdateRequest;
-import com.medic115.mwms_be.requests.AreaRequest;
-import com.medic115.mwms_be.requests.CancelImportRequest;
-import com.medic115.mwms_be.requests.CreateImportRequest;
-import com.medic115.mwms_be.requests.CreateTaskRequest;
-import com.medic115.mwms_be.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
-import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
-import com.medic115.mwms_be.requests.GetRequestDetailRequest;
-import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
-import com.medic115.mwms_be.requests.PositionRequest;
-import com.medic115.mwms_be.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
-import com.medic115.mwms_be.requests.UpdateImportRequest;
-import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
-import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
+import com.medic115.mwms_be.requests.*;
 import com.medic115.mwms_be.response.AreaResponse;
 import com.medic115.mwms_be.response.BatchItemResponse;
 import com.medic115.mwms_be.response.PositionResponse;
@@ -292,14 +275,19 @@ public class ManagerController {
         positionService.deletePosition(positionId);
         return ResponseEntity.ok("Delete position successful");
     }
-
-
     //------------------------------------------BatchItem----------------------------------------------//
 
     @GetMapping("/batch-item/{batchId}")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<List<BatchItemResponse>> getAlBatchItems(@PathVariable("batchId") Integer batchId) {
         return ResponseEntity.ok(batchService.getAllBatchItems(batchId));
+    }
+
+    //------------------------------------------BATCH----------------------------------------------//
+    @GetMapping("/batch/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllBatch(){
+        return managerService.getAllBatch();
     }
     //-----------------------------------------------------
     @GetMapping("/supplier")
@@ -313,5 +301,12 @@ public class ManagerController {
     public ResponseEntity<String> deleteBatch(@PathVariable("batchId") Integer batchId) {
         batchService.deleteBatch(batchId);
         return ResponseEntity.ok("Delete batch successful");
+    }
+
+    //------------------------------------------DASHBOARD----------------------------------------------//
+    @GetMapping("/data")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getDashboardData(){
+        return managerService.getDashboardData();
     }
 }
