@@ -2,7 +2,7 @@ import {
     Apps,
     Archive,
     Assignment,
-    AutoAwesomeMosaic,
+    AutoAwesomeMosaic, DashboardCustomize,
     InsertDriveFile,
     Inventory2,
     MedicalServices, Schedule,
@@ -11,6 +11,11 @@ import {
 import {DashboardUI} from "../components/ui/DashboardUI.jsx";
 
 const navigation = [
+    {
+        segment: 'manager/dashboard',
+        title: 'Dashboard',
+        icon: <DashboardCustomize/>,
+    },
     {
         segment: 'manager/request',
         title: 'Request',
