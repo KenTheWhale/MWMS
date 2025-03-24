@@ -9,5 +9,7 @@ public interface CategoryRepo extends JpaRepository<Category, Integer> {
 
     Category findByCode(String code);
 
+    Category findByCodeAndStatus(String code, String status);
+
     void deleteByCode(String code);
 }
