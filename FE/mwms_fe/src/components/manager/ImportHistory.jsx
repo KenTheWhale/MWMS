@@ -91,12 +91,11 @@ function ImportHistory() {
                                     value={filterDate.value}
                                     label="Request Date"/>
                     </LocalizationProvider>
-
                 </div>
             </div>
 
             <Paper sx={{overflowY: "hidden"}}>
-                <TableContainer sx={{height: "23vh"}}>
+                <TableContainer sx={{height: "50vh"}}>
                     <Table size={"small"} stickyHeader>
                         <TableHead>
                             <TableRow>
