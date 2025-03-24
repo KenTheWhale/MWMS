@@ -489,7 +489,12 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public ResponseEntity<ResponseObject> getStaffs() {
         List<Map<String, Object>> data = userRepo.findAll().stream()
-                .filter(user -> user.getAccount().getRole().equals(Role.STAFF))
+                .filter(user ->
+                        user.getAccount().getRole().equals(Role.STAFF)
+                        && user.getTasks().stream().filter(
+                                task -> task.getStatus().equalsIgnoreCase(Status.TASK_ASSIGNED.getValue())
+                        ).toList().size() < 5
+                )
                 .map(
                         staff -> {
                             Map<String, Object> dataItem = new HashMap<>();

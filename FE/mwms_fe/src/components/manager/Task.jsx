@@ -132,6 +132,7 @@ function RenderTable({tasks, SetActionFunc}) {
 function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, staffs}) {
     const [assignArea, setAssignArea] = useState(false)
     const [input, setInput] = useState({
+        id: 0,
         description: "",
         staff: ""
     })
@@ -234,9 +235,10 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                         Staff
                                                     </InputLabel>
                                                     <Select
-                                                        value={input.staff}
-                                                        onChange={(e) => setInput({...input, staff: e.target.value})}
+                                                        value={input.id === group.id ? input.staff : 0}
+                                                        onChange={(e) => setInput({...input, id: group.id, staff: e.target.value})}
                                                     >
+                                                        <MenuItem value={0} disabled>{"N/A"}</MenuItem>
                                                         {staffs.map((s, index) => (
                                                             <MenuItem key={index} value={s.id}>{s.name}</MenuItem>
                                                         ))}
@@ -250,9 +252,10 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                     <Input
                                                         multiline
                                                         required
-                                                        value={input.description}
+                                                        value={input.id === group.id ? input.description: ""}
                                                         onChange={(e) => setInput({
                                                             ...input,
+                                                            id: group.id,
                                                             description: e.target.value
                                                         })}
                                                     />
