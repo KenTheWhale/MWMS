@@ -259,8 +259,8 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
             area.equipment.id === eqId &&
             checkValidSquare(
                 area.square,
-                batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
-                batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
+                !batchItems.find(i => i.id === itemId) || batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
+                !batchItems.find(i => i.id === itemId) || batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
             )
         )
     }
@@ -269,8 +269,8 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
         return area ? area.positionList.filter(position =>
             checkValidSquare(
                 position.square,
-                batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
-                batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
+                !batchItems.find(i => i.id === itemId) || batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
+                !batchItems.find(i => i.id === itemId) || batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
             )
         ) : []
     }
