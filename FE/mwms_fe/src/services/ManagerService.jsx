@@ -97,10 +97,8 @@ export const addTask = async (staffId, description, groupId) => {
     return response ? response.data : null;
 }
 
-export const getTaskByCode = async (code) => {
-    const response = await axiosClient.post("/manager/task/detail", {
-        code: code,
-    })
+export const getAllBatches = async () => {
+    const response = await axiosClient.get("/manager/batch/list");
     return response ? response.data : null;
 }
 
@@ -168,5 +166,11 @@ export const cancelRequest = async (groupId) => {
 
 export const getHistoryImportList = async () => {
     const response = await axiosClient.get("/manager/request/history");
+    return response ? response.data : null;
+}
+
+//-----------------------------------------DASHBOARD-----------------------------------------//
+export const getDashboardData = async () => {
+    const response = await axiosClient.get("/manager/data");
     return response ? response.data : null;
 }

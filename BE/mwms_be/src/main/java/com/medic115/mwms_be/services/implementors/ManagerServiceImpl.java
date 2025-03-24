@@ -4,44 +4,16 @@ import com.medic115.mwms_be.enums.CodeFormat;
 import com.medic115.mwms_be.enums.Role;
 import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.enums.Type;
-import com.medic115.mwms_be.models.Category;
-import com.medic115.mwms_be.models.Equipment;
-import com.medic115.mwms_be.models.ItemGroup;
-import com.medic115.mwms_be.models.Partner;
-import com.medic115.mwms_be.models.PartnerEquipment;
-import com.medic115.mwms_be.models.RequestApplication;
-import com.medic115.mwms_be.models.RequestItem;
-import com.medic115.mwms_be.models.Task;
-import com.medic115.mwms_be.models.User;
-import com.medic115.mwms_be.repositories.CategoryRepo;
-import com.medic115.mwms_be.repositories.EquipmentRepo;
-import com.medic115.mwms_be.repositories.ItemGroupRepo;
-import com.medic115.mwms_be.repositories.PartnerEquipmentRepo;
-import com.medic115.mwms_be.repositories.PartnerRepo;
-import com.medic115.mwms_be.repositories.RequestApplicationRepo;
-import com.medic115.mwms_be.repositories.RequestItemRepo;
-import com.medic115.mwms_be.repositories.TaskRepo;
-import com.medic115.mwms_be.repositories.UserRepo;
-import com.medic115.mwms_be.requests.AddCategoryRequest;
-import com.medic115.mwms_be.requests.AddEquipmentRequest;
-import com.medic115.mwms_be.requests.AddForUpdateRequest;
-import com.medic115.mwms_be.requests.ApproveExportRequest;
-import com.medic115.mwms_be.requests.CancelImportRequest;
-import com.medic115.mwms_be.requests.CreateImportRequest;
-import com.medic115.mwms_be.requests.CreateTaskRequest;
-import com.medic115.mwms_be.requests.DeleteCategoryRequest;
-import com.medic115.mwms_be.requests.DeleteEquipmentRequest;
-import com.medic115.mwms_be.requests.FilterRequestApplicationRequest;
-import com.medic115.mwms_be.requests.GetRequestDetailRequest;
-import com.medic115.mwms_be.requests.GetTaskByCodeRequest;
-import com.medic115.mwms_be.requests.UpdateCategoryRequest;
-import com.medic115.mwms_be.requests.UpdateEquipmentRequest;
-import com.medic115.mwms_be.requests.UpdateImportRequest;
-import com.medic115.mwms_be.requests.ViewEquipmentSupplierRequest;
-import com.medic115.mwms_be.requests.ViewSupplierEquipmentRequest;
+import com.medic115.mwms_be.models.*;
+import com.medic115.mwms_be.repositories.*;
+import com.medic115.mwms_be.requests.*;
 import com.medic115.mwms_be.response.ResponseObject;
 import com.medic115.mwms_be.services.ManagerService;
-import com.medic115.mwms_be.validations.*;
+import com.medic115.mwms_be.utils.ResponseUtil;
+import com.medic115.mwms_be.validations.CategoryValidation;
+import com.medic115.mwms_be.validations.DeleteEquipmentValidation;
+import com.medic115.mwms_be.validations.UpdateCategoryValidation;
+import com.medic115.mwms_be.validations.UpdateEquipmentValidation;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Data
 @Service
@@ -81,6 +50,8 @@ public class ManagerServiceImpl implements ManagerService {
     UserRepo userRepo;
 
     PartnerRepo partnerRepo;
+
+    BatchRepo batchRepo;
 
     //-----------------------------------------------CATEGORY-----------------------------------------------//
     @Override
@@ -365,6 +336,7 @@ public class ManagerServiceImpl implements ManagerService {
                     dataItem.put("code", task.getCode());
                     dataItem.put("assignDate", task.getAssignedDate());
                     dataItem.put("staff", task.getUser().getName());
+                    dataItem.put("type", task.getType());
                     dataItem.put("partner", task.getItemGroup().getRequestItems().get(0).getPartner().getUser().getName());
                     dataItem.put("description", task.getDescription());
                     dataItem.put("status", task.getStatus());
@@ -405,8 +377,11 @@ public class ManagerServiceImpl implements ManagerService {
         }
 
         task.setStatus(Status.TASK_DELETE.getValue());
-        task.getItemGroup().setStatus(Status.GROUP_ACCEPTED.getValue());
+        ItemGroup item = task.getItemGroup();
+        task.setItemGroup(null);
         taskRepo.save(task);
+        item.setStatus(Status.GROUP_ACCEPTED.getValue());
+        itemGroupRepo.save(item);
         return ResponseEntity.ok().body(
                 ResponseObject.builder()
                         .message("Delete task successfully")
@@ -440,33 +415,21 @@ public class ManagerServiceImpl implements ManagerService {
             );
         }
 
-        boolean flag = false;
         List<Task> tasks = taskRepo.findAll();
-        for (Task t : tasks) {
-            if (t.getItemGroup().getId().equals(request.getGroupId())) {
-                t.setStatus(Status.TASK_ASSIGNED.getValue());
-                t.setDescription(request.getDescription());
-                t.setAssignedDate(group.getDeliveryDate());
-                t.setUser(staff);
-                taskRepo.save(t);
-                flag = true;
-            }
-        }
 
         int newCodeValue = tasks.isEmpty() ? 1 : Integer.parseInt(tasks.get(tasks.size() - 1).getCode().split("-")[1]) + 1;
 
-        if (!flag) {
-            taskRepo.save(
-                    Task.builder()
-                            .assignedDate(group.getDeliveryDate())
-                            .code(CodeFormat.TASK.getValue() + newCodeValue)
-                            .itemGroup(group)
-                            .user(staff)
-                            .description(request.getDescription())
-                            .status(Status.TASK_ASSIGNED.getValue())
-                            .build()
-            );
-        }
+        taskRepo.save(
+                Task.builder()
+                        .assignedDate(group.getDeliveryDate())
+                        .code(CodeFormat.TASK.getValue() + newCodeValue)
+                        .itemGroup(group)
+                        .user(staff)
+                        .type(Type.TASK_IMPORT.getValue())
+                        .description(request.getDescription())
+                        .status(Status.TASK_ASSIGNED.getValue())
+                        .build()
+        );
         group.setStatus(Status.GROUP_PROCESSING.getValue());
         itemGroupRepo.save(group);
         return ResponseEntity.ok().body(
@@ -497,6 +460,7 @@ public class ManagerServiceImpl implements ManagerService {
         data.put("assignDate", task.getAssignedDate());
         data.put("staff", task.getUser().getName());
         data.put("description", task.getDescription());
+        data.put("type", task.getType());
         data.put("status", task.getStatus());
         data.put("group", getItemGroupFromTask(task));
 
@@ -582,7 +546,6 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     private List<Map<String, Object>> getItemDataFromGroup(ItemGroup itemGroup) {
-        DecimalFormat df = new DecimalFormat("#.##");
 
         return requestItemRepo.findAll().stream()
                 .filter(item -> item.getItemGroup().getId().equals(itemGroup.getId()))
@@ -1038,6 +1001,208 @@ public class ManagerServiceImpl implements ManagerService {
         );
     }
 
+    //-----------------------------BATCH-----------------------------//
+
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllBatch() {
+        return ResponseUtil.build(HttpStatus.OK, "", true, getBatchList());
+    }
+
+    private List<Map<String, Object>> getBatchList() {
+        return batchRepo.findAll().stream()
+                .map(
+                        batch -> {
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("id", batch.getId());
+                            data.put("code", batch.getCode());
+                            data.put("createdDate", batch.getCreatedDate());
+                            data.put("length", batch.getLength());
+                            data.put("width", batch.getWidth());
+                            data.put("qty", batch.getBatchItems().size());
+                            data.put("location", getLocationFromBatch(batch));
+                            data.put("request", getRequestFromBatch(batch));
+                            data.put("items", getItemsFromBatch(batch));
+                            return data;
+                        }
+                )
+                .toList();
+    }
+
+    private Map<String, Object> getLocationFromBatch(Batch batch) {
+        Map<String, Object> location = new HashMap<>();
+        location.put("areaName", batch.getPosition().getArea().getName());
+        location.put("positionName", batch.getPosition().getName());
+        return location;
+    }
+
+    private Map<String, Object> getRequestFromBatch(Batch batch) {
+        RequestItem item = batch.getRequestItem();
+        Map<String, Object> request = new HashMap<>();
+        request.put("id", item.getId());
+        request.put("partner", item.getPartner().getUser().getName());
+        request.put("group", getGroupFromItem(item));
+        request.put("equipment", getEquipmentFromItem(item));
+        return request;
+    }
+
+    private Map<String, Object> getGroupFromItem(RequestItem item) {
+        ItemGroup group = item.getItemGroup();
+        Map<String, Object> groupItem = new HashMap<>();
+        groupItem.put("id", group.getId());
+        groupItem.put("cName", group.getCarrierName());
+        groupItem.put("cPhone", group.getCarrierPhone());
+        groupItem.put("delivery", group.getDeliveryDate());
+        groupItem.put("request", getRequestApplicationFromGroup(group));
+        return groupItem;
+    }
+
+    private Map<String, Object> getRequestApplicationFromGroup(ItemGroup group) {
+        RequestApplication request = group.getRequestApplication();
+        Map<String, Object> requestApplication = new HashMap<>();
+        requestApplication.put("id", request.getId());
+        requestApplication.put("code", request.getCode());
+        requestApplication.put("requestDate", request.getRequestDate());
+        return requestApplication;
+    }
+
+    private Map<String, Object> getEquipmentFromItem(RequestItem item) {
+        Equipment equipment = item.getEquipment();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", equipment.getId());
+        data.put("code", equipment.getCode());
+        data.put("name", equipment.getName());
+        data.put("unit", equipment.getUnit());
+        data.put("category", equipment.getCategory().getName());
+        data.put("description", equipment.getDescription());
+        return data;
+    }
+
+    private List<Map<String, Object>> getItemsFromBatch(Batch batch) {
+        return batch.getBatchItems().stream().map(
+                item -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("serial", item.getSerialNumber());
+                    return data;
+                }
+        ).toList();
+    }
+
+    //-----------------------------DASHBOARD-----------------------------//
+    @Override
+    public ResponseEntity<ResponseObject> getDashboardData() {
+        return ResponseUtil.build(HttpStatus.OK, "", true, getData());
+    }
+
+    private Map<String, Object> getData() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("number", getDataNumberInMonth());
+        data.put("chart", getDataChart());
+        return data;
+    }
+
+    private Map<String, Object> getDataNumberInMonth() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("batch", getImportedBatchAmount());
+        data.put("task", getCompletedTaskAmount());
+        data.put("peRequest", getRequestAmountBaseOnStatus(Status.GROUP_PENDING.getValue()));
+        data.put("acRequest", getRequestAmountBaseOnStatus(Status.GROUP_ACCEPTED.getValue()));
+        data.put("prRequest", getRequestAmountBaseOnStatus(Status.GROUP_PROCESSING.getValue()));
+        data.put("stRequest", getRequestAmountBaseOnStatus(Status.GROUP_STORED.getValue()));
+        data.put("reRequest", getRequestAmountBaseOnStatus(Status.GROUP_REJECTED.getValue()));
+        data.put("caRequest", getRequestAmountBaseOnStatus(Status.GROUP_CANCELLED.getValue()));
+        return data;
+    }
+
+    private int getImportedBatchAmount() {
+        return batchRepo.findAll().stream()
+                .filter(batch -> batch.getCreatedDate().getMonth()
+                        .equals(LocalDate.now().getMonth())
+                )
+                .toList()
+                .size();
+    }
+
+    private int getCompletedTaskAmount() {
+        return taskRepo.findAll().stream()
+                .filter(task -> task.getAssignedDate().getMonth()
+                        .equals(LocalDate.now().getMonth())
+                        && task.getStatus()
+                        .equalsIgnoreCase(Status.TASK_COMPLETED.getValue())
+                ).toList().size();
+    }
+
+    private int getRequestAmountBaseOnStatus(String status) {
+        return itemGroupRepo.findAll().stream()
+                .filter(group -> group.getStatus()
+                        .equalsIgnoreCase(status)
+                        && group.getRequestApplication().getRequestDate().getMonth()
+                        .equals(LocalDate.now().getMonth())
+
+                )
+                .toList().size();
+    }
+
+    private Map<String, Object> getDataChart() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("equipment", getTopImportedEquipment());
+        data.put("request", getMonthlyImportedAcceptedRequest());
+        return data;
+    }
+
+    private List<Map<String, Object>> getTopImportedEquipment() {
+        List<Equipment> equipments = equipmentRepo.findAll();List<Map<String, Object>> dataSet = new ArrayList<>();
+        for (Equipment equipment : equipments) {
+            int count = 0;
+            Map<String, Object> data = new HashMap<>();
+            List<RequestItem> items = equipment.getRequestItems();
+            for (RequestItem item : items) {
+                if(item.getBatch() != null){
+                    count++;
+                }
+            }
+            data.put("name", equipment.getName());
+            data.put("qty", count);
+            dataSet.add(data);
+        }
+
+        return dataSet.stream()
+                .sorted(Comparator.comparingInt(m -> {
+                    Integer qty = (Integer) ((Map<String, Object>) m).get("qty");
+                    return Optional.ofNullable(qty).orElse(0);
+                }).reversed())
+                .limit(5)
+                .toList();
+    }
+
+    private List<Map<String, Object>> getMonthlyImportedAcceptedRequest() {
+        List<Month> months = new ArrayList<>();
+        LocalDate last3Months = LocalDate.now().minusMonths(4);
+
+        while (!last3Months.isAfter(LocalDate.now())) {
+            months.add(last3Months.getMonth());
+            last3Months = last3Months.plusMonths(1);
+        }
+
+        List<Map<String, Object>> dataSet = new ArrayList<>();
+        for(Month month : months){
+            Map<String, Object> data = new HashMap<>();
+            data.put("month", month.getDisplayName(TextStyle.FULL, Locale.getDefault()));
+            data.put("qty",getRequestByMonth(month));
+            dataSet.add(data);
+        }
+        return dataSet;
+    }
+
+    private int getRequestByMonth(Month month){
+        return itemGroupRepo.findAll().stream().filter(
+                group -> group.getRequestApplication().getRequestDate().getMonth().equals(month)
+                && (group.getStatus().equalsIgnoreCase(Status.GROUP_ACCEPTED.getValue())
+                        || group.getStatus().equalsIgnoreCase(Status.GROUP_PROCESSING.getValue())
+                        || group.getStatus().equalsIgnoreCase(Status.GROUP_STORED.getValue())
+                )
+        ).toList().size();
+    }
 
     //-----------------------------PRIVATE FUNCTIONS-----------------------------//
     private String generateRequestCode() {

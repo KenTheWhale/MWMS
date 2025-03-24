@@ -294,14 +294,19 @@ public class ManagerController {
         positionService.deletePosition(positionId);
         return ResponseEntity.ok("Delete position successful");
     }
-
-
     //------------------------------------------BatchItem----------------------------------------------//
 
     @GetMapping("/batch-item/{batchId}")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<List<BatchItemResponse>> getAlBatchItems(@PathVariable("batchId") Integer batchId) {
         return ResponseEntity.ok(batchService.getAllBatchItems(batchId));
+    }
+
+    //------------------------------------------BATCH----------------------------------------------//
+    @GetMapping("/batch/list")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getAllBatch(){
+        return managerService.getAllBatch();
     }
     //-----------------------------------------------------
     @GetMapping("/supplier")
@@ -315,5 +320,12 @@ public class ManagerController {
     public ResponseEntity<String> deleteBatch(@PathVariable("batchId") Integer batchId) {
         batchService.deleteBatch(batchId);
         return ResponseEntity.ok("Delete batch successful");
+    }
+
+    //------------------------------------------DASHBOARD----------------------------------------------//
+    @GetMapping("/data")
+    @PreAuthorize("hasRole('manager')")
+    public ResponseEntity<ResponseObject> getDashboardData(){
+        return managerService.getDashboardData();
     }
 }

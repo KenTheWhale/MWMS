@@ -251,19 +251,27 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
     const limitation = {
         length: {max: 100, min: 1},
         width: {max: 100, min: 1},
-        quantity: {max: 100, min: 1}
+        quantity: {min: 1}
     }
 
     const filteredArea = (itemId, eqId) => {
         return areas.filter(area =>
             area.equipment.id === eqId &&
-            checkValidSquare(area.square, batchItems.find(i => i.id === itemId).length, batchItems.find(i => i.id === itemId).width)
+            checkValidSquare(
+                area.square,
+                batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
+                batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
+            )
         )
     }
 
     const filteredPositions = (itemId, area) => {
         return area ? area.positionList.filter(position =>
-            checkValidSquare(position.square, batchItems.find(i => i.id === itemId).length, batchItems.find(i => i.id === itemId).width)
+            checkValidSquare(
+                position.square,
+                batchItems.find(i => i.id === itemId).length === "" ? 0 : batchItems.find(i => i.id === itemId).length,
+                batchItems.find(i => i.id === itemId).width === "" ? 0 : batchItems.find(i => i.id === itemId).width
+            )
         ) : []
     }
 
@@ -271,9 +279,15 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
         setExpand(index);
     }
 
-    const handleInputChange = (id, e) => {
-        const value = checkLimitation(e.target.value, e.target.name);
-        if (Number.isInteger(value) || e.target.value === "") {
+    const handleInputChange = (id, e, maxValue) => {
+        const value = checkLimitation(e.target.value, e.target.name, maxValue);
+        if (e.target.value === "") {
+            setBatchItems(batch => batch.map(item =>
+                item.id === id ? {...item, [e.target.name]: ""} : item
+            ))
+        }
+
+        if (Number.isInteger(value)) {
             setBatchItems(batch => batch.map(item =>
                 item.id === id ? {...item, [e.target.name]: value} : item
             ))
@@ -292,12 +306,12 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
         ))
     }
 
-    const checkLimitation = (value, name) => {
+    const checkLimitation = (value, name, maxValue) => {
         const intValue = parseInt(value, 10);
         if (Number.isInteger(intValue)) {
-            return Math.max(limitation[name].min, (Math.min(limitation[name].max, intValue)));
+            return Math.max(limitation[name].min, (Math.min(maxValue, intValue)));
         }
-        return null
+        return ""
     }
 
     const checkValidSquare = (square, length, width) => {
@@ -410,15 +424,15 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
                                 <Box>
                                     <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
                                         <TextField
-                                            label={`Quantity (${limitation.quantity.min} ~ ${limitation.quantity.max} ${item.unit})`}
+                                            label={`Quantity (${limitation.quantity.min} ~ ${item.quantity} ${item.unit})`}
                                             type={"number"}
                                             variant={"standard"}
                                             name={"quantity"}
                                             value={item.batch ? item.batch.items.length : batchItems.find(i => i.id === item.id).quantity}
-                                            onChange={(e) => handleInputChange(item.id, e)}
+                                            onChange={(e) => handleInputChange(item.id, e, item.quantity)}
                                             slotProps={{
                                                 htmlInput: {
-                                                    max: limitation.quantity.max,
+                                                    max: item.quantity,
                                                     min: limitation.quantity.min
                                                 },
                                                 inputLabel: {
@@ -436,7 +450,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
                                             variant={"standard"}
                                             name={"length"}
                                             value={item.batch ? item.batch.length : batchItems.find(i => i.id === item.id).length}
-                                            onChange={(e) => handleInputChange(item.id, e)}
+                                            onChange={(e) => handleInputChange(item.id, e, limitation.length.max)}
                                             slotProps={{
                                                 htmlInput: {
                                                     max: limitation.length.max,
@@ -457,7 +471,7 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
                                             variant={"standard"}
                                             name={"width"}
                                             value={item.batch ? item.batch.width : batchItems.find(i => i.id === item.id).width}
-                                            onChange={(e) => handleInputChange(item.id, e)}
+                                            onChange={(e) => handleInputChange(item.id, e, limitation.width.max)}
                                             slotProps={{
                                                 htmlInput: {
                                                     max: limitation.width.max,
@@ -511,7 +525,8 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
                                                     ))
                                             }
                                             {
-                                                item.batch && <MenuItem value={-1}>{item.batch.location.positionName}</MenuItem>
+                                                item.batch &&
+                                                <MenuItem value={-1}>{item.batch.location.positionName}</MenuItem>
                                             }
                                         </Select>
                                     </FormControl>
@@ -519,26 +534,29 @@ function RenderCreateBatchModal({modal, CloseBatchModal, task, areas, updateData
                             </AccordionDetails>
                             {
                                 item.batch ? "" :
-                                <div className={'d-flex justify-content-end me-2 mb-2'}>
-                                    <Button
-                                        variant={"contained"}
-                                        color={"success"}
-                                        disabled={
-                                            batchItems.find(i => i.id === item.id).area === 0 ||
-                                            batchItems.find(i => i.id === item.id).position === 0
-                                        }
-                                        onClick={
-                                            () => createNewBatch(
-                                                batchItems.find(i => i.id === item.id).quantity,
-                                                batchItems.find(i => i.id === item.id).id,
-                                                batchItems.find(i => i.id === item.id).length,
-                                                batchItems.find(i => i.id === item.id).width,
-                                                batchItems.find(i => i.id === item.id).position)
-                                        }
-                                    >
-                                        Create
-                                    </Button>
-                                </div>
+                                    <div className={'d-flex justify-content-end me-2 mb-2'}>
+                                        <Button
+                                            variant={"contained"}
+                                            color={"success"}
+                                            disabled={
+                                                batchItems.find(i => i.id === item.id).area === 0 ||
+                                                batchItems.find(i => i.id === item.id).position === 0 ||
+                                                batchItems.find(i => i.id === item.id).quantity === "" ||
+                                                batchItems.find(i => i.id === item.id).length === "" ||
+                                                batchItems.find(i => i.id === item.id).width === ""
+                                            }
+                                            onClick={
+                                                () => createNewBatch(
+                                                    batchItems.find(i => i.id === item.id).quantity,
+                                                    batchItems.find(i => i.id === item.id).id,
+                                                    batchItems.find(i => i.id === item.id).length,
+                                                    batchItems.find(i => i.id === item.id).width,
+                                                    batchItems.find(i => i.id === item.id).position)
+                                            }
+                                        >
+                                            Create
+                                        </Button>
+                                    </div>
                             }
 
                         </Accordion>
@@ -580,7 +598,7 @@ export function TaskStaff() {
         if (taskResponse.success && areaResponse) {
             setTasks(taskResponse.data)
             setAreas(areaResponse.data)
-            if(selectedTask.id !== 0 && selectedTask.task !== null) {
+            if (selectedTask.id !== 0 && selectedTask.task !== null) {
                 setSelectedTask({...selectedTask, task: taskResponse.data.find(t => t.id === selectedTask.id)})
             }
         }

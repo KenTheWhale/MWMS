@@ -49,6 +49,7 @@ public class StaffServiceImpl implements StaffService {
                     data.put("code", task.getCode());
                     data.put("description", task.getDescription());
                     data.put("status", task.getStatus());
+                    data.put("type", task.getType());
                     data.put("group", buildGroupFromTask(task));
                     data.put("requestApp", buildRequestApplicationFromGroup(task.getItemGroup()));
                     data.put("items", buildRequestItemListFromGroup(task.getItemGroup()));

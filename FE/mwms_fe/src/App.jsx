@@ -7,7 +7,7 @@ import RequesterLayout from "./layouts/RequesterLayout.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashDefault from "./view/dashboard/index.jsx";
 import ImportRequest from "./components/manager/ImportRequest.jsx";
-import BatchManage from "./components/manager/BatchManage.jsx";
+import {BatchManage} from "./components/manager/BatchManage.jsx";
 import ExportRequest from "./components/manager/ExportRequest.jsx";
 import Equipment from "./components/manager/Equipment.jsx";
 import Category from "./components/manager/Category.jsx";
@@ -22,6 +22,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {SnackbarProvider} from "notistack";
 import Admin from "./components/admin/Account.jsx";
 import {TaskStaff} from "./components/staff/TaskStaff.jsx";
+import {Dashboard} from "./components/manager/Dashboard.jsx";
 import ImportHistory from "./components/manager/ImportHistory.jsx";
 
 
@@ -40,7 +41,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={"/manager/request/import"} />,
+        element: <Navigate to={"/manager/dashboard"} />,
+      },
+      {
+        path: "dashboard",
+        element: <Dashboard/>,
       },
       {
         path: "request",

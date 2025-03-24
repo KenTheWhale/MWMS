@@ -578,7 +578,7 @@ const validateEditForm = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showEquipment} className="text-black">
+      <Modal show={showEquipment} className="text-black" centered>
         <Modal.Header><Modal.Title>Equipment</Modal.Title></Modal.Header>
         <Modal.Body>
           {equipment.map((item, index) => (

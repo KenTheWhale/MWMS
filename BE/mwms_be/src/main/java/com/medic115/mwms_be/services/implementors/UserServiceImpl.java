@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.services.implementors;
 
+import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.response.AccountResponse;
 import com.medic115.mwms_be.response.UserResponse;
 import com.medic115.mwms_be.models.Account;
@@ -7,6 +8,7 @@ import com.medic115.mwms_be.models.User;
 import com.medic115.mwms_be.repositories.AccountRepo;
 import com.medic115.mwms_be.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,26 @@ public class UserServiceImpl implements UserService {
         List<AccountResponse> responses = accounts.stream().map(this::mapToDtoAccount).toList();
 
         return responses;
+    }
+
+    @Override
+    public ResponseEntity<?> countAccountActive() {
+        Integer count = accountRepo.countByStatusAndLogged(Status.ACCOUNT_ACTIVE.getValue(), true);
+        if(count == 0){
+            return ResponseEntity.ok("Empty account");
+        }
+
+        return ResponseEntity.ok(count);
+    }
+
+    @Override
+    public ResponseEntity<?> countAccountDeleted() {
+        Integer count = accountRepo.countByStatusAndLogged(Status.ACCOUNT_DELETE.getValue(), false);
+        if(count == 0){
+            return ResponseEntity.ok("Empty account");
+        }
+
+        return ResponseEntity.ok(count);
     }
 
     private AccountResponse mapToDtoAccount(Account account) {

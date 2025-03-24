@@ -27,6 +27,8 @@ public class Task {
 
     String status;
 
+    String type;
+
     @Column(name = "`assigned_date`")
     LocalDate assignedDate;
 
