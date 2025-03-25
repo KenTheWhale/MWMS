@@ -104,7 +104,7 @@ public class ManagerServiceImpl implements ManagerService {
                     .build()
             );
         }
-        Category category = categoryRepo.findByCode(request.getCode());
+        Category category = categoryRepo.findByCodeAndStatus(request.getCode(), Status.CATEGORY_ACTIVE.getValue());
         category.setCode(request.getCode());
         category.setName(request.getName());
         category.setDescription(request.getDescription());
@@ -126,7 +126,7 @@ public class ManagerServiceImpl implements ManagerService {
 //                    .build()
 //            );
 //        }
-        Category category = categoryRepo.findByCode(code);
+        Category category = categoryRepo.findByCodeAndStatus(code, Status.CATEGORY_ACTIVE.getValue());
         category.setStatus(Status.CATEGORY_DELETED.getValue());
         categoryRepo.save(category);
         return ResponseEntity.ok().body(ResponseObject.builder()
@@ -262,7 +262,7 @@ public class ManagerServiceImpl implements ManagerService {
                             .build()
             );
         }
-        Equipment equipment = equipmentRepo.findByCode(request.getCode());
+        Equipment equipment = equipmentRepo.findByCodeAndStatus(request.getCode(), Status.EQUIPMENT_ACTIVE.getValue());
         equipment.setUnit(request.getUnit());
         equipment.setCategory(category);
         equipment.setName(request.getName());
@@ -286,7 +286,7 @@ public class ManagerServiceImpl implements ManagerService {
                             .build()
             );
         }
-        Equipment equipment = equipmentRepo.findByCode(code);
+        Equipment equipment = equipmentRepo.findByCodeAndStatus(code, Status.EQUIPMENT_ACTIVE.getValue());
         equipment.setStatus(Status.EQUIPMENT_DELETED.getValue());
         equipmentRepo.save(equipment);
         return ResponseEntity.ok().body(

@@ -13,6 +13,8 @@ public interface EquipmentRepo extends JpaRepository<Equipment, Integer> {
 
     Equipment findByCode(String code);
 
+    Equipment findByCodeAndStatus(String code, String status);
+
     void deleteByCode(String code);
 
 }

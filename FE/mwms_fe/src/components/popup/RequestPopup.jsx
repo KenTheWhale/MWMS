@@ -16,7 +16,7 @@ import {
     TableHead,
     TableRow,
     Paper,
-    Typography, TextareaAutosize, Divider, CardContent
+    Typography, TextareaAutosize, Divider, CardContent, Box
 } from "@mui/material";
 import {approveRequest} from "../../services/SupplierService.jsx";
 import {enqueueSnackbar} from "notistack";
@@ -77,8 +77,11 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
 
     return (
         <Dialog open={show} onClose={handleClose} maxWidth="md" fullWidth>
-            <DialogTitle component={'div'} className={`d-flex justify-content-center mb-3 mt-3`}>
-                <Typography variant={'h4'} color={'textPrimary'}>Approve Request</Typography>
+            <DialogTitle component={'div'} className={`d-flex flex-column justify-content-center mb-3 mt-3`}>
+                <Typography variant={'h4'} color={'textPrimary'} align={'center'}>Approve Request</Typography>
+                <Box mt={1}>
+                    <Typography variant={'h6'} color={'error'} align={'center'}>{request.rejectionReason}</Typography>
+                </Box>
             </DialogTitle>
             <DialogContent>
                 {request ? (
@@ -117,16 +120,16 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
                         </Card>
 
                         <div className={`d-flex justify-content-center`}>
-                            <Typography variant="h5" color={'textPrimary'} className="mb-3 mt-3">Request
+                            <Typography variant="h5" color={'primary'} className="mb-3 mt-3">Request
                                 List</Typography>
                         </div>
                         <TableContainer component={Paper}>
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>#</TableCell>
-                                        <TableCell>Equipment Name</TableCell>
-                                        <TableCell>Quantity</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>#</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Equipment Name</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -149,7 +152,7 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
 
 
                         <div className={`d-flex justify-content-center`}>
-                            <Typography variant="h6" color={'textPrimary'} className={`mb-3 mt-3`}>Delivery Information</Typography>
+                            <Typography variant="h6" color={'primary'} className={`mb-3 mt-3`}>Delivery Information</Typography>
                         </div>
                         <TextField
                             label="Delivery Date" type="date" fullWidth margin="normal" InputLabelProps={{ shrink: true }}
@@ -179,7 +182,9 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
             </DialogActions>
 
             <Dialog open={showConfirm} onClose={() => setShowConfirm(false)}>
-                <DialogTitle color={"textPrimary"}>Confirm Action</DialogTitle>
+                <DialogTitle component={'div'} className={`d-flex justify-content-center mb-3 mt-3`}>
+                    <Typography variant={'h4'} color={'warning'}>Recheck Warning</Typography>
+                </DialogTitle>
                 <DialogContent>
                     <Typography>Double check the information. You cannot modify the request. Confirm?</Typography>
                 </DialogContent>
