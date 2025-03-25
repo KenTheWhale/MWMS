@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ public class MwmsBeApplication{
 
     private final JWTService jwtService;
 
+    private final PasswordEncoder passwordEncoder;
+
     public static void main(String[] args) {
         SpringApplication.run(MwmsBeApplication.class, args);
     }
@@ -66,7 +69,7 @@ public class MwmsBeApplication{
                     accountName.forEach(acc -> {
                         Account a = Account.builder()
                                 .username(acc)
-                                .password("1")
+                                .password(passwordEncoder.encode("1"))
                                 .role(Role.valueOf(roles.get(accountName.indexOf(acc)).toUpperCase()))
                                 .status(Status.ACCOUNT_ACTIVE.getValue())
                                 .logged(false)
@@ -74,6 +77,13 @@ public class MwmsBeApplication{
                         accounts.add(a);
                         accountRepo.save(a);
                     });
+                }
+
+                for (Account account: accountRepo.findAll()){
+                    if(account.isLogged()){
+                        account.setLogged(false);
+                        accountRepo.save(account);
+                    }
                 }
 
 

@@ -411,7 +411,7 @@ function ImportRequest() {
 
             {showAddCard && (
                 <Dialog open={showAddCard} onClose={handleClose} fullWidth maxWidth="md">
-                    <DialogTitle>Add Equipment</DialogTitle>
+                    <DialogTitle color={"textPrimary"}>Add Equipment</DialogTitle>
                     <DialogContent>
                         <form onSubmit={(e) => {
                             e.preventDefault();

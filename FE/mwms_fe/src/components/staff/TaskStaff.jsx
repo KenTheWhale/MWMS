@@ -16,7 +16,7 @@ import {
 import '../../styles/staff/TaskStaff.css'
 import {useEffect, useState} from "react";
 import {createBatch, getAllArea, getAllTasks} from "../../services/StaffService.jsx";
-import {ArrowDropDown, Create, Info} from "@mui/icons-material";
+import {ArrowDropDown, Create, Info, Visibility} from "@mui/icons-material";
 import {enqueueSnackbar} from "notistack";
 
 /* eslint-disable react/prop-types */
@@ -68,9 +68,9 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatch
                         <TableRow>
                             <TableCell align={"center"}>No</TableCell>
                             <TableCell align={"center"}>Code</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell align={"center"}>Status</TableCell>
                             <TableCell align={"center"}>Detail</TableCell>
-                            <TableCell align={"center"}>Create Batch</TableCell>
+                            <TableCell align={"center"}>Batch</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -83,15 +83,15 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatch
                                     <TableRow key={index} hover>
                                         <TableCell align={"center"}>{index + 1}</TableCell>
                                         <TableCell align={"center"}>{task.code}</TableCell>
-                                        <TableCell>{task.status}</TableCell>
+                                        <TableCell align={"center"}>{task.status}</TableCell>
                                         <TableCell align={"center"}>
                                             <IconButton color={"info"} onClick={() => handleSelectedTask(task)}>
                                                 <Info/>
                                             </IconButton>
                                         </TableCell>
                                         <TableCell align={"center"}>
-                                            <IconButton color={"success"} onClick={() => handleCreateBatch(task)}>
-                                                <Create/>
+                                            <IconButton color={task.status.toLowerCase() === "completed" ? "warning" : "success"} onClick={() => handleCreateBatch(task)}>
+                                                {task.status.toLowerCase() === "completed" ? <Visibility/> : <Create/>}
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -605,7 +605,6 @@ export function TaskStaff() {
     }
 
     function HandleOpenModal(open, type) {
-        updateData()
         setModal({...modal, visible: open, type: open ? type : ""})
     }
 

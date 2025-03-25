@@ -18,8 +18,6 @@ const DashDefault = () => {
 
       setActiveUsers(response1.data);
       setDeleteUsers(response2.data);
-
-      enqueueSnackbar("Fetch Success!", { variant: "success" });
     } catch (error) {
       enqueueSnackbar(error.response?.data || "Something went wrong", { variant: "error" });
     }
@@ -42,7 +40,7 @@ const DashDefault = () => {
       <Col xl={6} xxl={4} className="mt-5">
         <Card style={{borderRadius: "10px"}}>
           <Card.Body>
-            <h6 className="mb-4">Active Users</h6>
+            <h6 className="mb-4">Online Users</h6>
             <div className="row d-flex align-items-center">
               <div className="col-9">
                 <h3 className="f-w-300 d-flex align-items-center m-b-0">

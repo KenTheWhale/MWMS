@@ -46,7 +46,7 @@ function RenderChartArea({data}) {
         </Grid2>
 
         <Grid2 container spacing={2} direction={"row"} sx={{height: "60vh", marginBottom: "5vh"}} columns={1}>
-            <RenderChartGrid content={"Imported request by month"} size={1}>
+            <RenderChartGrid content={"Completed request by month"} size={1}>
                 <BarChart
                     dataset={barDataSet}
                     xAxis={[{scaleType: 'band', dataKey: 'month'}]}
@@ -88,7 +88,7 @@ function RenderSummaryArea({data}) {
         <Grid2 container spacing={2} direction={"row"} sx={{height: "15vh", marginTop: "2vh"}} columns={4}>
             <RenderNumberGrid content={"Requests (Pending)"} size={1} data={data.number.peRequest}/>
             <RenderNumberGrid content={"Requests (Accepted)"} size={1} data={data.number.acRequest}/>
-            <RenderNumberGrid content={"Requests (Processing)"} size={1} data={data.number.prRequest}/>
+            <RenderNumberGrid content={"Requests (Assigned)"} size={1} data={data.number.prRequest}/>
             <RenderNumberGrid content={"Requests (Stored)"} size={1} data={data.number.stRequest}/>
         </Grid2>
         <Grid2 container spacing={2} direction={"row"} sx={{height: "15vh", marginTop: "2vh"}} columns={2}>

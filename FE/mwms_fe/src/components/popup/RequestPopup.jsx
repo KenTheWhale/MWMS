@@ -179,7 +179,7 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
             </DialogActions>
 
             <Dialog open={showConfirm} onClose={() => setShowConfirm(false)}>
-                <DialogTitle>Confirm Action</DialogTitle>
+                <DialogTitle color={"textPrimary"}>Confirm Action</DialogTitle>
                 <DialogContent>
                     <Typography>Double check the information. You cannot modify the request. Confirm?</Typography>
                 </DialogContent>
