@@ -1,5 +1,6 @@
 package com.medic115.mwms_be.validations;
 
+import com.medic115.mwms_be.enums.Status;
 import com.medic115.mwms_be.requests.AddCategoryRequest;
 import com.medic115.mwms_be.repositories.CategoryRepo;
 
@@ -16,9 +17,7 @@ public class CategoryValidation {
             error = "Category name must be at most 50 characters";
         } else if (request.getDescription().length() > 100) {
             error = "Category description must be at most 100 characters";
-        } else if (categoryRepo.findByName(request.getName()) != null) {
-            error = "Category name already exists";
-        } else if (categoryRepo.findByCode(request.getCode()) != null) {
+        } else if (categoryRepo.findByCodeAndStatus(request.getCode(), Status.CATEGORY_ACTIVE.getValue()) != null) {
             error = "Category code already exists";
         }
         return error;
