@@ -96,12 +96,16 @@ function RenderTable({tasks, SetActionFunc}) {
                                     <TableCell>{task.partner}</TableCell>
                                     <TableCell>{task.description}</TableCell>
                                     <TableCell>{task.status}</TableCell>
-                                    <TableCell align={"center"}>
-                                        <DeleteForeverRounded
-                                            className="delete-btn"
-                                            onClick={() => handleDeleteTask(task.id)}
-                                        />
-                                    </TableCell>
+                                    {
+                                        task.status.toLowerCase() === "assigned" ?
+                                        <TableCell align={"center"}>
+                                            <DeleteForeverRounded
+                                                className="delete-btn"
+                                                onClick={() => handleDeleteTask(task.id)}
+                                            />
+                                        </TableCell> : <TableCell align={"center"}></TableCell>
+                                    }
+
                                 </TableRow>
                             ))
                         }

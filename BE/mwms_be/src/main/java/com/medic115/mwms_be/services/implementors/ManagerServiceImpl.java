@@ -1182,17 +1182,19 @@ public class ManagerServiceImpl implements ManagerService {
 
     private List<Map<String, Object>> getMonthlyImportedAcceptedRequest() {
         List<Month> months = new ArrayList<>();
+        List<Integer> years = new ArrayList<>();
         LocalDate last3Months = LocalDate.now().minusMonths(4);
 
         while (!last3Months.isAfter(LocalDate.now())) {
             months.add(last3Months.getMonth());
+            years.add(last3Months.getYear());
             last3Months = last3Months.plusMonths(1);
         }
 
         List<Map<String, Object>> dataSet = new ArrayList<>();
         for(Month month : months){
             Map<String, Object> data = new HashMap<>();
-            data.put("month", month.getDisplayName(TextStyle.FULL, Locale.getDefault()));
+            data.put("month", month.getDisplayName(TextStyle.FULL, Locale.getDefault()) + " (" + years.get(months.indexOf(month)) + ")");
             data.put("qty",getRequestByMonth(month));
             dataSet.add(data);
         }
@@ -1202,10 +1204,7 @@ public class ManagerServiceImpl implements ManagerService {
     private int getRequestByMonth(Month month){
         return itemGroupRepo.findAll().stream().filter(
                 group -> group.getRequestApplication().getRequestDate().getMonth().equals(month)
-                && (group.getStatus().equalsIgnoreCase(Status.GROUP_ACCEPTED.getValue())
-                        || group.getStatus().equalsIgnoreCase(Status.GROUP_PROCESSING.getValue())
-                        || group.getStatus().equalsIgnoreCase(Status.GROUP_STORED.getValue())
-                )
+                && (group.getStatus().equalsIgnoreCase(Status.GROUP_STORED.getValue()))
         ).toList().size();
     }
 

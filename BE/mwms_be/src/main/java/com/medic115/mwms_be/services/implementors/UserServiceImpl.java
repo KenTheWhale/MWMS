@@ -37,9 +37,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> countAccountActive() {
         Integer count = accountRepo.countByStatusAndLogged(Status.ACCOUNT_ACTIVE.getValue(), true);
-        if(count == 0){
-            return ResponseEntity.ok("Empty account");
-        }
 
         return ResponseEntity.ok(count);
     }
@@ -47,9 +44,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> countAccountDeleted() {
         Integer count = accountRepo.countByStatusAndLogged(Status.ACCOUNT_DELETE.getValue(), false);
-        if(count == 0){
-            return ResponseEntity.ok("Empty account");
-        }
 
         return ResponseEntity.ok(count);
     }
