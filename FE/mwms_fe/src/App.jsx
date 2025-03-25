@@ -133,18 +133,6 @@ const router = createBrowserRouter([
         path: "task",
         element: <TaskStaff/>,
       }
-      // {
-      //   path: "batch",
-      //   element: (
-      //     <h1 className={`d-flex justify-content-center text-light`}>Batch</h1>
-      //   ),
-      // },
-      // {
-      //   path: "area",
-      //   element: (
-      //     <h1 className={`d-flex justify-content-center text-light`}>Area</h1>
-      //   ),
-      // },
     ],
   },
   {
@@ -199,7 +187,7 @@ const router = createBrowserRouter([
 
 function App() {
     return (
-        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={1000}>
+        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={3000}>
             <RouterProvider router={router}/>
         </SnackbarProvider>
     )

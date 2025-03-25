@@ -17,7 +17,6 @@ import {
     Box,
     Button,
     Card,
-    CardActions,
     CardContent,
     Dialog,
     DialogActions,
@@ -117,7 +116,10 @@ function ImportRequest() {
         });
     }
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShowAddCard(false);
+        setShow(false)
+    };
 
     const handleAddClick = () => {
 
@@ -331,20 +333,28 @@ function ImportRequest() {
             </div>
 
             <div className="row">
-                <div className="col-12 d-flex justify-content-end align-items-center mb-4 gap-2">
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker slotProps={{field: {clearable: true, onClear: clearDatePicker}}}
-                                    format={"YYYY-MM-DD"} timezone={"system"}
-                                    onChange={handleDateChange}
-                                    value={filterDate.value}
-                                    label="Request Date"/>
-                    </LocalizationProvider>
-                    <Button size={"large"} startIcon={<Add/>} variant={"contained"} onClick={handleAddClick}>Add</Button>
+                <div className="col-12 d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                slotProps={{field: {clearable: true, onClear: clearDatePicker}}}
+                                format={"YYYY-MM-DD"}
+                                timezone={"system"}
+                                onChange={handleDateChange}
+                                value={filterDate.value}
+                                label="Request Date"
+                            />
+                        </LocalizationProvider>
+                    </div>
+                    <Button size="large" startIcon={<Add/>} variant="contained" onClick={handleAddClick}>
+                        Add
+                    </Button>
                 </div>
             </div>
 
+
             <Paper sx={{overflowY: "hidden"}}>
-                <TableContainer sx={{height: "23vh"}}>
+                <TableContainer sx={{height: "50vh"}}>
                     <Table size={"small"} stickyHeader>
                         <TableHead>
                             <TableRow>
@@ -400,22 +410,23 @@ function ImportRequest() {
             </Paper>
 
             {showAddCard && (
-                <Card className={style.addCard} sx={{mt: 3, p: 3}}>
-                    <CardContent>
+                <Dialog open={showAddCard} onClose={handleClose} fullWidth maxWidth="md">
+                    <DialogTitle color={"textPrimary"}>Add Equipment</DialogTitle>
+                    <DialogContent>
                         <form onSubmit={(e) => {
                             e.preventDefault();
                             handleSubmit();
                         }}>
-                            <TableContainer sx={{maxHeight: `28vh`}}>
-                                <Table stickyHeader>
-                                    <TableHead >
+                            <TableContainer sx={{ maxHeight: `50vh` }}>
+                                <Table  stickyHeader>
+                                    <TableHead>
                                         <TableRow>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Equipment Name</TableCell>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Partner Name</TableCell>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Description</TableCell>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Quantity</TableCell>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Unit</TableCell>
-                                            <TableCell align={"center"} sx={{fontWeight: "bold"}}>Remove Line</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Equipment Name</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Partner Name</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Description</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Quantity</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Unit</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Remove Line</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -432,8 +443,7 @@ function ImportRequest() {
                                                             required
                                                         >
                                                             <MenuItem disabled value="">Select Equipment</MenuItem>
-                                                            {equipments
-                                                                .map(equipment => (
+                                                            {equipments.map(equipment => (
                                                                 <MenuItem disabled={selectedEqId.includes(equipment.id)} key={equipment.id} value={equipment.id}>
                                                                     {equipment.name}
                                                                 </MenuItem>
@@ -442,21 +452,19 @@ function ImportRequest() {
                                                     </FormControl>
                                                 </TableCell>
 
-
                                                 <TableCell>
-                                                    <FormControl variant={"outlined"} fullWidth sx={{m: 1}}>
+                                                    <FormControl variant="outlined" fullWidth sx={{ m: 1 }}>
                                                         <InputLabel>Partner</InputLabel>
                                                         <Select
-                                                            variant={"filled"}
-                                                            label={"Partner"}
+                                                            variant="filled"
+                                                            label="Partner"
                                                             value={row.partner}
                                                             onChange={(e) => handleInputRow(index, e, "partner")}
                                                             required
                                                         >
                                                             <MenuItem disabled value="">Select Partner</MenuItem>
                                                             {partners.map((partner) => (
-                                                                <MenuItem key={partner.id}
-                                                                          value={partner.id}>
+                                                                <MenuItem key={partner.id} value={partner.id}>
                                                                     {partner.name}
                                                                 </MenuItem>
                                                             ))}
@@ -465,43 +473,28 @@ function ImportRequest() {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <TextField
-                                                        fullWidth
-                                                        sx={{m: 1}}
-                                                        value={row.description}
-                                                        variant="outlined"
-                                                        InputProps={{readOnly: true}}
-                                                    />
+                                                    <TextField fullWidth sx={{ m: 1 }} value={row.description} variant="outlined" InputProps={{ readOnly: true }} />
                                                 </TableCell>
 
                                                 <TableCell>
                                                     <TextField
                                                         fullWidth
-                                                        sx={{m: 1}}
+                                                        sx={{ m: 1 }}
                                                         type="number"
                                                         value={row.quantity}
                                                         onChange={(e) => handleInputRow(index, e, "quantity")}
                                                         required
-                                                        slotProps={{htmlInput:{min:1, max:100}}}
+                                                        slotProps={{ htmlInput: { min: 1, max: 100 } }}
                                                     />
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <TextField
-                                                        fullWidth
-                                                        sx={{m: 1}}
-                                                        value={row.unit}
-                                                        variant="outlined"
-                                                        InputProps={{readOnly: true}}
-                                                    />
+                                                    <TextField fullWidth sx={{ m: 1 }} value={row.unit} variant="outlined" InputProps={{ readOnly: true }} />
                                                 </TableCell>
 
-                                                <TableCell align={"center"}>
-                                                    <IconButton
-                                                        color="error"
-                                                        onClick={() => handleRemoveRow(index)}
-                                                    >
-                                                        <RemoveCircleOutline/>
+                                                <TableCell align="center">
+                                                    <IconButton color="error" onClick={() => handleRemoveRow(index)}>
+                                                        <RemoveCircleOutline />
                                                     </IconButton>
                                                 </TableCell>
                                             </TableRow>
@@ -510,20 +503,23 @@ function ImportRequest() {
                                 </Table>
                             </TableContainer>
 
-                            <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
-                                <Button  variant="outlined" color="primary" onClick={handleAddRow}>
-                                    <Add/>
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                                <Button variant="outlined" color="primary" onClick={handleAddRow}>
+                                    <Add />
                                 </Button>
                             </Box>
 
-                            <CardActions disableSpacing sx={{justifyContent: "flex-end"}}>
-                                <Button type="submit" variant="contained" color="success" endIcon={<CheckCircle/>}>
+                            <DialogActions>
+                                <Button onClick={handleClose} color="error">
+                                    Cancel
+                                </Button>
+                                <Button type="submit" variant="contained" color="success" endIcon={<CheckCircle />}>
                                     Create
                                 </Button>
-                            </CardActions>
+                            </DialogActions>
                         </form>
-                    </CardContent>
-                </Card>
+                    </DialogContent>
+                </Dialog>
             )}
 
 

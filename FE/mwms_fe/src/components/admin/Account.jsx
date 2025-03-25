@@ -20,9 +20,10 @@ import { MdModeEdit } from "react-icons/md";
 import { BiSolidUserDetail } from "react-icons/bi";
 import { useSnackbar } from "notistack";
 
+/* eslint-disable react/prop-types*/
 // Component Header riêng
-const AdminHeader = ({ 
-  searchTerm, 
+const AdminHeader = ({
+  searchTerm,
   sortOrder, 
   onSearchChange, 
   onSortToggle, 
@@ -407,20 +408,20 @@ const validateEditForm = () => {
                 <Table responsive hover className="table-striped">
                   <thead className="bg-light text-center" >
                     <tr>
-                      <th>ID</th>
+                      <th>No</th>
                       <th>Username</th>
                       <th>Role</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className={'text-center'}>
                     {currentItems.length > 0 ? (
-                      currentItems.map((item) => (
+                      currentItems.map((item, index) => (
                         <tr key={item.id} style={{ opacity: item.status === "deleted" ? 0.3 : 1 }}>
-                          <td>{item.id}</td>
+                          <td>{index + 1}</td>
                           <td>{item.username}</td>
-                          <td>{item.role.toUpperCase()}</td>
+                          <td>{item.role.toLowerCase()}</td>
                           <td>
                             <i className={`fa fa-circle ${item.status === "active" ? "text-success" : "text-secondary"} me-2`} />
                             {item.status}

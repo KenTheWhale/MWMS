@@ -21,6 +21,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -51,11 +52,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${jwt.expiration.refresh-token}")
     private long refreshExpiration;
 
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public ResponseEntity<ResponseObject> login(SignInRequest request, HttpServletResponse response) {
-        Account account = accountRepo.findByUsernameAndPassword(request.getUsername(), request.getPassword()).orElse(null);
-        if (account == null) {
+        Account account = accountRepo.findByUsername(request.getUsername()).orElse(null);
+        if (account == null || !passwordEncoder.matches(request.getPassword(), account.getPassword())) {
             return ResponseEntity.ok().body(
                     ResponseObject.builder()
                             .message("Username or password incorrect")

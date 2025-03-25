@@ -112,6 +112,10 @@ public class PositionServiceImpl implements PositionService {
             return ResponseEntity.badRequest().body("Position name already exists!");
         }
 
+        if(!position.getBatches().isEmpty() && request.square() - sumTotalBatchSquare(position) < 0){
+            return ResponseEntity.badRequest().body("Position size must not smaller than total batch size: " + sumTotalBatchSquare(position) + " m²");
+        }
+
         position.setName(request.name());
         position.setArea(area);
         position.setSquare(request.square());
@@ -119,6 +123,15 @@ public class PositionServiceImpl implements PositionService {
         positionRepo.save(position);
 
         return ResponseEntity.ok("Updated successfully!");
+    }
+
+    private int sumTotalBatchSquare(Position position) {
+        int sum = 0;
+        List<Batch> batches = position.getBatches();
+        for (Batch batch : batches) {
+            sum += batch.getLength() * batch.getWidth();
+        }
+        return sum;
     }
 
     @Transactional
