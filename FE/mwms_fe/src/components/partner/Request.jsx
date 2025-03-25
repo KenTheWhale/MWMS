@@ -128,7 +128,7 @@ import { useEffect, useState } from "react";
 import RequestPopup from "../popup/RequestPopup.jsx";
 import { getSupplierRequestList } from "../../services/SupplierService.jsx";
 import style from "../../styles/partner/Request.module.css";
-import {ModeEdit, Visibility} from "@mui/icons-material";
+import {AddTask, ModeEdit, Visibility} from "@mui/icons-material";
 import {IconButton} from "@mui/material";
 
 const columns = [
@@ -137,7 +137,7 @@ const columns = [
     { id: "requestDate", label: "Request Date", minWidth: 200 },
     { id: "lastModifiedDate", label: "Last Modified Date", minWidth: 200 },
     { id: "status", label: "Status", minWidth: 150 },
-    { id: "actions", label: "Actions", minWidth: 150, align: "center" },
+    { id: "actions", label: "Approve", minWidth: 150, align: "center" },
 ];
 
 export default function Request() {
@@ -206,7 +206,7 @@ export default function Request() {
                                                 <TableCell key={column.id} align={column.align}>
                                                     {column.id === "actions" ? (
                                                         <IconButton color="warning" onClick={() => handleViewClick(row, event)}>
-                                                            <Visibility/>
+                                                            <AddTask/>
                                                         </IconButton>
                                                     ) : (
                                                         value
