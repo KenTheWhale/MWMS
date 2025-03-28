@@ -20,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         if (requestApplication.getItemGroups().stream()
                 .allMatch(itemGroup -> Status.REQUEST_CANCELLED.getValue().equals(itemGroup.getStatus()))) {
-            return ResponseEntity.badRequest().body(ResponseObject.builder()
+            return ResponseEntity.ok().body(ResponseObject.builder()
                     .success(false)
                     .message("Can not change status of a cancelled request")
                     .build());
@@ -94,10 +95,18 @@ public class SupplierServiceImpl implements SupplierService {
 
         Partner supplier = partnerRepo.findByUser_Name(request.getUsername()).orElse(null);
         if (supplier == null) {
-            return ResponseEntity.badRequest().body(ResponseObject.builder()
+            return ResponseEntity.ok().body(ResponseObject.builder()
                     .success(false)
                     .message("Supplier not found")
                     .build());
+        }
+
+        if (!request.getDeliveryDate().isAfter(LocalDate.now())) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .success(false)
+                            .message("Delivery date must be after today")
+                            .build());
         }
 
         for (ItemGroup itemGroup : requestApplication.getItemGroups()) {
@@ -130,6 +139,10 @@ public class SupplierServiceImpl implements SupplierService {
                     .message("Request is rejected")
                     .build());
         }
+    }
+
+    private boolean isAfterToday(LocalDate date) {
+        return date != null && date.isAfter(LocalDate.now());
     }
 
     @Override

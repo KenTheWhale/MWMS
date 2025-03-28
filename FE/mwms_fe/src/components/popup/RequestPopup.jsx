@@ -38,7 +38,18 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
 
     const validateForm = () => {
         let errors = {};
-        if (!deliveryDate) errors.deliveryDate = "Delivery date is required";
+            const currentYear = new Date().getFullYear();
+        if (!deliveryDate) {
+            errors.deliveryDate = "Delivery date is required";
+        } else {
+            const selectedDate = new Date(deliveryDate);
+            if (selectedDate < tomorrow) {
+                errors.deliveryDate = "Delivery date must be in the future";
+            }
+            if (selectedDate.getFullYear() > currentYear) {
+                errors.deliveryDate = `Delivery date cannot be beyond ${currentYear}`;
+            }
+        }
         if (!carrierName) errors.carrierName = "Carrier name is required";
         if (carrierPhone.length < 10) errors.carrierPhone = "Phone must be 10 digits";
         if (!/^0(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/.test(carrierPhone)) {errors.carrierPhone = "Invalid phone number (Vietnamese format required)";}
@@ -160,7 +171,7 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
                             onChange={e => setDeliveryDate(e.target.value)}
                             error={!!errors.deliveryDate} helperText={errors.deliveryDate}
                             disabled={isDeliveryDisabled}
-                            inputProps={{ min: minDate }}
+                            inputProps={{ min: minDate, max: `${new Date().getFullYear()}-12-31` }}
                         />
                         <TextField label="Carrier Name" fullWidth margin="normal" value={!request.carrierName ? carrierName : request.carrierName}
                                    onChange={e => setCarrierName(e.target.value)} error={!!errors.carrierName}
