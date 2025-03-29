@@ -50,7 +50,6 @@ function ImportRequest() {
     const [show, setShow] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState({});
     const [showAddCard, setShowAddCard] = useState(false);
-    const [partners, setPartners] = useState([]);
     const [equipments, setEquipments] = useState([]);
     const [rows, setRows] = useState([{eqId: "", description: "", quantity: 0, unit: "", partner: ""}]);
     const [editRows, setEditRows] = useState({});
@@ -141,51 +140,52 @@ function ImportRequest() {
 
     const handleAddRow = () => {
         setRows(prevRows => {
-            const newRow = { eqId: "", name: "", description: "", quantity: "", unit: "", partner: "" };
+            const newRow = {eqId: "", name: "", description: "", quantity: "", unit: "", partner: ""};
             return [...prevRows, newRow];
         });
     };
 
     const handleInputRow = async (index, e, name) => {
         const value = e.target.value;
-        setRows(prevRows => prevRows.map((item, i) => {
-            if (i === index) {
-                let updatedItem = { ...item, [name]: e.target.value };
+        setRows(prevRows =>
+            prevRows.map((item, i) => {
+                if (i === index) {
+                    let updatedItem = {...item, [name]: value};
 
-                if (name === "eqId") {
-                    const selectedEquipment = equipments.find(e => e.id === value);
-                    if (selectedEquipment) {
-                        updatedItem.description = selectedEquipment.description || "";
-                        updatedItem.unit = selectedEquipment.unit || "";
+                    if (name === "eqId") {
+                        const selectedEquipment = equipments.find(e => e.id === value);
+                        if (selectedEquipment) {
+                            updatedItem.description = selectedEquipment.description || "";
+                            updatedItem.unit = selectedEquipment.unit || "";
+                        }
                     }
+
+                    return updatedItem;
                 }
+                return item;
+            })
+        );
 
-                return updatedItem;
-            }
-            return item;
-        }));
-
-        if(name === "eqId") {
-            const response = await getSupplierEquipment(e.target.value);
-            if (response.success){
-                setPartners(response.data);
-            } else {
-                setPartners([]);
+        if (name === "eqId") {
+            const response = await getSupplierEquipment(value);
+            if (response.success) {
+                setRows(prevRows =>
+                    prevRows.map((item, i) =>
+                        i === index ? {...item, partners: response.data} : item
+                    )
+                );
             }
         }
-        if(name === "description"){
-
-        }
-
     };
 
+
     useEffect(() => {
-        if(rows.length > 0) {
+        if (rows.length > 0) {
             const selectedId = rows
                 .filter(rows => rows.eqId !== "").map(row => row.eqId);
             setSelectedEqId(selectedId)
         }
-    },[rows])
+    }, [rows])
 
 
     const handleRemoveRow = (index) => {
@@ -363,9 +363,6 @@ function ImportRequest() {
                                 <TableCell align={"center"}
                                            sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Request
                                     Date</TableCell>
-                                <TableCell align={"center"}
-                                           sx={{fontWeight: "bold", border: 1, borderColor: "inherit"}}>Last
-                                    Modified</TableCell>
                                 <TableCell align={"center"} sx={{
                                     fontWeight: "bold",
                                     border: 1,
@@ -385,8 +382,6 @@ function ImportRequest() {
                                         <TableCell sx={{border: 1, borderColor: "inherit"}}>{item.code}</TableCell>
                                         <TableCell
                                             sx={{border: 1, borderColor: "inherit"}}>{item.requestDate}</TableCell>
-                                        <TableCell
-                                            sx={{border: 1, borderColor: "inherit"}}>{item.lastModifiedDate}</TableCell>
                                         <TableCell sx={{border: 1, borderColor: "inherit"}} align={"center"}>
                                             <IconButton color={`white`} onClick={() => handleViewDetail(item.code)}>
                                                 <Visibility/>
@@ -417,23 +412,23 @@ function ImportRequest() {
                             e.preventDefault();
                             handleSubmit();
                         }}>
-                            <TableContainer sx={{ maxHeight: `50vh` }}>
-                                <Table  stickyHeader>
+                            <TableContainer sx={{maxHeight: `50vh`}}>
+                                <Table stickyHeader>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Equipment Name</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Partner Name</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Description</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Quantity</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Unit</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: "bold" }}>Remove Line</TableCell>
+                                            <TableCell align="center" sx={{fontWeight: "bold"}}>Equipment
+                                                Name</TableCell>
+                                            <TableCell align="center" sx={{fontWeight: "bold"}}>Partner Name</TableCell>
+                                            <TableCell align="center" sx={{fontWeight: "bold"}}>Quantity</TableCell>
+                                            <TableCell align="center" sx={{fontWeight: "bold"}}>Unit</TableCell>
+                                            <TableCell align="center" sx={{fontWeight: "bold"}}>Remove Line</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {rows.map((row, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>
-                                                    <FormControl fullWidth sx={{ m: 1 }}>
+                                                    <FormControl fullWidth sx={{m: 1}}>
                                                         <InputLabel>Equipment</InputLabel>
                                                         <Select
                                                             variant="filled"
@@ -444,7 +439,8 @@ function ImportRequest() {
                                                         >
                                                             <MenuItem disabled value="">Select Equipment</MenuItem>
                                                             {equipments.map(equipment => (
-                                                                <MenuItem disabled={selectedEqId.includes(equipment.id)} key={equipment.id} value={equipment.id}>
+                                                                <MenuItem disabled={selectedEqId.includes(equipment.id)}
+                                                                          key={equipment.id} value={equipment.id}>
                                                                     {equipment.name}
                                                                 </MenuItem>
                                                             ))}
@@ -453,7 +449,7 @@ function ImportRequest() {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <FormControl variant="outlined" fullWidth sx={{ m: 1 }}>
+                                                    <FormControl variant="outlined" fullWidth sx={{m: 1}}>
                                                         <InputLabel>Partner</InputLabel>
                                                         <Select
                                                             variant="filled"
@@ -463,7 +459,7 @@ function ImportRequest() {
                                                             required
                                                         >
                                                             <MenuItem disabled value="">Select Partner</MenuItem>
-                                                            {partners.map((partner) => (
+                                                            {(row.partners || []).map((partner) => (
                                                                 <MenuItem key={partner.id} value={partner.id}>
                                                                     {partner.name}
                                                                 </MenuItem>
@@ -473,28 +469,25 @@ function ImportRequest() {
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <TextField fullWidth sx={{ m: 1 }} value={row.description} variant="outlined" InputProps={{ readOnly: true }} />
-                                                </TableCell>
-
-                                                <TableCell>
                                                     <TextField
                                                         fullWidth
-                                                        sx={{ m: 1 }}
+                                                        sx={{m: 1}}
                                                         type="number"
                                                         value={row.quantity}
                                                         onChange={(e) => handleInputRow(index, e, "quantity")}
                                                         required
-                                                        slotProps={{ htmlInput: { min: 1, max: 100 } }}
+                                                        slotProps={{htmlInput: {min: 1, max: 100}}}
                                                     />
                                                 </TableCell>
 
                                                 <TableCell>
-                                                    <TextField fullWidth sx={{ m: 1 }} value={row.unit} variant="outlined" InputProps={{ readOnly: true }} />
+                                                    <TextField fullWidth sx={{m: 1}} value={row.unit} variant="outlined"
+                                                               InputProps={{readOnly: true}}/>
                                                 </TableCell>
 
                                                 <TableCell align="center">
                                                     <IconButton color="error" onClick={() => handleRemoveRow(index)}>
-                                                        <RemoveCircleOutline />
+                                                        <RemoveCircleOutline/>
                                                     </IconButton>
                                                 </TableCell>
                                             </TableRow>
@@ -503,9 +496,9 @@ function ImportRequest() {
                                 </Table>
                             </TableContainer>
 
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                            <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
                                 <Button variant="outlined" color="primary" onClick={handleAddRow}>
-                                    <Add />
+                                    <Add/>
                                 </Button>
                             </Box>
 
@@ -513,7 +506,7 @@ function ImportRequest() {
                                 <Button onClick={handleClose} color="error">
                                     Cancel
                                 </Button>
-                                <Button type="submit" variant="contained" color="success" endIcon={<CheckCircle />}>
+                                <Button type="submit" variant="contained" color="success" endIcon={<CheckCircle/>}>
                                     Create
                                 </Button>
                             </DialogActions>
@@ -532,136 +525,180 @@ function ImportRequest() {
 
                 <DialogContent>
                     {selectedRequest ? (
-                        <div>
-                            <div style={{ marginBottom: 16 }}>
-                                <Typography variant="body1"><strong>Request Date:</strong> {selectedRequest.requestDate}</Typography>
-                                <Typography variant="body1"><strong>Last Modified:</strong> {selectedRequest.lastModified}</Typography>
-                            </div>
+                            <div>
+                                <div style={{marginBottom: 16}}>
+                                    <Typography variant="body1"><strong>Request Date:</strong> {selectedRequest.requestDate}
+                                    </Typography>
 
-                            {selectedRequest.itemGroups?.length > 0 ? (
-                                selectedRequest.itemGroups.map((group) => (
-                                    <Card key={group.groupId} sx={{ mb: 3 }}>
-                                        <CardContent>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <Typography variant="h6" color="text.primary">
-                                                    Partner : {group.partner}
-                                                </Typography>
-                                                <Button variant="outlined" endIcon={<Info/>} color={"info"} size="small" onClick={() => toggleGroup(group.groupId)}>
-                                                     View
-                                                </Button>
-                                            </div>
+                                </div>
 
-                                            <Typography variant="body2">
-                                                Carrier Name : {group.carrierName ? group.carrierName : "N/A"}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Carrier Phone: {group.carrierPhone ? group.carrierPhone : "N/A"}
-                                            </Typography>
-                                            <Typography variant="body2">Delivery Date: {group.deliveryDate ? group.deliveryDate : "N/A"}</Typography>
-                                            <Typography variant="body2"><span style={{fontWeight: "bold"}}>Status: </span>{group.status}</Typography>
-
-                                            {expandedGroups[group.groupId] && (
-                                                <>
-                                                    <TableContainer>
-                                                        <Table sx={{ mt: 2 }}>
-                                                            <TableHead>
-                                                                <TableRow>
-                                                                    <TableCell>Equipment Name</TableCell>
-                                                                    <TableCell>Description</TableCell>
-                                                                    <TableCell>Quantity</TableCell>
-                                                                    <TableCell>Unit</TableCell>
-                                                                    <TableCell>Action</TableCell>
-                                                                </TableRow>
-                                                            </TableHead>
-                                                            <TableBody>
-                                                                {group.requestItems.map((item, index) => {
-                                                                    const rowKey = `${group.groupId}-${index}`;
-                                                                    const isEditing = editRows[rowKey];
-
-                                                                    return (
-                                                                        <TableRow key={index}>
-                                                                            <TableCell>
-                                                                                {isEditing ? (
-                                                                                    <Select
-                                                                                        value={isEditing.selectedEquipmentId || item.eqId}
-                                                                                        onChange={(e) =>
-                                                                                            handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))
-                                                                                        }
-                                                                                        fullWidth
-                                                                                    >
-                                                                                        <MenuItem value={item.eqId} disabled>{item.equipmentName}</MenuItem>
-                                                                                        {equipmentForUpdate
-                                                                                            .filter(eq => eq.id !== item.eqId)
-                                                                                            .map(eq => (
-                                                                                                <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
-                                                                                            ))}
-                                                                                    </Select>
-                                                                                ) : (
-                                                                                    item.equipmentName
-                                                                                )}
-                                                                            </TableCell>
-
-                                                                            <TableCell>{item.equipmentDescription}</TableCell>
-                                                                            <TableCell>
-                                                                                {isEditing ? (
-                                                                                    <TextField
-                                                                                        type="number"
-                                                                                        value={isEditing.quantity || item.quantity}
-                                                                                        onChange={(e) =>
-                                                                                            handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)
-                                                                                        }
-                                                                                        inputProps={{ min: 1, max: 100 }}
-                                                                                        fullWidth
-                                                                                    />
-                                                                                ) : (
-                                                                                    item.quantity
-                                                                                )}
-                                                                            </TableCell>
-                                                                            <TableCell>{item.unit}</TableCell>
-                                                                            <TableCell>
-                                                                                {group.status !== "canceled" && (
-                                                                                    isEditing ? (
-                                                                                        <div>
-                                                                                            <IconButton size="small" color="primary" onClick={() => handleUpdateSave(group.groupId, index, item)}>
-                                                                                                <Save/>
-                                                                                            </IconButton>
-                                                                                            <IconButton size="small" color="error" onClick={() => cancelEditRow(group.groupId, index)}>
-                                                                                                <Cancel/>
-                                                                                            </IconButton>
-                                                                                        </div>
-                                                                                    ) : (
-                                                                                        <IconButton size="small" variant="outlined" onClick={() => handleEditRow(group.groupId, index, item)}>
-                                                                                            <EditNote/>
-                                                                                        </IconButton>
-                                                                                    )
-                                                                                )}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    );
-                                                                })}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </TableContainer>
-
-                                                    {group.status === "pending" && (
-                                                        <div style={{ textAlign: "right", marginTop: 16 }}>
-                                                            <Button variant="contained" color="warning" onClick={() => handleCancelClick(group.groupId)}>
-                                                                Cancel
+                                {selectedRequest.itemGroups?.length > 0 ? (
+                                        selectedRequest.itemGroups.map((group) => (
+                                                <Card key={group.groupId} sx={{mb: 3}}>
+                                                    <CardContent>
+                                                        <div style={{
+                                                            display: "flex",
+                                                            justifyContent: "space-between",
+                                                            alignItems: "center"
+                                                        }}>
+                                                            <Typography variant="h6" color="text.primary">
+                                                                Partner : {group.partner}
+                                                            </Typography>
+                                                            <Button variant="outlined" endIcon={<Info/>} color={"info"} size="small"
+                                                                    onClick={() => toggleGroup(group.groupId)}>
+                                                                View
                                                             </Button>
                                                         </div>
-                                                    )}
-                                                </>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                ))
-                            ) : (
-                                <Typography variant="body2" align="center">No groups available</Typography>
-                            )}
-                        </div>
-                    ) : (
-                        <Typography variant="body2" align="center">No request detail</Typography>
-                    )}
+
+                                                        {
+                                                            group.carrierName ? (
+                                                                <Typography variant="body2">
+                                                                    Carrier Name : {group.carrierName}
+                                                                </Typography>
+                                                            ) : (
+                                                                <></>
+                                                            )
+                                                        }
+
+                                                        {
+                                                            group.carrierPhone ? (
+                                                                <Typography variant="body2">
+                                                                    Carrier Phone: {group.carrierPhone}
+                                                                </Typography>
+                                                            ) : (
+                                                                <></>
+                                                            )
+                                                        }
+                                                        {
+                                                            group.deliveryDate ? (
+                                                                <Typography variant="body2">Delivery
+                                                                    Date: {group.deliveryDate ? group.deliveryDate : "N/A"}</Typography>
+
+                                                            ) : (
+                                                                <></>
+                                                            )
+                                                        }
+                                                        <Typography variant="body2">
+                                                        <span
+                                                            style={{fontWeight: "bold"}}>Status: </span>{group.status}
+                                                        </Typography>
+
+                                                        {expandedGroups[group.groupId] && (
+                                                            <>
+                                                                <TableContainer>
+                                                                    <Table sx={{mt: 2}}>
+                                                                        <TableHead>
+                                                                            <TableRow>
+                                                                                <TableCell>Equipment Name</TableCell>
+                                                                                <TableCell>Description</TableCell>
+                                                                                <TableCell>Quantity</TableCell>
+                                                                                <TableCell>Unit</TableCell>
+                                                                                <TableCell>Action</TableCell>
+                                                                            </TableRow>
+                                                                        </TableHead>
+                                                                        <TableBody>
+                                                                            {group.requestItems.map((item, index) => {
+                                                                                const rowKey = `${group.groupId}-${index}`;
+                                                                                const isEditing = editRows[rowKey];
+
+                                                                                return (
+                                                                                    <TableRow key={index}>
+                                                                                        <TableCell>
+                                                                                            {isEditing ? (
+                                                                                                <Select
+                                                                                                    value={isEditing.selectedEquipmentId || item.eqId}
+                                                                                                    onChange={(e) =>
+                                                                                                        handleUpdateChange(group.groupId, index, "selectedEquipmentId", parseInt(e.target.value, 10))
+                                                                                                    }
+                                                                                                    fullWidth
+                                                                                                >
+                                                                                                    <MenuItem value={item.eqId}
+                                                                                                              disabled>{item.equipmentName}</MenuItem>
+                                                                                                    {equipmentForUpdate
+                                                                                                        .filter(eq => eq.id !== item.eqId)
+                                                                                                        .map(eq => (
+                                                                                                            <MenuItem key={eq.id}
+                                                                                                                      value={eq.id}>{eq.name}</MenuItem>
+                                                                                                        ))}
+                                                                                                </Select>
+                                                                                            ) : (
+                                                                                                item.equipmentName
+                                                                                            )}
+                                                                                        </TableCell>
+
+                                                                                        <TableCell>{item.equipmentDescription}</TableCell>
+                                                                                        <TableCell>
+                                                                                            {isEditing ? (
+                                                                                                <TextField
+                                                                                                    type="number"
+                                                                                                    value={isEditing.quantity || item.quantity}
+                                                                                                    onChange={(e) =>
+                                                                                                        handleUpdateChange(group.groupId, index, "quantity", parseInt(e.target.value, 10) || 1)
+                                                                                                    }
+                                                                                                    inputProps={{min: 1, max: 100}}
+                                                                                                    fullWidth
+                                                                                                />
+                                                                                            ) : (
+                                                                                                item.quantity
+                                                                                            )}
+                                                                                        </TableCell>
+                                                                                        <TableCell>{item.unit}</TableCell>
+                                                                                        <TableCell>
+                                                                                            {group.status !== "canceled" && (
+                                                                                                isEditing ? (
+                                                                                                    <div>
+                                                                                                        <IconButton size="small"
+                                                                                                                    color="primary"
+                                                                                                                    onClick={() => handleUpdateSave(group.groupId, index, item)}>
+                                                                                                            <Save/>
+                                                                                                        </IconButton>
+                                                                                                        <IconButton size="small"
+                                                                                                                    color="error"
+                                                                                                                    onClick={() => cancelEditRow(group.groupId, index)}>
+                                                                                                            <Cancel/>
+                                                                                                        </IconButton>
+                                                                                                    </div>
+                                                                                                ) : (
+                                                                                                    <IconButton size="small"
+                                                                                                                variant="outlined"
+                                                                                                                onClick={() => handleEditRow(group.groupId, index, item)}>
+                                                                                                        <EditNote/>
+                                                                                                    </IconButton>
+                                                                                                )
+                                                                                            )}
+                                                                                        </TableCell>
+                                                                                    </TableRow>
+                                                                                );
+                                                                            })}
+                                                                        </TableBody>
+                                                                    </Table>
+                                                                </TableContainer>
+
+                                                                {group.status === "pending" && (
+                                                                    <div style={{textAlign: "right", marginTop: 16}}>
+                                                                        <Button variant="contained" color="warning"
+                                                                                onClick={() => handleCancelClick(group.groupId)}>
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            )
+                                        )
+                                    ) :
+                                    (
+                                        <Typography variant="body2" align="center">No groups available</Typography>
+                                    )
+                                }
+                            </div>
+                        ) :
+                        (
+                            <Typography variant="body2" align="center">No request detail</Typography>
+                        )
+                    }
                 </DialogContent>
 
                 <DialogActions>
@@ -690,7 +727,8 @@ function ImportRequest() {
 
         </div>
 
-    );
+    )
+        ;
 }
 
 export default ImportRequest;

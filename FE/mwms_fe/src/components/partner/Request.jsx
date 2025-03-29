@@ -10,7 +10,7 @@ import {useEffect, useState} from "react";
 import RequestPopup from "../popup/RequestPopup.jsx";
 import {getSupplierRequestList} from "../../services/SupplierService.jsx";
 import style from "../../styles/partner/Request.module.css";
-import {AddTask, ModeEdit, Visibility} from "@mui/icons-material";
+import {AddTask} from "@mui/icons-material";
 import {IconButton} from "@mui/material";
 
 const columns = [

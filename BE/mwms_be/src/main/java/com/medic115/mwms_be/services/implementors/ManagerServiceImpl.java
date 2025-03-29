@@ -864,6 +864,7 @@ public class ManagerServiceImpl implements ManagerService {
         if (requestItem.getEquipment().getId() != request.getEquipmentId()) {
             Equipment equipment = equipmentRepo.findById(request.getEquipmentId()).orElse(null);
             requestItem.setEquipment(equipment);
+
         }
         requestItem.setQuantity(request.getQuantity());
         requestItemRepo.save(requestItem);

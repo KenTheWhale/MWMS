@@ -41,12 +41,12 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={"/manager/dashboard"} />,
+        element: <Navigate to={"/manager/request"} />,
       },
-      {
-        path: "dashboard",
-        element: <Dashboard/>,
-      },
+      // {
+      //   path: "dashboard",
+      //   element: <Dashboard/>,
+      // },
       {
         path: "request",
         element: <Navigate to={"/manager/request/import"} />,
@@ -187,7 +187,7 @@ const router = createBrowserRouter([
 
 function App() {
     return (
-        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={3000}>
+        <SnackbarProvider maxSnack={4} anchorOrigin={{horizontal: "right", vertical: "top"}} autoHideDuration={2000}>
             <RouterProvider router={router}/>
         </SnackbarProvider>
     )

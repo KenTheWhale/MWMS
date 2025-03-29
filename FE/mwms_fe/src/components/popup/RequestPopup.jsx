@@ -30,11 +30,13 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
     const [errors, setErrors] = useState({});
     const [showConfirm, setShowConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const today = new Date();
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setDate(today.getDate() + 1);
     const minDate = tomorrow.toISOString().split("T")[0];
 
     const isDeliveryDisabled = request?.status !== "pending";
+
 
     const validateForm = () => {
         let errors = {};
@@ -43,8 +45,10 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
             errors.deliveryDate = "Delivery date is required";
         } else {
             const selectedDate = new Date(deliveryDate);
-            if (selectedDate < tomorrow) {
-                errors.deliveryDate = "Delivery date must be in the future";
+            console.log(tomorrow)
+            console.log(selectedDate)
+            if (selectedDate.getDate() < tomorrow.getDate()) {
+                errors.deliveryDate = "Delivery date must be after today";
             }
             if (selectedDate.getFullYear() > currentYear) {
                 errors.deliveryDate = `Delivery date cannot be beyond ${currentYear}`;
@@ -57,6 +61,8 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
         setErrors(errors);
         return Object.keys(errors).length === 0;
     };
+
+
 
     const handleConfirmAccept = async () => {
         if (!validateForm() || !request){
@@ -120,12 +126,12 @@ const RequestPopup = ({request, show, handleClose, onFetch}) => {
                                         <Typography variant="body1">{request.requestDate}</Typography>
                                     </Grid>
 
-                                    <Grid item xs={6}>
-                                        <Typography variant="body1" fontWeight="bold">Last Modified:</Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="body1">{request.lastModifiedDate}</Typography>
-                                    </Grid>
+                                    {/*<Grid item xs={6}>*/}
+                                    {/*    <Typography variant="body1" fontWeight="bold">Last Modified:</Typography>*/}
+                                    {/*</Grid>*/}
+                                    {/*<Grid item xs={6}>*/}
+                                    {/*    <Typography variant="body1">{request.lastModifiedDate}</Typography>*/}
+                                    {/*</Grid>*/}
                                 </Grid>
                             </CardContent>
                         </Card>

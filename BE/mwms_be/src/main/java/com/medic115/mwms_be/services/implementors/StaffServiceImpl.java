@@ -37,7 +37,9 @@ public class StaffServiceImpl implements StaffService {
     //-------------------------------------------TASK-------------------------------------------//
     @Override
     public ResponseEntity<ResponseObject> getTaskList(int id) {
-        List<Task> tasks = taskRepo.findAllByUser_Id(id);
+        List<Task> tasks = taskRepo.findAllByUser_Id(id).stream()
+                .filter(task -> !task.getStatus().equalsIgnoreCase(Status.TASK_DELETE.getValue()))
+                .toList();
         return ResponseUtil.build(HttpStatus.OK, "", true, buildTaskList(tasks));
     }
 
