@@ -78,7 +78,6 @@ function RenderTable({tasks, OpenDetailModalFunc, SetSelectedTaskFunc, OpenBatch
 
                             tasks
                                 .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
-                                .sort((t1, t2) => t2.id - t1.id)
                                 .map((task, index) => (
                                     <TableRow key={index} hover>
                                         <TableCell align={"center"}>{index + 1}</TableCell>

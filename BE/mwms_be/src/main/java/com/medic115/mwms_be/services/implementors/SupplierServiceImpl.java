@@ -101,12 +101,13 @@ public class SupplierServiceImpl implements SupplierService {
                     .build());
         }
 
-        if (!request.getDeliveryDate().isAfter(LocalDate.now())) {
+        if (!isAfterToday(request.getDeliveryDate())) {
             return ResponseEntity.ok().body(
                     ResponseObject.builder()
                             .success(false)
                             .message("Delivery date must be after today")
-                            .build());
+                            .build()
+            );
         }
 
         for (ItemGroup itemGroup : requestApplication.getItemGroups()) {

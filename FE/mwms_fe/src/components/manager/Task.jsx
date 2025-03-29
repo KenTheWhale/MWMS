@@ -38,12 +38,13 @@ function RenderInfoTextField({label, data, isCapital}) {
             <InputLabel shrink>
                 {label}
             </InputLabel>
-            <Input readOnly defaultValue={!data || data === "" ? "N/A" : (isCapital ? CapitalizeFirstLetter(data) : data)}/>
+            <Input readOnly
+                   defaultValue={!data || data === "" ? "N/A" : (isCapital ? CapitalizeFirstLetter(data) : data)}/>
         </FormControl>
     )
 }
 
-function RenderTable({tasks, SetActionFunc}) {
+function RenderTable({tasks, fetchData}) {
     const [rowPerPage, setRowPerPage] = useState(5);
     const [page, setPage] = useState(0);
 
@@ -59,7 +60,7 @@ function RenderTable({tasks, SetActionFunc}) {
     const handleDeleteTask = async (id) => {
         const response = await deleteTask(id);
         if (response.success) {
-            SetActionFunc()
+            fetchData()
             enqueueSnackbar(response.message, {variant: 'success'});
         } else {
             enqueueSnackbar(response.message, {variant: 'error'});
@@ -86,7 +87,6 @@ function RenderTable({tasks, SetActionFunc}) {
                     <TableBody>
                         {tasks
                             .slice(page * rowPerPage, page * rowPerPage + rowPerPage)
-                            .sort((t1, t2) => t2.id - t1.id)
                             .map((task, index) => (
                                 <TableRow key={index} hover>
                                     <TableCell>{index + 1}</TableCell>
@@ -98,12 +98,12 @@ function RenderTable({tasks, SetActionFunc}) {
                                     <TableCell>{task.status}</TableCell>
                                     {
                                         task.status.toLowerCase() === "assigned" ?
-                                        <TableCell align={"center"}>
-                                            <DeleteForeverRounded
-                                                className="delete-btn"
-                                                onClick={() => handleDeleteTask(task.id)}
-                                            />
-                                        </TableCell> : <TableCell align={"center"}></TableCell>
+                                            <TableCell align={"center"}>
+                                                <DeleteForeverRounded
+                                                    className="delete-btn"
+                                                    onClick={() => handleDeleteTask(task.id)}
+                                                />
+                                            </TableCell> : <TableCell align={"center"}></TableCell>
                                     }
 
                                 </TableRow>
@@ -133,34 +133,18 @@ function RenderTable({tasks, SetActionFunc}) {
     )
 }
 
-function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, staffs}) {
-    const [assignArea, setAssignArea] = useState(false)
-    const [input, setInput] = useState({
-        id: 0,
-        description: "",
-        staff: ""
-    })
+function RenderGroupModal({modalVisible, closeModal, groups, fetchData, setGrp, openAssignModal}) {
 
-    const handleAssignArea = () => {
-        SetActionFunc()
-        setAssignArea(!assignArea)
-    }
-
-    const handleAssign = async (staffId, description, groupId) => {
-        SetActionFunc()
-        const response = await addTask(staffId, description, groupId)
-        if (response.success) {
-            enqueueSnackbar(response.message, {variant: "success"});
-            setAssignArea(false)
-        } else {
-            enqueueSnackbar(response.message, {variant: "error"})
-        }
+    const handleAssignArea = (group) => {
+        setGrp(group)
+        fetchData
+        openAssignModal()
     }
 
     return (
         <Dialog
             open={modalVisible}
-            onClose={CloseModalFunc}
+            onClose={closeModal}
             scroll={"paper"}
             maxWidth={"md"}
             fullWidth={true}
@@ -175,7 +159,7 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                             <Accordion key={index}>
                                 <AccordionSummary expandIcon={<ArrowDropDown/>}>
                                     <Typography component={"span"}>
-                                        {(index + 1) + ". " + CapitalizeFirstLetter(group.items[0].partner) + " - " + group.items.length + " equipment(s) - " + group.request.requestDate}
+                                        {(index + 1) + ". " + CapitalizeFirstLetter(group.items[0].partner) + " - " + group.items.length + " equipment(s) - Delivery: " + group.delivery}
                                     </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -224,59 +208,18 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         {/*Quantity*/}
-                                                        <RenderInfoTextField label={`Quantity (${item.unit})`} data={item.quantity}
+                                                        <RenderInfoTextField label={`Quantity (${item.unit})`}
+                                                                             data={item.quantity}
                                                                              isCapital={false}/>
                                                     </AccordionDetails>
                                                 </Accordion>
                                             ))}
                                         </AccordionDetails>
                                     </Accordion>
-                                    {assignArea &&
-                                        (
-                                            <>
-                                                <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
-                                                    <InputLabel shrink>
-                                                        Staff
-                                                    </InputLabel>
-                                                    <Select
-                                                        value={input.id === group.id ? input.staff : 0}
-                                                        onChange={(e) => setInput({...input, id: group.id, staff: e.target.value})}
-                                                    >
-                                                        <MenuItem value={0} disabled>{"N/A"}</MenuItem>
-                                                        {staffs.map((s, index) => (
-                                                            <MenuItem key={index} value={s.id}>{s.name}</MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-
-                                                <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
-                                                    <InputLabel shrink>
-                                                        Description
-                                                    </InputLabel>
-                                                    <Input
-                                                        multiline
-                                                        required
-                                                        value={input.id === group.id ? input.description: ""}
-                                                        onChange={(e) => setInput({
-                                                            ...input,
-                                                            id: group.id,
-                                                            description: e.target.value
-                                                        })}
-                                                    />
-                                                </FormControl>
-                                            </>
-
-                                        )
-                                    }
                                 </AccordionDetails>
                                 <AccordionActions>
-                                    {
-                                        assignArea &&
-                                        <Button variant="contained" color="error" onClick={handleAssignArea}>Cancel
-                                            assign</Button>
-                                    }
                                     <Button variant="contained" color="primary"
-                                            onClick={assignArea ? () => handleAssign(input.staff, input.description, group.id) : handleAssignArea}>Assign
+                                            onClick={() => handleAssignArea(group)}>Assign
                                         staff</Button>
                                 </AccordionActions>
                             </Accordion>
@@ -285,138 +228,166 @@ function RenderGroupModal({modalVisible, CloseModalFunc, groups, SetActionFunc, 
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button variant={"contained"} color={"error"} onClick={CloseModalFunc}>Close</Button>
+                <Button variant={"contained"} color={"error"} onClick={closeModal}>Close</Button>
             </DialogActions>
         </Dialog>
     )
 }
 
-// function RenderTaskDetailModal({modalVisible, CloseModalFunc, SetActionFunc}){
-//     const [expand, setExpand] = useState("0")
-//     const [childExpand, setChildExpand] = useState("0")
-//     const [secondChildExpand, setSecondChildExpand] = useState("0")
-//     const [assignArea, setAssignArea] = useState(false)
-//     const [input, setInput] = useState({
-//         description: "",
-//         staff: ""
-//     })
-//
-//     const handleExpand = (value, type) => {
-//         switch (type) {
-//             case "1":
-//                 setExpand(expand === value ? "0" : value)
-//                 break
-//             case "2":
-//                 setChildExpand(childExpand === value ? "0" : value)
-//                 break
-//             case "3":
-//                 setSecondChildExpand(secondChildExpand === value ? "0" : value)
-//                 break
-//         }
-//     }
-//
-//     const handleAssignArea = () => {
-//         SetActionFunc()
-//         setAssignArea(!assignArea)
-//     }
-//
-//     return (
-//         <Dialog
-//             open={modalVisible}
-//             onClose={CloseModalFunc}
-//             scroll={"paper"}
-//             maxWidth={"md"}
-//             fullWidth={true}
-//         >
-//             <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
-//                 <label>Task Detail</label>
-//                 <Button variant={"contained"} color={"success"} onClick={() => {
-//                     setExpand("0")
-//                     setChildExpand("0")
-//                     setSecondChildExpand("0")
-//                 }}>Collapse all</Button>
-//             </DialogTitle>
-//             <DialogContent dividers={true}>
-//                 <Box>
-//
-//                 </Box>
-//             </DialogContent>
-//             <DialogActions>
-//                 <Button variant={"contained"} color={"error"} onClick={CloseModalFunc}>Close</Button>
-//             </DialogActions>
-//         </Dialog>
-//     )
-// }
+function RenderAssignModal({modalVisible, closeModal, group, fetchData, staffs}) {
+    const [input, setInput] = useState({
+        staff: 0,
+        description: ""
+    })
+
+    const handleAssign = async () => {
+        const response = await addTask(input.staff, input.description, group.id)
+        if (response.success) {
+            enqueueSnackbar(response.message, {variant: "success"});
+        } else {
+            enqueueSnackbar(response.message, {variant: "error"})
+        }
+        fetchData
+        closeModal()
+    }
+
+
+    return (
+        <Dialog
+            open={modalVisible}
+            onClose={closeModal}
+            scroll={"paper"}
+            maxWidth={"md"}
+            fullWidth={true}
+        >
+            <DialogTitle style={{display: "flex", justifyContent: "space-between"}}>
+                <Typography variant={"h5"} color={"textPrimary"}>Assign staff</Typography>
+            </DialogTitle>
+            <DialogContent dividers={true}>
+                <Box>
+                    <RenderInfoTextField
+                        label={"Request code"}
+                        data={group.request.code}
+                        isCapital={false}
+                    />
+
+                    <RenderInfoTextField
+                        label={"Assigned date (Same day as delivery)"}
+                        data={group.delivery}
+                        isCapital={false}
+                    />
+
+                    <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
+                        <InputLabel shrink>
+                            Staff
+                        </InputLabel>
+                        <Select
+                            value={input.staff}
+                            onChange={(e) => setInput({
+                                ...input,
+                                staff: e.target.value
+                            })}
+                        >
+                            <MenuItem value={0} disabled>{"N/A"}</MenuItem>
+                            {staffs.map((s, index) => (
+                                <MenuItem key={index} value={s.id}>{s.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl variant="standard" fullWidth={true} sx={{m: 1}}>
+                        <InputLabel shrink>
+                            Description
+                        </InputLabel>
+                        <Input
+                            multiline
+                            maxRows={3}
+                            required
+                            value={input.description}
+                            onChange={(e) => setInput({
+                                ...input,
+                                description: e.target.value
+                            })}
+                        />
+                    </FormControl>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button variant="contained" color="error" onClick={closeModal}>Cancel</Button>
+                <Button variant="contained" color="primary" disabled={input.staff === 0} onClick={handleAssign}>Assign</Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
 
 export default function Task() {
     const [tasks, setTasks] = useState([]);
     const [unassignedGrp, setUnassignedGrp] = useState([])
     const [staffs, setStaffs] = useState([])
-    const [action, setAction] = useState(false)
     const [modal, setModal] = useState({
         visible: false,
         type: ""
     })
+    const [currentGrp, setCurrentGrp] = useState(null)
+
+    const fetchData = async () => {
+        const taskResponse = await getTasks()
+        const groupResponse = await getUnassignedGroups()
+        const staffResponse = await getStaffs()
+        if (taskResponse.success && groupResponse.success && staffResponse.success) {
+            setTasks(taskResponse.data)
+            setUnassignedGrp(groupResponse.data)
+            setStaffs(staffResponse.data)
+        }
+    }
 
     /* fetch data */
     useEffect(() => {
-        async function fetchData() {
-            const taskResponse = await getTasks()
-            const groupResponse = await getUnassignedGroups()
-            const staffResponse = await getStaffs()
-            if (taskResponse.success && groupResponse.success && staffResponse.success) {
-                setTasks(taskResponse.data)
-                setUnassignedGrp(groupResponse.data)
-                setStaffs(staffResponse.data)
-            }
-        }
-
         fetchData()
-    }, [action]);
+    }, []);
 
-    function SetAction() {
-        setAction(!action)
+    function ToggleModal(visibility, modalType) {
+        setModal({...modal, visible: visibility, type: visibility ? modalType : ""})
+        console.log({visible: visibility, type: visibility ? modalType : ""})
+        fetchData()
     }
 
-    function CloseCurrentModal(nextType) {
-        setModal({...modal, visible: false, type: nextType})
-        SetAction()
-    }
 
-    function OpenModal(openType) {
-        setModal({...modal, visible: true, type: openType})
-        SetAction()
-    }
-
-    const renderTableProp = {
-        tasks: tasks,
-        SetActionFunc: SetAction
-    }
-
-    const renderGroupModalProp = {
-        modalVisible: modal.visible,
-        CloseModalFunc: () => CloseCurrentModal(""),
-        groups: unassignedGrp,
-        SetActionFunc: SetAction,
-        staffs: staffs
-    }
 
     return (
         <>
-            <Typography component={"span"}  className={'d-flex justify-content-center'} color={"textPrimary"} style={{fontSize: "2.5rem"}}>TASK
+            <Typography component={"span"} className={'d-flex justify-content-center'} color={"textPrimary"}
+                        style={{fontSize: "2.5rem"}}>TASK
                 MANAGEMENT</Typography>
             <div className={"assign"}>
                 <Button style={{width: "12vw", height: "6vh"}}
                         variant={"contained"}
                         startIcon={<AddRounded/>}
                         disabled={unassignedGrp.length <= 0}
-                        onClick={() => OpenModal("group")}
+                        onClick={() => ToggleModal(true, "group")}
                 >Assign task</Button>
             </div>
-            <RenderTable {...renderTableProp}/>
+            <RenderTable tasks={tasks} fetchData={fetchData()}/>
             {
                 modal.visible && modal.type === "group" &&
-                <RenderGroupModal {...renderGroupModalProp}/>
+                <RenderGroupModal
+                    modalVisible={modal.visible}
+                    closeModal={() => ToggleModal(false, "")}
+                    groups={unassignedGrp}
+                    fetchData={fetchData()}
+                    setGrp={setCurrentGrp}
+                    openAssignModal={() => ToggleModal(true, "assign")}
+                />
+            }
+            {
+                modal.visible && modal.type === "assign" && currentGrp !== null &&
+                <RenderAssignModal
+                    modalVisible={modal.visible}
+                    closeModal={() => ToggleModal(true, "group")}
+                    fetchData={fetchData()}
+                    staffs={staffs}
+                    group={currentGrp}
+                />
             }
         </>
     )
